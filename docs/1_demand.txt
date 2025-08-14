@@ -1,0 +1,14 @@
+Teste Back:
+A. Crie uma aplicação web backend em nodejs capaz de monitorar a saúde de uma lista de serviços remotos:
+Periodicamente, uma requisição é realizada para cada serviço para análise.
+Retornos não-2xx ou muito lentos são registrados para cada serviço individualmente.
+O usuário pode iniciar a análise de um serviço qualquer manualmente, caso já não esteja ocorrendo uma.
+
+B. Crie um arquivo Dockerfile para criar uma imagem do Docker (não é necessário publicar, utilize um nome local).
+
+C. Crie uma interface web em React para visualização dos registros armazenados
+Visualização do monitoramento em ordem cronológica.
+Filtro por serviço e status (ok, não-2xx, muito lento - fique à vontade para renomear, aqui apenas referenciamos o item A.2)
+
+D. Crie um README para o projeto descrevendo a organização, quais são as dependências de desenvolvimento e como rodar a aplicação final
+(via linha de comando ou arquivo compose).
