@@ -11,3 +11,5 @@ To support project's decisions I've created docs directory that compiles all pro
 `docs/2_requirements.md`: Here I syntetized the main requiriments found on initial demand. I splited in: functional requirements, non-functional requirements and design requirements.
 
 `docs/3_application_container.dio`: That file is a fragment from C4 model (only container) and It helped me to see the project in a big picture.
+
+`docs/4_ui_ux`: In this folder I've scratched up the desktop and mobile wireframe to guide my frontend development.
