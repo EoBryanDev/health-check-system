@@ -1,8 +1,6 @@
-import express from 'express'
+import { env } from "../env";
+import WebServerFactory from "./infrastructure/factory/WebServerFactory";
 
-const app = express()
+const app = new WebServerFactory('express')
 
-app.listen(process.env.SERVER_PORT, () => {
-  console.log('running');
-
-})
+app.startup(env.SERVER_PORT)

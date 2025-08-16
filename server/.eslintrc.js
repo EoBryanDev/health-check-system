@@ -18,23 +18,23 @@ export default defineConfig({
     ecmaVersion: 12,
     sourceType: 'module',
   },
-  // rules: {
-  //   'prettier/prettier': 'error',
-  //   'no-console': 'off',
-  //   'import/no-unresolved': 'off',
-  //   'import/extensions': [
-  //     'error',
-  //     'ignorePackages',
-  //     {
-  //       js: 'never',
-  //       ts: 'never',
-  //     },
-  //   ],
-  //   'import/no-extraneous-dependencies': [
-  //     'error',
-  //     {
-  //       devDependencies: ['**/*.test.js', '**/*.spec.js'],
-  //     },
-  //   ],
-  // },
+  rules: {
+    'prettier/prettier': 'error',
+    'no-console': 'off',
+    'import/no-unresolved': 'off',
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'never',
+        ts: 'never',
+      },
+    ],
+    'import/no-extraneous-dependencies': [
+      'error',
+      {
+        devDependencies: ['**/*.test.js', '**/*.spec.js'],
+      },
+    ],
+  },
 })
