@@ -1,0 +1,17 @@
+version: "3.9"
+
+services: 
+  postgres-hcs:
+    image: postgres:16.8-alpine
+    container_name: postgres-hcs
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: health-checker-system
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
