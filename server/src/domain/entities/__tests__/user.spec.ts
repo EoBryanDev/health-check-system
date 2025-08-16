@@ -12,7 +12,7 @@ describe('User Switcase', () => {
             last_name: 'Viana',
             email: 'teste@teste.com.br',
             password: '123',
-            roles: ERoles.ADMIN,
+            role: ERoles.ADMIN,
             active: false,
             created_at: new Date().toISOString()
         }
@@ -57,11 +57,83 @@ describe('User Switcase', () => {
         const bryanPropsInfo = bryan.getUserInfo();
         // Assert
         expect(bryanPropsInfo.active).toBe(true);
-        expect(bryanPropsInfo.roles).toBe(ERoles.ANALYST);
+        expect(bryanPropsInfo.role).toBe(ERoles.ANALYST);
         expect(bryanPropsInfo.created_at).toBeDefined();
 
         expect(bryanPropsInfo.updated_at).not.toBeDefined();
         expect(bryanPropsInfo.cellnumber).not.toBeDefined();
         expect(bryanPropsInfo.user_id).not.toBeDefined();
+    });
+
+    it('should be able user changer its status', () => {
+        // Arrange
+        const new_user_payload: IUser = {
+            first_name: 'Mauricio',
+            last_name: 'Viana',
+            email: 'teste@teste.com.br',
+            password: '123'
+        }
+        // Act
+        const regular_user = new User(new_user_payload)
+        const info = regular_user.getUserInfo()
+
+        // Assert
+        expect(info.active).toBe(true)
+
+        // Act
+        regular_user.changeUserStatus()
+        // Assert
+        expect(info.active).toBe(false)
+        // Act
+        regular_user.changeUserStatus()
+        // Assert
+        expect(info.active).toBe(true)
+
+
+    });
+
+    it('should not be able commom user changer its role', () => {
+        // Arrange
+        const new_user_payload: IUser = {
+            first_name: 'Mauricio',
+            last_name: 'Viana',
+            email: 'teste@teste.com.br',
+            password: '123'
+        }
+        // Act
+
+        const common_user = new User(new_user_payload)
+
+        expect(() => common_user.changeRole(common_user, ERoles.ADMIN)).toThrow('The current user does not have privileges to do this action!')
+    });
+
+    it('should be able ADMIN user incresase ANALYST user to MANAGER user', () => {
+        // Arrange
+        const new_user_payload: IUser = {
+            first_name: 'Mauricio',
+            last_name: 'Viana',
+            email: 'teste@teste.com.br',
+            password: '123'
+        }
+
+        const new_useradmin_payload: IUser = {
+            first_name: 'Mauricio',
+            last_name: 'Viana',
+            email: 'teste@teste.com.br',
+            role: ERoles.ADMIN,
+            password: '123'
+        }
+        // Act
+
+        const common_user = new User(new_user_payload)
+        const user = common_user.getUserInfo()
+        expect(user.role).toBe(ERoles.ANALYST)
+
+        const admin_user = new User(new_useradmin_payload)
+
+        const userWithPriviled = admin_user.changeRole(common_user, ERoles.MANAGER)
+        const priviledUser = userWithPriviled.getUserInfo()
+
+        expect(priviledUser.role).toBe(ERoles.MANAGER)
     });
 })
