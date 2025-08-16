@@ -7,7 +7,7 @@ interface IUser {
     email: string,
     password: string,
     cellnumber?: string,
-    roles?: ERoles,
+    role?: ERoles,
     active?: boolean,
     created_at?: string,
     updated_at?: string
