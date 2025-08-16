@@ -1,5 +1,5 @@
 import { env } from "../env";
-import WebServerFactory from "./infrastructure/factory/WebServerFactory";
+import WebServerFactory from "./infrastructure/http/factory/WebServerFactory";
 
 const app = new WebServerFactory('express')
 
