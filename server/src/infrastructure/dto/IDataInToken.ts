@@ -1,7 +1,7 @@
-import { TRole } from "../../domain/entities/interfaces/TRole"
+
 
 interface IDataInToken {
-    role: TRole,
+    role: string,
     user_id: string
 }
 
