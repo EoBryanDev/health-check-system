@@ -1,15 +1,23 @@
+import { BCryptHashPwd } from "../services/BCryptHashPwd";
 import { ERoles } from "./interfaces/ERoles";
 import { IUser } from "./interfaces/IUser";
 
 class User {
     private props: IUser;
-    constructor(props: IUser) {
+    private constructor(props: IUser) {
+        this.props = props
+    }
+
+    static async create(props: IUser): Promise<User> {
+        const hashService = new BCryptHashPwd()
+        const hashedPwd = await hashService.hash(props.password);
+
         const constructorProps: IUser = {
             user_id: props.user_id ?? undefined,
             first_name: props.first_name,
             last_name: props.last_name,
             email: props.email,
-            password: props.password,
+            password: hashedPwd,
             role: props.role ?? ERoles.ANALYST,
             active: props.active ?? true,
             cellnumber: props.cellnumber ?? undefined,
@@ -17,7 +25,7 @@ class User {
             created_at: props.created_at ?? new Date().toISOString()
         }
 
-        this.props = constructorProps
+        return new User(constructorProps);
     }
 
     public getUserInfo(): IUser {
