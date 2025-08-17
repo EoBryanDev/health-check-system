@@ -1,9 +1,9 @@
-import { ICreateUserOutputDTO } from "../../../infrastructure/dto/ICreateUserDTO";
+import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
 import { User } from "../User";
 
 
 interface IUserRepository {
-    findByEmail(email: string): Promise<ICreateUserOutputDTO | null>;
+    findByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null>;
 
     // findById(id: string): Promise<User | null>;
 

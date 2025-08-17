@@ -1,14 +1,14 @@
 import { IUser } from "../../domain/entities/interfaces/IUser";
 import { IUserRepository } from "../../domain/entities/interfaces/IUserRepository";
 import { User } from "../../domain/entities/User";
-import { ICreateUserOutputDTO } from "../dto/ICreateUserDTO";
+import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
 
 
-class InMemoryUserRepository implements IUserRepository {
+class InMemoryRepository implements IUserRepository {
 
     readonly users: User[] = [];
 
-    async findByEmail(email: string): Promise<ICreateUserOutputDTO | null> {
+    async findByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
 
         const user = this.users.find(user => user.getUserInfo().email! === email) || null
 
@@ -18,12 +18,14 @@ class InMemoryUserRepository implements IUserRepository {
 
         const user_info = user.getUserInfo()
 
-        const user_dto: ICreateUserOutputDTO = {
+        const user_dto: ICreateUserOutputWPwdDTO = {
             user_id: user_info.user_id!,
             first_name: user_info.first_name!,
             last_name: user_info.last_name!,
             email: user_info.email!,
             created_at: user_info.created_at!,
+            role: user_info.role!,
+            password: user_info.password!
         }
         return user_dto;
     }
@@ -55,7 +57,7 @@ class InMemoryUserRepository implements IUserRepository {
             cellnumber: payload_user.cellnumber
         }
 
-        const createdUser = await User.create(new_user_payload)
+        const createdUser = new User(new_user_payload)
 
         this.users.push(createdUser);
 
@@ -99,4 +101,4 @@ class InMemoryUserRepository implements IUserRepository {
 
 }
 
-export { InMemoryUserRepository };
+export { InMemoryRepository };
