@@ -5,7 +5,7 @@ import { User } from '../User'
 
 describe('User Switcase', () => {
 
-    it('should create a new user', () => {
+    it('should create a new user', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -18,12 +18,12 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = new User(new_user_payload)
+        const bryan = await User.create(new_user_payload)
         // Assert
         expect(bryan).toBeInstanceOf(User);
     })
 
-    it('should return Users obrigatory props filled', () => {
+    it('should return Users obrigatory props filled', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -33,17 +33,17 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = new User(new_user_payload)
+        const bryan = await User.create(new_user_payload)
         const bryanPropsInfo = bryan.getUserInfo();
         // Assert
         expect(bryan).toBeInstanceOf(User);
         expect(new_user_payload.first_name).toBe(bryanPropsInfo.first_name);
         expect(new_user_payload.last_name).toBe(bryanPropsInfo.last_name);
         expect(new_user_payload.email).toBe(bryanPropsInfo.email);
-        expect(new_user_payload.password).toBe(bryanPropsInfo.password);
+        expect(bryanPropsInfo.password).toBeDefined();
     });
 
-    it('should return Users non obrigatory props filled or undefined', () => {
+    it('should return Users non obrigatory props filled or undefined', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -53,7 +53,7 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = new User(new_user_payload)
+        const bryan = await User.create(new_user_payload)
         const bryanPropsInfo = bryan.getUserInfo();
         // Assert
         expect(bryanPropsInfo.active).toBe(true);
@@ -65,7 +65,7 @@ describe('User Switcase', () => {
         expect(bryanPropsInfo.user_id).not.toBeDefined();
     });
 
-    it('should be able user changer its status', () => {
+    it('should be able user changer its status', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -74,7 +74,7 @@ describe('User Switcase', () => {
             password: '123'
         }
         // Act
-        const regular_user = new User(new_user_payload)
+        const regular_user = await User.create(new_user_payload)
         const info = regular_user.getUserInfo()
 
         // Assert
@@ -92,7 +92,7 @@ describe('User Switcase', () => {
 
     });
 
-    it('should not be able commom user changer its role', () => {
+    it('should not be able commom user changer its role', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -102,12 +102,12 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const common_user = new User(new_user_payload)
+        const common_user = await User.create(new_user_payload)
 
         expect(() => common_user.changeRole(common_user, ERoles.ADMIN)).toThrow('The current user does not have privileges to do this action!')
     });
 
-    it('should be able ADMIN user incresase ANALYST user to MANAGER user', () => {
+    it('should be able ADMIN user incresase ANALYST user to MANAGER user', async () => {
         // Arrange
         const new_user_payload: IUser = {
             first_name: 'Mauricio',
@@ -125,11 +125,11 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const common_user = new User(new_user_payload)
+        const common_user = await User.create(new_user_payload)
         const user = common_user.getUserInfo()
         expect(user.role).toBe(ERoles.ANALYST)
 
-        const admin_user = new User(new_useradmin_payload)
+        const admin_user = await User.create(new_useradmin_payload)
 
         const userWithPriviled = admin_user.changeRole(common_user, ERoles.MANAGER)
         const priviledUser = userWithPriviled.getUserInfo()
