@@ -4,20 +4,13 @@ import { IUser } from "./interfaces/IUser";
 
 class User {
     private props: IUser;
-    private constructor(props: IUser) {
-        this.props = props
-    }
-
-    static async create(props: IUser): Promise<User> {
-        const hashService = new BCryptHashPwd()
-        const hashedPwd = await hashService.hash(props.password);
-
+    constructor(props: IUser) {
         const constructorProps: IUser = {
             user_id: props.user_id ?? undefined,
             first_name: props.first_name,
             last_name: props.last_name,
             email: props.email,
-            password: hashedPwd,
+            password: props.password,
             role: props.role ?? ERoles.ANALYST,
             active: props.active ?? true,
             cellnumber: props.cellnumber ?? undefined,
@@ -25,7 +18,7 @@ class User {
             created_at: props.created_at ?? new Date().toISOString()
         }
 
-        return new User(constructorProps);
+        this.props = constructorProps
     }
 
     public getUserInfo(): IUser {
