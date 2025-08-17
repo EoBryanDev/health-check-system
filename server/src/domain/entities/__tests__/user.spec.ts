@@ -18,7 +18,7 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = await User.create(new_user_payload)
+        const bryan = new User(new_user_payload)
         // Assert
         expect(bryan).toBeInstanceOf(User);
     })
@@ -33,7 +33,7 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = await User.create(new_user_payload)
+        const bryan = new User(new_user_payload)
         const bryanPropsInfo = bryan.getUserInfo();
         // Assert
         expect(bryan).toBeInstanceOf(User);
@@ -53,7 +53,7 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const bryan = await User.create(new_user_payload)
+        const bryan = new User(new_user_payload)
         const bryanPropsInfo = bryan.getUserInfo();
         // Assert
         expect(bryanPropsInfo.active).toBe(true);
@@ -74,7 +74,7 @@ describe('User Switcase', () => {
             password: '123'
         }
         // Act
-        const regular_user = await User.create(new_user_payload)
+        const regular_user = new User(new_user_payload)
         const info = regular_user.getUserInfo()
 
         // Assert
@@ -102,7 +102,7 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const common_user = await User.create(new_user_payload)
+        const common_user = new User(new_user_payload)
 
         expect(() => common_user.changeRole(common_user, ERoles.ADMIN)).toThrow('The current user does not have privileges to do this action!')
     });
@@ -125,11 +125,11 @@ describe('User Switcase', () => {
         }
         // Act
 
-        const common_user = await User.create(new_user_payload)
+        const common_user = new User(new_user_payload)
         const user = common_user.getUserInfo()
         expect(user.role).toBe(ERoles.ANALYST)
 
-        const admin_user = await User.create(new_useradmin_payload)
+        const admin_user = new User(new_useradmin_payload)
 
         const userWithPriviled = admin_user.changeRole(common_user, ERoles.MANAGER)
         const priviledUser = userWithPriviled.getUserInfo()

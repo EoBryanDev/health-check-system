@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { InMemoryUserRepository } from '../../../infrastructure/repository/InMemoryRepository';
+import { InMemoryRepository } from '../../../infrastructure/repository/InMemoryRepository';
 import { CreateUserUseCase } from '../CreateUserUseCase';
 import { ICreateUserInputDTO, ICreateUserOutputDTO } from '../../../infrastructure/dto/ICreateUserDTO';
+import { BCryptHashPwd } from '../../services/BCryptHashPwd';
 
 describe('Create User Use Case', () => {
 
     it('should create an User with id', async () => {
-        const testUserRepository = new InMemoryUserRepository()
-        const createUserUseCase = new CreateUserUseCase(testUserRepository);
+        const testUserRepository = new InMemoryRepository()
+        const createHashService = new BCryptHashPwd()
+        const createUserUseCase = new CreateUserUseCase(testUserRepository, createHashService);
 
         const controller_payload: ICreateUserInputDTO = {
             first_name: 'Mauricio',
@@ -26,8 +28,9 @@ describe('Create User Use Case', () => {
     })
 
     it('should throw an error if try create an User with the same email', async () => {
-        const testUserRepository = new InMemoryUserRepository()
-        const createUserUseCase = new CreateUserUseCase(testUserRepository);
+        const testUserRepository = new InMemoryRepository()
+        const createHashService = new BCryptHashPwd()
+        const createUserUseCase = new CreateUserUseCase(testUserRepository, createHashService);
 
         const controller_payload1: ICreateUserInputDTO = {
             first_name: 'Mauricio',
