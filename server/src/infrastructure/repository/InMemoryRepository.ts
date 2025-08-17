@@ -1,13 +1,31 @@
+import { IUser } from "../../domain/entities/interfaces/IUser";
 import { IUserRepository } from "../../domain/entities/interfaces/IUserRepository";
 import { User } from "../../domain/entities/User";
+import { ICreateUserOutputDTO } from "../dto/ICreateUserDTO";
 
 
 class InMemoryUserRepository implements IUserRepository {
 
     readonly users: User[] = [];
 
-    async findByEmail(email: string): Promise<User | null> {
-        return this.users.find(user => user.getUserInfo().email! === email) || null;
+    async findByEmail(email: string): Promise<ICreateUserOutputDTO | null> {
+
+        const user = this.users.find(user => user.getUserInfo().email! === email) || null
+
+        if (!user) {
+            return null;
+        }
+
+        const user_info = user.getUserInfo()
+
+        const user_dto: ICreateUserOutputDTO = {
+            user_id: user_info.user_id!,
+            first_name: user_info.first_name!,
+            last_name: user_info.last_name!,
+            email: user_info.email!,
+            created_at: user_info.created_at!,
+        }
+        return user_dto;
     }
 
     // async findById(id: string): Promise<User | null> {
@@ -21,13 +39,36 @@ class InMemoryUserRepository implements IUserRepository {
     //     }
     // }
 
-    async create(user: User): Promise<User> {
+    async create(user: User): Promise<ICreateUserOutputDTO> {
 
-        const createdUser = await User.create(user.getUserInfo())
+        const last_user = this.users.findLast((user) => user.getUserInfo().user_id !== undefined);
+        const new_id = last_user ? last_user.getUserInfo().user_id + 'a' : 'a'
+
+        const payload_user = user.getUserInfo()
+
+        const new_user_payload: IUser = {
+            user_id: new_id,
+            first_name: payload_user.first_name,
+            last_name: payload_user.last_name,
+            email: payload_user.email,
+            password: payload_user.password,
+            cellnumber: payload_user.cellnumber
+        }
+
+        const createdUser = await User.create(new_user_payload)
 
         this.users.push(createdUser);
 
-        return createdUser;
+        const user_info = createdUser.getUserInfo()
+
+        const user_dto: ICreateUserOutputDTO = {
+            user_id: user_info.user_id!,
+            first_name: user_info.first_name!,
+            last_name: user_info.last_name!,
+            email: user_info.email!,
+            created_at: user_info.created_at!,
+        }
+        return user_dto;
     }
 
     // async delete(id: string): Promise<void> {
@@ -39,8 +80,21 @@ class InMemoryUserRepository implements IUserRepository {
 
     // }
 
-    async findAll(): Promise<User[]> {
-        return this.users;
+    async findAll(): Promise<ICreateUserOutputDTO[]> {
+
+        const all_users: ICreateUserOutputDTO[] = this.users.map((user) => {
+            const user_info = user.getUserInfo();
+
+            return {
+                user_id: user_info.user_id!,
+                first_name: user_info.first_name!,
+                last_name: user_info.last_name!,
+                email: user_info.email!,
+                created_at: user_info.created_at!,
+            }
+        })
+
+        return all_users;
     }
 
 }

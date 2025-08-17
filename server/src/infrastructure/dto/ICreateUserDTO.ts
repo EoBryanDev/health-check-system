@@ -1,4 +1,4 @@
-interface CreateUserInputDTO {
+interface ICreateUserInputDTO {
 
     first_name: string,
     last_name: string,
@@ -7,7 +7,7 @@ interface CreateUserInputDTO {
     cellnumber?: string,
 }
 
-interface CreateUserOutputDTO {
+interface ICreateUserOutputDTO {
     user_id: string,
     first_name: string,
     last_name: string,
@@ -16,4 +16,4 @@ interface CreateUserOutputDTO {
     created_at: string,
 
 }
-export { CreateUserInputDTO, CreateUserOutputDTO }
+export { ICreateUserInputDTO, ICreateUserOutputDTO }
