@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { IUser } from '../interfaces/IUser'
 import { ERoles } from '../interfaces/ERoles'
 import { User } from '../User'
