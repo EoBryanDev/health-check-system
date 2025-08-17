@@ -1,14 +1,16 @@
+import { IRepository } from "../../domain/entities/interfaces/IRepository";
+import { IGroupOutputDTO, IGroupOutputUsersDTO } from "../dto/IGroupDTO";
 import { IUser } from "../../domain/entities/interfaces/IUser";
-import { IUserRepository } from "../../domain/entities/interfaces/IUserRepository";
 import { User } from "../../domain/entities/User";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
 
 
-class InMemoryRepository implements IUserRepository {
+class InMemoryRepository implements IRepository {
 
-    readonly users: User[] = [];
+    readonly users: any[] = [];
+    readonly groups: any[] = [];
 
-    async findByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
+    async findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
 
         const user = this.users.find(user => user.getUserInfo().email! === email) || null
 
@@ -41,7 +43,7 @@ class InMemoryRepository implements IUserRepository {
     //     }
     // }
 
-    async create(user: User): Promise<ICreateUserOutputDTO> {
+    async createUser(user: User): Promise<ICreateUserOutputDTO> {
 
         const last_user = this.users.findLast((user) => user.getUserInfo().user_id !== undefined);
         const new_id = last_user ? last_user.getUserInfo().user_id + 'a' : 'a'
@@ -82,7 +84,7 @@ class InMemoryRepository implements IUserRepository {
 
     // }
 
-    async findAll(): Promise<ICreateUserOutputDTO[]> {
+    async findAllUsers(): Promise<any[]> {
 
         const all_users: ICreateUserOutputDTO[] = this.users.map((user) => {
             const user_info = user.getUserInfo();
@@ -99,6 +101,21 @@ class InMemoryRepository implements IUserRepository {
         return all_users;
     }
 
+    async createGroup(): Promise<void> {
+        throw new Error("Method not implemented.");
+    }
+    async findAllGroups(): Promise<IGroupOutputDTO[] | null> {
+        throw new Error("Method not implemented.");
+    }
+    async findGroupById(group_id: string): Promise<IGroupOutputDTO | null> {
+        throw new Error("Method not implemented.");
+    }
+    async findGroupMembersById(user_id: string): Promise<IGroupOutputUsersDTO[] | null> {
+        throw new Error("Method not implemented.");
+    }
+    // async inativeGroup(group_id: string): Promise<void> {
+    //     throw new Error("Method not implemented.");
+    // }
 }
 
 export { InMemoryRepository };
