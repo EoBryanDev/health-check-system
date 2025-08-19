@@ -8,7 +8,7 @@ import { users } from "./users";
 
 const groups = pgTable('groups', {
     group_id: uuid().primaryKey().defaultRandom(),
-    group_name: text().notNull(),
+    group_name: text().notNull().unique(),
     group_description: text(),
     active: boolean().notNull().default(true),
     created_at: timestamp().defaultNow().notNull(),
