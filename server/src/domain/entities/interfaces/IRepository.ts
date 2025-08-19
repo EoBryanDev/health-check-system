@@ -1,25 +1,34 @@
-import { IGroupOutputDTO, IGroupOutputUsersDTO } from "../../../infrastructure/dto/IGroupDTO";
+import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
+import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
+import { MonitGroup } from "../MonitGroup";
+import { User } from "../User";
 
 interface IRepository {
-    findUserByEmail(email: string): Promise<any | null>;
+    findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null>;
 
-    // findById(id: string): Promise<User | null>;
+    findUserById(id: string): Promise<ICreateUserOutputWPwdDTO | null>;
 
     // update(user: User): Promise<void>;
 
-    createUser(user: any): Promise<any>;
+    createUser(user: User): Promise<ICreateUserOutputDTO>;
 
     // delete(id: string): Promise<void>;
 
-    findAllUsers(): Promise<any[]>;
+    createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup>;
 
-    createGroup(): Promise<void>;
+    findAllUserByGroupId(group_id: string): Promise<IUserGroup[] | null>;
+
+    findAllUsers(): Promise<ICreateUserOutputDTO[] | null>;
+
+    createGroup(group: IGroupInputDTO, user_id: string): Promise<IGroupOutputDTO>;
+
+    findGroupByName(group_name: string): Promise<IGroupOutputDTO | null>;
 
     findAllGroups(): Promise<IGroupOutputDTO[] | null>;
 
     findGroupById(group_id: string): Promise<IGroupOutputDTO | null>;
 
-    findGroupMembersById(user_id: string): Promise<IGroupOutputUsersDTO[] | null>;
+    findGroupMembersById(group_id: string): Promise<IGroupOutputUsersDTO[] | null>;
 
     // inativeGroup(group_id: string): Promise<void>;
 
