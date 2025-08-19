@@ -29,11 +29,11 @@ interface IGroupOutputUsersDTO {
     group_id: string,
     group_name: string,
     group_description: string,
-    user: {
+    user: Array<{
         user_name: string
         email: string;
         active: boolean
-    },
+    }> | Array<{}>,
     active: boolean,
     created_at: string,
     updated_at: string,

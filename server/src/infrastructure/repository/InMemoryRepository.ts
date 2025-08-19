@@ -170,26 +170,56 @@ class InMemoryRepository implements IRepository {
     }
 
     async findAllGroups(): Promise<IGroupOutputDTO[] | null> {
-        const all_groups: IGroupOutputDTO[] = this.groups.map((group) => {
-            const group_info = group.getMonitGroup();
+        const group_filtered = this.groups
 
-            return {
+        const all_groups: IGroupOutputUsersDTO[] = []
+
+        for (let i = 0; i < group_filtered.length; i++) {
+            const group = group_filtered[i];
+            const group_info = group.getMonitGroup()
+
+            let users_in_group = await this.findAllUserByGroupId(group.getMonitGroup().group_id!)
+
+            if (!users_in_group) {
+                users_in_group = []
+            }
+
+            all_groups.push({
                 group_id: group_info.group_id!,
                 group_name: group_info.group_name!,
                 group_description: group_info.group_description!,
+                user: users_in_group.map(group_user => {
+                    const user = this.users.find(u => u.getUserInfo().user_id === group_user!.user_id);
+
+                    if (user) {
+                        return [{}]
+                    }
+
+                    const user_info = user!.getUserInfo();
+
+                    return {
+                        user_name: `${user_info.first_name} ${user_info.last_name}`,
+                        email: user_info.email!,
+                        active: user_info.active ?? true
+                    };
+
+                }),
                 created_at: group_info.created_at!,
                 active: group_info.active!,
                 created_by: group_info.created_by!,
-                updated_at: group_info.updated_at ?? '',
-            }
-        })
+                updated_at: group_info.updated_at ?? ''
+            })
+        }
 
-        if (all_groups.length === 0) {
+
+
+        if (!all_groups) {
             return null
         }
 
         return all_groups;
     }
+
     async findGroupById(group_id: string): Promise<IGroupOutputDTO | null> {
         const group = this.groups.find(group => group.getMonitGroup().group_id! === group_id)
 
@@ -218,28 +248,48 @@ class InMemoryRepository implements IRepository {
             return null
         }
 
-        const user_info = user.getUserInfo();
+        const group_filtered = this.groups.filter(group => group.getMonitGroup().user_id! === user_id)
 
-        const all_groups = this.groups.filter(group => group.getMonitGroup().user_id! === user_id).map(group => {
+        const all_groups: IGroupOutputUsersDTO[] = []
+
+        for (let i = 0; i < group_filtered.length; i++) {
+            const group = group_filtered[i];
             const group_info = group.getMonitGroup()
 
+            let users_in_group = await this.findAllUserByGroupId(group.getMonitGroup().group_id!)
 
-            return {
+            if (!users_in_group) {
+                users_in_group = []
+            }
+
+            all_groups.push({
                 group_id: group_info.group_id!,
                 group_name: group_info.group_name!,
                 group_description: group_info.group_description!,
-                user: {
-                    user_name: `${user_info.first_name} ${user_info.last_name}`,
-                    email: user_info.email,
-                    active: user_info.active!,
-                },
+                user: users_in_group.map(group_user => {
+                    const user = this.users.find(u => u.getUserInfo().user_id === group_user!.user_id);
+
+                    if (user) {
+                        return [{}]
+                    }
+
+                    const user_info = user!.getUserInfo();
+
+                    return {
+                        user_name: `${user_info.first_name} ${user_info.last_name}`,
+                        email: user_info.email!,
+                        active: user_info.active ?? true
+                    };
+
+                }),
                 created_at: group_info.created_at!,
                 active: group_info.active!,
                 created_by: group_info.created_by!,
                 updated_at: group_info.updated_at ?? ''
-            }
+            })
+        }
 
-        });
+
 
         if (!all_groups) {
             return null
