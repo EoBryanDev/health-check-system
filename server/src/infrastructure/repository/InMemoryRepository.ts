@@ -5,7 +5,12 @@ import { User } from "../../domain/entities/User";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
 import { MonitGroup } from "../../domain/entities/MonitGroup";
 import { IMonitGroup } from "../../domain/entities/interfaces/IMonitGroup";
-import { IJobOutputDTO, IJobInputDTO } from "../dto/IJobDTO";
+import { IJobOutputDTO, IJobInputDTO, IJobOutputWServiceDTO } from "../dto/IJobDTO";
+import { Job } from "../../domain/entities/Job";
+import { IJob } from "../../domain/entities/interfaces/IJob";
+import { IServiceInputDTO, IServiceOutputDTO } from "../dto/IServiceDTO";
+import { Service } from "../../domain/entities/Service";
+import { IService } from "../../domain/entities/interfaces/IService";
 
 
 class InMemoryRepository implements IRepository {
@@ -13,6 +18,8 @@ class InMemoryRepository implements IRepository {
     readonly users: User[] = [];
     readonly groups: MonitGroup[] = [];
     readonly group_users: IUserGroup[] = [];
+    readonly jobs: Job[] = [];
+    readonly services: Service[] = [];
     // ini - User
     async findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
 
@@ -347,25 +354,329 @@ class InMemoryRepository implements IRepository {
     //     throw new Error("Method not implemented.");
     // }
 
+    // fim - Group
+    // ini - Jobs
+
     async createJob(job: IJobInputDTO): Promise<IJobOutputDTO> {
-        throw new Error("Method not implemented.");
+
+        const groups = await this.findGroupByName(job.group_name)
+
+        if (!groups) {
+            throw new Error("There was not found any group valid for this job!");
+
+        }
+
+        const new_id = 'a'
+
+        const job_payload: IJob = {
+            group_id: new_id,
+            job_name: job.job_name,
+            interval_time: job.interval_time,
+            created_by: job.created_by
+        }
+        const new_job = new Job(job_payload)
+
+        this.jobs.push(new_job)
+
+        const new_job_info = new_job.getJobInfo();
+
+        const createJobOutput: IJobOutputDTO = {
+            job_id: new_job_info.job_id!,
+            group_id: new_job_info.group_id,
+            job_name: new_job_info.job_name,
+            interval_time: new_job_info.interval_time,
+            created_at: new_job_info.created_at!,
+            created_by: new_job_info.created_by
+        }
+
+        return createJobOutput
+
     }
 
-    async findJobById(job_id: string): Promise<IJobOutputDTO> {
-        throw new Error("Method not implemented.");
+    async findJobById(job_id: string): Promise<IJobOutputDTO | null> {
+        const job = this.jobs.find(job => job.getJobInfo().job_id! === job_id)
+
+        if (!job) {
+            return null;
+        }
+
+        const job_info = job?.getJobInfo()
+
+        const job_output: IJobOutputDTO = {
+            job_id: job_info.job_id!,
+            group_id: job_info.group_id,
+            job_name: job_info.job_name,
+            interval_time: job_info.interval_time,
+            created_at: job_info.created_at!,
+            created_by: job_info.created_by
+        }
+
+        return job_output
+
     }
 
-    async findJobByName(job_name: string): Promise<IJobOutputDTO> {
-        throw new Error("Method not implemented.");
+    async findJobByName(job_name: string): Promise<IJobOutputDTO | null> {
+        const job = this.jobs.find(job => job.getJobInfo().job_name === job_name)
+
+        if (!job) {
+            return null;
+        }
+
+        const job_info = job?.getJobInfo()
+
+        const job_output: IJobOutputDTO = {
+            job_id: job_info.job_id!,
+            group_id: job_info.group_id,
+            job_name: job_info.job_name,
+            interval_time: job_info.interval_time,
+            created_at: job_info.created_at!,
+            created_by: job_info.created_by
+        }
+
+        return job_output
     }
 
-    async findJobByGroupId(group_id: string): Promise<IJobOutputDTO> {
-        throw new Error("Method not implemented.");
+    async findJobByGroupId(group_id: string): Promise<IJobOutputDTO | null> {
+        const job = this.jobs.find(job => job.getJobInfo().group_id === group_id)
+
+        if (!job) {
+            return null;
+        }
+
+        const job_info = job?.getJobInfo()
+
+        const job_output: IJobOutputDTO = {
+            job_id: job_info.job_id!,
+            group_id: job_info.group_id,
+            job_name: job_info.job_name,
+            interval_time: job_info.interval_time,
+            created_at: job_info.created_at!,
+            created_by: job_info.created_by
+        }
+
+        return job_output
     }
 
-    async findAllJobs(): Promise<IJobOutputDTO[]> {
-        throw new Error("Method not implemented.");
+    async findAllJobs(): Promise<IJobOutputWServiceDTO[] | null> {
+        const job_filtered = this.jobs
+
+        const all_jobs: IJobOutputWServiceDTO[] = []
+
+        for (let i = 0; i < job_filtered.length; i++) {
+            const job = job_filtered[i];
+            const job_info = job.getJobInfo()
+
+            // depois implementar os services que contem job id
+
+            let services_in_job = await this.findServicesByJobId(job_info.job_id!)
+
+            if (!services_in_job) {
+                services_in_job = []
+            }
+
+            all_jobs.push({
+                group_id: job_info.group_id!,
+                job_id: job_info.job_id!,
+                job_name: job_info.job_name!,
+                job_description: job_info.job_description!,
+                interval_time: job_info.interval_time,
+                services: services_in_job.map(service => {
+                    return {
+                        group_id: service.group_id,
+                        job_id: service.job_id!,
+                        service_name: service.service_name,
+                        service_description: service.service_description ?? '',
+                        service_url: service.service_url,
+                        rate_limit_tolerance: service.rate_limit_tolerance,
+                        created_at: service.created_at,
+                        created_by: service.created_by,
+                    }
+                }),
+                created_at: job_info.created_at!,
+                created_by: job_info.created_by!
+            })
+        }
+
+        if (!all_jobs) {
+            return null
+        }
+
+        return all_jobs;
     }
+    // fim - Jobs
+
+    // ini - Service
+
+    async createService(service: IServiceInputDTO): Promise<IServiceOutputDTO> {
+        const groups = await this.findGroupByName(service.group_name)
+
+        if (!groups) {
+            throw new Error("There was not found any group valid for this service!");
+        }
+
+        if (service.job_name) {
+            const jobs = await this.findJobByName(service.job_name)
+
+            if (!jobs) {
+                throw new Error("There was not found any job valid for this service!");
+            }
+
+        }
+
+        const new_id = 'a'
+
+        const service_payload: IService = {
+            service_id: new_id,
+            group_id: service.group_id,
+            job_id: service.job_id,
+            service_name: service.service_name,
+            service_description: service.service_name,
+            service_url: service.service_url,
+            rate_limit_tolerance: service.rate_limit_tolerance,
+            created_by: service.created_by
+        }
+        const new_service = new Service(service_payload)
+
+        this.services.push(new_service)
+
+        const new_service_info = new_service.getServiceInfo();
+
+        const createJobOutput: IServiceOutputDTO = {
+            job_id: new_service_info.job_id!,
+            group_id: new_service_info.group_id,
+            service_name: new_service_info.service_name,
+            service_description: new_service_info.service_description,
+            service_url: new_service_info.service_url,
+            rate_limit_tolerance: new_service_info.rate_limit_tolerance,
+            created_at: new_service_info.created_at!,
+            created_by: new_service_info.created_by
+        }
+
+        return createJobOutput
+    }
+
+    async findServiceById(service_id: string): Promise<IServiceOutputDTO | null> {
+        const service = this.services.find(service => service.getServiceInfo().service_id! === service_id)
+
+        if (!service) {
+            return null;
+        }
+
+        const service_info = service?.getServiceInfo()
+
+        const service_output: IServiceOutputDTO = {
+            job_id: service_info.job_id!,
+            group_id: service_info.group_id,
+            service_name: service_info.service_name,
+            service_description: service_info.service_description,
+            service_url: service_info.service_url,
+            rate_limit_tolerance: service_info.rate_limit_tolerance,
+            created_at: service_info.created_at!,
+            created_by: service_info.created_by
+        }
+
+        return service_output
+    }
+
+    async findServiceByName(service_name: string): Promise<IServiceOutputDTO | null> {
+        const service = this.services.find(service => service.getServiceInfo().service_name! === service_name)
+
+        if (!service) {
+            return null;
+        }
+
+        const service_info = service?.getServiceInfo()
+
+        const service_output: IServiceOutputDTO = {
+            job_id: service_info.job_id!,
+            group_id: service_info.group_id,
+            service_name: service_info.service_name,
+            service_description: service_info.service_description,
+            service_url: service_info.service_url,
+            rate_limit_tolerance: service_info.rate_limit_tolerance,
+            created_at: service_info.created_at!,
+            created_by: service_info.created_by
+        }
+
+        return service_output
+    }
+
+    async findServicesByGroupId(group_id: string): Promise<IServiceOutputDTO[] | null> {
+        const services = this.services.filter(service => service.getServiceInfo().group_id! === group_id)
+
+        if (services.length === 0) {
+            return null;
+        }
+
+        const services_output = services.map(service => {
+            const service_info = service?.getServiceInfo()
+
+            return {
+                job_id: service_info.job_id!,
+                group_id: service_info.group_id,
+                service_name: service_info.service_name,
+                service_description: service_info.service_description,
+                service_url: service_info.service_url,
+                rate_limit_tolerance: service_info.rate_limit_tolerance,
+                created_at: service_info.created_at!,
+                created_by: service_info.created_by
+            }
+        })
+
+        return services_output
+    }
+
+    async findServicesByJobId(job_id: string): Promise<IServiceOutputDTO[] | null> {
+        const services = this.services.filter(service => service.getServiceInfo().job_id! === job_id)
+
+        if (services.length === 0) {
+            return null;
+        }
+
+        const services_output = services.map(service => {
+            const service_info = service?.getServiceInfo()
+
+            return {
+                job_id: service_info.job_id!,
+                group_id: service_info.group_id,
+                service_name: service_info.service_name,
+                service_description: service_info.service_description,
+                service_url: service_info.service_url,
+                rate_limit_tolerance: service_info.rate_limit_tolerance,
+                created_at: service_info.created_at!,
+                created_by: service_info.created_by
+            }
+        })
+
+        return services_output
+    }
+
+    async findAllServices(): Promise<IServiceOutputDTO[] | null> {
+        const service_filtered = this.services
+
+        if (service_filtered.length === 0) {
+            return null
+        }
+
+        const services_output = service_filtered.map(service => {
+            const service_info = service?.getServiceInfo()
+
+            return {
+                job_id: service_info.job_id!,
+                group_id: service_info.group_id,
+                service_name: service_info.service_name,
+                service_description: service_info.service_description,
+                service_url: service_info.service_url,
+                rate_limit_tolerance: service_info.rate_limit_tolerance,
+                created_at: service_info.created_at!,
+                created_by: service_info.created_by
+            }
+        })
+
+        return services_output
+    }
+
+    // fim - Service
 
 }
 
