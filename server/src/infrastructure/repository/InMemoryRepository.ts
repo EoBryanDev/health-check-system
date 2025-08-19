@@ -357,14 +357,7 @@ class InMemoryRepository implements IRepository {
     // fim - Group
     // ini - Jobs
 
-    async createJob(job: IJobInputDTO): Promise<IJobOutputDTO> {
-
-        const groups = await this.findGroupByName(job.group_name)
-
-        if (!groups) {
-            throw new Error("There was not found any group valid for this job!");
-
-        }
+    async createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO> {
 
         const new_id = 'a'
 
@@ -372,7 +365,7 @@ class InMemoryRepository implements IRepository {
             group_id: new_id,
             job_name: job.job_name,
             interval_time: job.interval_time,
-            created_by: job.created_by
+            created_by
         }
         const new_job = new Job(job_payload)
 
