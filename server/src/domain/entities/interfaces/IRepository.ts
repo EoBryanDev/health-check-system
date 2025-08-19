@@ -43,7 +43,7 @@ interface IRepository {
 
     findAllJobs(): Promise<IJobOutputWServiceDTO[] | null>;
 
-    createService(service: IServiceInputDTO): Promise<IServiceOutputDTO>;
+    createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO>;
 
     findServiceById(service_id: string): Promise<IServiceOutputDTO | null>;
 

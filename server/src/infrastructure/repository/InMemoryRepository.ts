@@ -500,7 +500,7 @@ class InMemoryRepository implements IRepository {
 
     // ini - Service
 
-    async createService(service: IServiceInputDTO): Promise<IServiceOutputDTO> {
+    async createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO> {
         const groups = await this.findGroupByName(service.group_name)
 
         if (!groups) {
@@ -526,7 +526,7 @@ class InMemoryRepository implements IRepository {
             service_description: service.service_name,
             service_url: service.service_url,
             rate_limit_tolerance: service.rate_limit_tolerance,
-            created_by: service.created_by
+            created_by
         }
         const new_service = new Service(service_payload)
 
