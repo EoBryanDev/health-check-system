@@ -10,7 +10,7 @@ const users = pgTable('users', {
     user_id: uuid().primaryKey().defaultRandom(),
     first_name: text().notNull(),
     last_name: text().notNull(),
-    email: text().notNull(),
+    email: text().notNull().unique(),
     password: text().notNull(),
     cellnumber: text(),
     role: ERoles('role').notNull().default('ANALYST'),
