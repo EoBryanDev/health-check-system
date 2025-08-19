@@ -14,7 +14,7 @@ const jobs = pgTable('jobs', {
         onDelete: 'set null',
         onUpdate: 'cascade'
     }).notNull(),
-    job_name: text().notNull(),
+    job_name: text().notNull().unique(),
     job_description: text(),
     interval_time: integer(), // in miliseconds
     active: boolean().notNull().default(true),
