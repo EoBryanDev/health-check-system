@@ -35,7 +35,7 @@ interface IRepository {
 
     findJobByGroupId(group_id: string): Promise<IJobOutputDTO | null>;
 
-    createJob(job: IJobInputDTO): Promise<IJobOutputDTO>;
+    createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO>;
 
     findJobByName(job_name: string): Promise<IJobOutputDTO | null>;
 

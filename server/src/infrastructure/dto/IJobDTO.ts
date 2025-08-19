@@ -26,7 +26,7 @@ interface IJobInputDTO {
     job_name: string,
     job_description?: string,
     interval_time: number, // in miliseconds
-    created_by: string
+
 }
 
 export { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceDTO }
