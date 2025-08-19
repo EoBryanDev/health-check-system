@@ -5,15 +5,15 @@ import { User } from "../../domain/entities/User";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
 import { MonitGroup } from "../../domain/entities/MonitGroup";
 import { IMonitGroup } from "../../domain/entities/interfaces/IMonitGroup";
+import { IJobOutputDTO, IJobInputDTO } from "../dto/IJobDTO";
 
 
 class InMemoryRepository implements IRepository {
 
-
     readonly users: User[] = [];
     readonly groups: MonitGroup[] = [];
     readonly group_users: IUserGroup[] = [];
-
+    // ini - User
     async findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
 
         const user = this.users.find(user => user.getUserInfo().email! === email) || null
@@ -126,6 +126,9 @@ class InMemoryRepository implements IRepository {
         return all_users;
     }
 
+    //  fim - User
+
+    // ini - Group
     async createGroup(group: IGroupInputDTO, user_id: string): Promise<IGroupOutputDTO> {
 
         const user = this.users.find(user => user.getUserInfo().email === group.users_email)
@@ -343,6 +346,27 @@ class InMemoryRepository implements IRepository {
     // async inativeGroup(group_id: string): Promise<void> {
     //     throw new Error("Method not implemented.");
     // }
+
+    async createJob(job: IJobInputDTO): Promise<IJobOutputDTO> {
+        throw new Error("Method not implemented.");
+    }
+
+    async findJobById(job_id: string): Promise<IJobOutputDTO> {
+        throw new Error("Method not implemented.");
+    }
+
+    async findJobByName(job_name: string): Promise<IJobOutputDTO> {
+        throw new Error("Method not implemented.");
+    }
+
+    async findJobByGroupId(group_id: string): Promise<IJobOutputDTO> {
+        throw new Error("Method not implemented.");
+    }
+
+    async findAllJobs(): Promise<IJobOutputDTO[]> {
+        throw new Error("Method not implemented.");
+    }
+
 }
 
 export { InMemoryRepository };
