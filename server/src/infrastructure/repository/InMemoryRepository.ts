@@ -1,5 +1,5 @@
 import { IRepository } from "../../domain/entities/interfaces/IRepository";
-import { IGroupOutputDTO, IGroupOutputUsersDTO } from "../dto/IGroupDTO";
+import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../dto/IGroupDTO";
 import { IUser } from "../../domain/entities/interfaces/IUser";
 import { User } from "../../domain/entities/User";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
@@ -12,6 +12,7 @@ class InMemoryRepository implements IRepository {
 
     readonly users: User[] = [];
     readonly groups: MonitGroup[] = [];
+    readonly group_users: IUserGroup[] = [];
 
     async findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
 
@@ -125,25 +126,35 @@ class InMemoryRepository implements IRepository {
         return all_users;
     }
 
-    async createGroup(group: MonitGroup): Promise<IGroupOutputDTO> {
+    async createGroup(group: IGroupInputDTO, user_id: string): Promise<IGroupOutputDTO> {
+
+        const user = this.users.find(user => user.getUserInfo().email === group.users_email)
+
+        if (!user) {
+            throw new Error("There was not found user to make bond with this group");
+        }
+
+        const user_info = user.getUserInfo();
+
         const last_group = this.groups.findLast((group) => group.getMonitGroup().group_id! !== undefined);
 
         const new_id = last_group ? last_group.getMonitGroup().group_id + 'a' : 'a'
 
-        const payload_group = group.getMonitGroup();
-
         const new_group_payload: IMonitGroup = {
             group_id: new_id,
-            group_name: payload_group.group_name,
-            group_description: payload_group.group_description,
-            created_by: payload_group.created_by
+            group_name: group.group_name,
+            group_description: group.group_description,
+            created_by: user_id
         }
 
         const createdGroup = new MonitGroup(new_group_payload)
 
         this.groups.push(createdGroup);
 
-        const group_info = createdGroup.getMonitGroup()
+
+        const group_info = createdGroup.getMonitGroup();
+
+        const resp = await this.createUserGroup({ group_id: group_info.group_id!, user_id: group_info.created_by })
 
         const group_dto: IGroupOutputDTO = {
             group_id: group_info.group_id!,
@@ -157,6 +168,7 @@ class InMemoryRepository implements IRepository {
 
         return group_dto;
     }
+
     async findAllGroups(): Promise<IGroupOutputDTO[] | null> {
         const all_groups: IGroupOutputDTO[] = this.groups.map((group) => {
             const group_info = group.getMonitGroup();
@@ -236,8 +248,47 @@ class InMemoryRepository implements IRepository {
         return all_groups;
     }
 
-    async findGroupByName(group_name: string): Promise<IGroupOutputDTO[] | null> {
-        throw new Error("Method not implemented.");
+    async findGroupByName(group_name: string): Promise<IGroupOutputDTO | null> {
+
+        const groups = this.groups.find(group => group.getMonitGroup().group_name === group_name);
+
+        if (!groups) {
+            return null
+        }
+        const group_info = groups?.getMonitGroup()
+
+        const group_dto: IGroupOutputDTO = {
+            group_id: group_info.group_id!,
+            group_name: group_info.group_name!,
+            group_description: group_info.group_description!,
+            created_at: group_info.created_at!,
+            active: group_info.active!,
+            created_by: group_info.created_by!,
+            updated_at: group_info.updated_at ?? ''
+        }
+
+        return group_dto;
+
+    }
+
+    async createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup> {
+        const user_group: IUserGroup = {
+            created_at: new Date().toISOString(),
+            ...user_group_payload
+        }
+        this.group_users.push(user_group)
+
+        return user_group;
+    }
+
+    async findAllUserByGroupId(group_id: string): Promise<IUserGroup[] | null> {
+        const users_group = this.group_users.filter(group_users => group_users.group_id = group_id)
+
+        if (users_group.length === 0) {
+            return null
+        }
+
+        return users_group
     }
     // async inativeGroup(group_id: string): Promise<void> {
     //     throw new Error("Method not implemented.");

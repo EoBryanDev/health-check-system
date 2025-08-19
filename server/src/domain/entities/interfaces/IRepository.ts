@@ -1,5 +1,5 @@
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
-import { IGroupOutputDTO, IGroupOutputUsersDTO } from "../../../infrastructure/dto/IGroupDTO";
+import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
 import { MonitGroup } from "../MonitGroup";
 import { User } from "../User";
 
@@ -14,11 +14,15 @@ interface IRepository {
 
     // delete(id: string): Promise<void>;
 
+    createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup>;
+
+    findAllUserByGroupId(group_id: string): Promise<IUserGroup[] | null>;
+
     findAllUsers(): Promise<ICreateUserOutputDTO[] | null>;
 
-    createGroup(group: MonitGroup): Promise<IGroupOutputDTO>;
+    createGroup(group: IGroupInputDTO, user_id: string): Promise<IGroupOutputDTO>;
 
-    findGroupByName(group_name: string): Promise<IGroupOutputDTO[] | null>;
+    findGroupByName(group_name: string): Promise<IGroupOutputDTO | null>;
 
     findAllGroups(): Promise<IGroupOutputDTO[] | null>;
 
