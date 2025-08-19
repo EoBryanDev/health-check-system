@@ -1,9 +1,7 @@
 interface IGroupInputDTO {
     group_name: string,
     group_description?: string,
-    users?: Array<{
-        user_email: string
-    }>
+    users_email: string
 }
 
 interface IGroupOutputDTO {
@@ -14,6 +12,17 @@ interface IGroupOutputDTO {
     created_at: string,
     updated_at: string,
     created_by: string
+}
+
+interface IUserGroupInput {
+    group_id: string,
+    user_id: string
+}
+
+interface IUserGroup {
+    group_id: string,
+    user_id: string,
+    created_at: string
 }
 
 interface IGroupOutputUsersDTO {
@@ -31,4 +40,4 @@ interface IGroupOutputUsersDTO {
     created_by: string
 }
 
-export { IGroupOutputDTO, IGroupOutputUsersDTO, IGroupInputDTO }
+export { IGroupOutputDTO, IGroupOutputUsersDTO, IGroupInputDTO, IUserGroupInput, IUserGroup }
