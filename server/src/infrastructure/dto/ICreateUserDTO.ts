@@ -14,6 +14,7 @@ interface ICreateUserOutputDTO {
     first_name: string,
     last_name: string,
     email: string,
+    active: boolean,
     cellnumber?: string,
     created_at: string,
 
