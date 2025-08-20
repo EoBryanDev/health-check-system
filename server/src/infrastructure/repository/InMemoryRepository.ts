@@ -5,12 +5,15 @@ import { User } from "../../domain/entities/User";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../dto/ICreateUserDTO";
 import { MonitGroup } from "../../domain/entities/MonitGroup";
 import { IMonitGroup } from "../../domain/entities/interfaces/IMonitGroup";
-import { IJobOutputDTO, IJobInputDTO, IJobOutputWServiceDTO } from "../dto/IJobDTO";
+import { IJobOutputDTO, IJobInputDTO, IJobOutputWServiceDTO, IJobOutputWServiceAvailableDTO } from "../dto/IJobDTO";
 import { Job } from "../../domain/entities/Job";
 import { IJob } from "../../domain/entities/interfaces/IJob";
 import { IServiceInputDTO, IServiceOutputDTO } from "../dto/IServiceDTO";
 import { Service } from "../../domain/entities/Service";
 import { IService } from "../../domain/entities/interfaces/IService";
+import { IQueryParams } from "../../domain/use_cases/interfaces/IQueryParams";
+import { IServiceLogInputDTO } from "../dto/IServiceLogDTO";
+import { IJobLogInputDTO } from "../dto/IJobLogDTO";
 
 
 class InMemoryRepository implements IRepository {
@@ -357,14 +360,7 @@ class InMemoryRepository implements IRepository {
     // fim - Group
     // ini - Jobs
 
-    async createJob(job: IJobInputDTO): Promise<IJobOutputDTO> {
-
-        const groups = await this.findGroupByName(job.group_name)
-
-        if (!groups) {
-            throw new Error("There was not found any group valid for this job!");
-
-        }
+    async createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO> {
 
         const new_id = 'a'
 
@@ -372,7 +368,7 @@ class InMemoryRepository implements IRepository {
             group_id: new_id,
             job_name: job.job_name,
             interval_time: job.interval_time,
-            created_by: job.created_by
+            created_by
         }
         const new_job = new Job(job_payload)
 
@@ -457,7 +453,7 @@ class InMemoryRepository implements IRepository {
         return job_output
     }
 
-    async findAllJobs(): Promise<IJobOutputWServiceDTO[] | null> {
+    async findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
         const job_filtered = this.jobs
 
         const all_jobs: IJobOutputWServiceDTO[] = []
@@ -482,6 +478,7 @@ class InMemoryRepository implements IRepository {
                 interval_time: job_info.interval_time,
                 services: services_in_job.map(service => {
                     return {
+                        service_id: service.service_id,
                         group_id: service.group_id,
                         job_id: service.job_id!,
                         service_name: service.service_name,
@@ -503,11 +500,111 @@ class InMemoryRepository implements IRepository {
 
         return all_jobs;
     }
+
+    async findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+        const job_filtered = this.jobs.filter(job => job.getJobInfo().active! === params.active)
+
+        const all_jobs: IJobOutputWServiceDTO[] = []
+
+        for (let i = 0; i < job_filtered.length; i++) {
+            const job = job_filtered[i];
+            const job_info = job.getJobInfo()
+
+            // depois implementar os services que contem job id
+
+            let services_in_job = await this.findServicesByJobId(job_info.job_id!)
+
+            if (!services_in_job) {
+                services_in_job = []
+            }
+
+            all_jobs.push({
+                group_id: job_info.group_id!,
+                job_id: job_info.job_id!,
+                job_name: job_info.job_name!,
+                job_description: job_info.job_description!,
+                interval_time: job_info.interval_time,
+                services: services_in_job.map(service => {
+                    return {
+                        service_id: service.service_id,
+                        group_id: service.group_id,
+                        job_id: service.job_id!,
+                        service_name: service.service_name,
+                        service_description: service.service_description ?? '',
+                        service_url: service.service_url,
+                        rate_limit_tolerance: service.rate_limit_tolerance,
+                        created_at: service.created_at,
+                        created_by: service.created_by,
+                    }
+                }),
+                created_at: job_info.created_at!,
+                created_by: job_info.created_by!
+            })
+        }
+
+        const filtered_job = all_jobs.filter(all_job => all_job.services.length >= 1)
+
+        if (!filtered_job) {
+            return null
+        }
+
+        return filtered_job;
+    }
+
+    async findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+        const job_filtered = this.jobs.filter(job => job.getJobInfo().active! === params.active).filter(job => job.getJobInfo().group_id === group_id)
+
+        const all_jobs: IJobOutputWServiceDTO[] = []
+
+        for (let i = 0; i < job_filtered.length; i++) {
+            const job = job_filtered[i];
+            const job_info = job.getJobInfo()
+
+            // depois implementar os services que contem job id
+
+            let services_in_job = await this.findServicesByJobId(job_info.job_id!)
+
+            if (!services_in_job) {
+                services_in_job = []
+            }
+
+            all_jobs.push({
+                group_id: job_info.group_id!,
+                job_id: job_info.job_id!,
+                job_name: job_info.job_name!,
+                job_description: job_info.job_description!,
+                interval_time: job_info.interval_time,
+                services: services_in_job.map(service => {
+                    return {
+                        service_id: service.service_id,
+                        group_id: service.group_id,
+                        job_id: service.job_id!,
+                        service_name: service.service_name,
+                        service_description: service.service_description ?? '',
+                        service_url: service.service_url,
+                        rate_limit_tolerance: service.rate_limit_tolerance,
+                        created_at: service.created_at,
+                        created_by: service.created_by,
+                    }
+                }),
+                created_at: job_info.created_at!,
+                created_by: job_info.created_by!
+            })
+        }
+
+        const filtered_job = all_jobs.filter(all_job => all_job.services.length >= 1)
+
+        if (!filtered_job) {
+            return null
+        }
+
+        return filtered_job;
+    }
     // fim - Jobs
 
     // ini - Service
 
-    async createService(service: IServiceInputDTO): Promise<IServiceOutputDTO> {
+    async createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO> {
         const groups = await this.findGroupByName(service.group_name)
 
         if (!groups) {
@@ -533,7 +630,7 @@ class InMemoryRepository implements IRepository {
             service_description: service.service_name,
             service_url: service.service_url,
             rate_limit_tolerance: service.rate_limit_tolerance,
-            created_by: service.created_by
+            created_by
         }
         const new_service = new Service(service_payload)
 
@@ -542,6 +639,7 @@ class InMemoryRepository implements IRepository {
         const new_service_info = new_service.getServiceInfo();
 
         const createJobOutput: IServiceOutputDTO = {
+            service_id: new_id,
             job_id: new_service_info.job_id!,
             group_id: new_service_info.group_id,
             service_name: new_service_info.service_name,
@@ -565,6 +663,7 @@ class InMemoryRepository implements IRepository {
         const service_info = service?.getServiceInfo()
 
         const service_output: IServiceOutputDTO = {
+            service_id: service_info.service_id!,
             job_id: service_info.job_id!,
             group_id: service_info.group_id,
             service_name: service_info.service_name,
@@ -588,6 +687,7 @@ class InMemoryRepository implements IRepository {
         const service_info = service?.getServiceInfo()
 
         const service_output: IServiceOutputDTO = {
+            service_id: service_info.service_id!,
             job_id: service_info.job_id!,
             group_id: service_info.group_id,
             service_name: service_info.service_name,
@@ -612,6 +712,7 @@ class InMemoryRepository implements IRepository {
             const service_info = service?.getServiceInfo()
 
             return {
+                service_id: service_info.service_id!,
                 job_id: service_info.job_id!,
                 group_id: service_info.group_id,
                 service_name: service_info.service_name,
@@ -637,6 +738,7 @@ class InMemoryRepository implements IRepository {
             const service_info = service?.getServiceInfo()
 
             return {
+                service_id: service_info.service_id!,
                 job_id: service_info.job_id!,
                 group_id: service_info.group_id,
                 service_name: service_info.service_name,
@@ -662,6 +764,7 @@ class InMemoryRepository implements IRepository {
             const service_info = service?.getServiceInfo()
 
             return {
+                service_id: service_info.service_id!,
                 job_id: service_info.job_id!,
                 group_id: service_info.group_id,
                 service_name: service_info.service_name,
@@ -677,6 +780,45 @@ class InMemoryRepository implements IRepository {
     }
 
     // fim - Service
+
+    // ini - Service log
+
+    async createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void> {
+
+    }
+
+    async findAllServicesLogByJob(job_name: string): Promise<any> {
+
+    }
+
+    async findAllServicesLogByGroup(group_name: string): Promise<any> {
+
+    }
+
+    async findServiceLogByServiceId(service_id: string): Promise<any> {
+
+    }
+
+
+    // fim - Service log
+
+    // ini - Job log
+    async createJobLog(job_log_payload: IJobLogInputDTO): Promise<void> {
+
+    }
+
+    async findAllJobsLogByJobId(job_id: string): Promise<null> {
+        return null
+
+    }
+
+    async findAllJobsLogByGroupId(group_id: string): Promise<null> {
+
+        return null
+
+    }
+
+    // fim - Job log
 
 }
 

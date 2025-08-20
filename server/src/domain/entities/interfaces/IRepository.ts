@@ -1,7 +1,10 @@
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
-import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
+import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceAvailableDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
+import { IJobLogInputDTO } from "../../../infrastructure/dto/IJobLogDTO";
 import { IServiceInputDTO, IServiceOutputDTO } from "../../../infrastructure/dto/IServiceDTO";
+import { IServiceLogInputDTO } from "../../../infrastructure/dto/IServiceLogDTO";
+import { IQueryParams } from "../../use_cases/interfaces/IQueryParams";
 import { MonitGroup } from "../MonitGroup";
 import { User } from "../User";
 
@@ -35,15 +38,19 @@ interface IRepository {
 
     findJobByGroupId(group_id: string): Promise<IJobOutputDTO | null>;
 
-    createJob(job: IJobInputDTO): Promise<IJobOutputDTO>;
+    createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO>;
 
     findJobByName(job_name: string): Promise<IJobOutputDTO | null>;
 
     findJobById(job_id: string): Promise<IJobOutputDTO | null>;
 
-    findAllJobs(): Promise<IJobOutputWServiceDTO[] | null>;
+    findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null>;
 
-    createService(service: IServiceInputDTO): Promise<IServiceOutputDTO>;
+    findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
+
+    findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
+
+    createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO>;
 
     findServiceById(service_id: string): Promise<IServiceOutputDTO | null>;
 
@@ -55,7 +62,25 @@ interface IRepository {
 
     findAllServices(): Promise<IServiceOutputDTO[] | null>;
 
+    createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void>;
+
+    findAllServicesLogByJob(job_name: string): Promise<any>;
+
+    findAllServicesLogByGroup(group_name: string): Promise<any>;
+
+    findServiceLogByServiceId(service_id: string): Promise<any>;
+
+    createJobLog(job_log_payload: IJobLogInputDTO): Promise<void>;
+
+    findAllJobsLogByJobId(job_id: string): Promise<IJobOutputWServiceDTO[] | null>;
+
+    findAllJobsLogByGroupId(group_id: string): Promise<IJobOutputWServiceDTO[] | null>;
+
+
 
 }
 
 export { IRepository };
+
+
+
