@@ -550,6 +550,56 @@ class InMemoryRepository implements IRepository {
 
         return filtered_job;
     }
+
+    async findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+        const job_filtered = this.jobs.filter(job => job.getJobInfo().active! === params.active).filter(job => job.getJobInfo().group_id === group_id)
+
+        const all_jobs: IJobOutputWServiceDTO[] = []
+
+        for (let i = 0; i < job_filtered.length; i++) {
+            const job = job_filtered[i];
+            const job_info = job.getJobInfo()
+
+            // depois implementar os services que contem job id
+
+            let services_in_job = await this.findServicesByJobId(job_info.job_id!)
+
+            if (!services_in_job) {
+                services_in_job = []
+            }
+
+            all_jobs.push({
+                group_id: job_info.group_id!,
+                job_id: job_info.job_id!,
+                job_name: job_info.job_name!,
+                job_description: job_info.job_description!,
+                interval_time: job_info.interval_time,
+                services: services_in_job.map(service => {
+                    return {
+                        service_id: service.service_id,
+                        group_id: service.group_id,
+                        job_id: service.job_id!,
+                        service_name: service.service_name,
+                        service_description: service.service_description ?? '',
+                        service_url: service.service_url,
+                        rate_limit_tolerance: service.rate_limit_tolerance,
+                        created_at: service.created_at,
+                        created_by: service.created_by,
+                    }
+                }),
+                created_at: job_info.created_at!,
+                created_by: job_info.created_by!
+            })
+        }
+
+        const filtered_job = all_jobs.filter(all_job => all_job.services.length >= 1)
+
+        if (!filtered_job) {
+            return null
+        }
+
+        return filtered_job;
+    }
     // fim - Jobs
 
     // ini - Service
@@ -737,15 +787,15 @@ class InMemoryRepository implements IRepository {
 
     }
 
-    async findAllServicesLogByJob(): Promise<any> {
+    async findAllServicesLogByJob(job_name: string): Promise<any> {
 
     }
 
-    async findAllServicesLogByGroup(): Promise<any> {
+    async findAllServicesLogByGroup(group_name: string): Promise<any> {
 
     }
 
-    async findServiceLogByServiceId(): Promise<any> {
+    async findServiceLogByServiceId(service_id: string): Promise<any> {
 
     }
 
@@ -757,11 +807,14 @@ class InMemoryRepository implements IRepository {
 
     }
 
-    async findAllJobsLogByJobId(): Promise<any> {
+    async findAllJobsLogByJobId(job_id: string): Promise<null> {
+        return null
 
     }
 
-    async findAllJobsLogByGroupId(): Promise<any> {
+    async findAllJobsLogByGroupId(group_id: string): Promise<null> {
+
+        return null
 
     }
 
