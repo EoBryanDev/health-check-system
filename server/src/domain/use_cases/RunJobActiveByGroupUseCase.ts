@@ -13,16 +13,13 @@ class RunJobActiveByGroupUseCase {
             throw new Error("");
         }
 
-        let jobs = await this.repository.findAllJobsLogByGroupId(group_id);
+        let jobs = await this.repository.findAllJobsByGroupId(group_id, params);
 
         if (!jobs) {
             throw new Error("There was not found any job active/registered");
 
         }
 
-        if (data_in_token.role === 'MANAGER') {
-            jobs = jobs.filter(job => job.created_by === data_in_token.user_id)
-        }
 
 
         for (let i = 0; i < jobs.length; i++) {
@@ -31,7 +28,7 @@ class RunJobActiveByGroupUseCase {
             const job = jobs[i];
 
             if (!job.services) {
-
+                return null;
             }
 
             for (let j = 0; j < job.services.length; j++) {
