@@ -3,6 +3,7 @@ import { ILoginInputDTO, ILoginOutputDTO } from "../../infrastructure/dto/ILogin
 import { IHashPassword } from "../entities/interfaces/IHashPassword";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { ITokenGenerator } from "../entities/interfaces/ITokenGenerator";
+import { parseERoleTRole } from "../helpers/parseERoleTRole";
 import { parseSecondsToIsoString } from "../helpers/parseSecondsToIsoString";
 
 class LoginUseCase {
