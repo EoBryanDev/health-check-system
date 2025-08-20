@@ -48,6 +48,8 @@ interface IRepository {
 
     findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
 
+    findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
+
     createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO>;
 
     findServiceById(service_id: string): Promise<IServiceOutputDTO | null>;
@@ -62,17 +64,18 @@ interface IRepository {
 
     createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void>;
 
-    findAllServicesLogByJob(): Promise<any>;
+    findAllServicesLogByJob(job_name: string): Promise<any>;
 
-    findAllServicesLogByGroup(): Promise<any>;
+    findAllServicesLogByGroup(group_name: string): Promise<any>;
 
-    findServiceLogByServiceId(): Promise<any>
+    findServiceLogByServiceId(service_id: string): Promise<any>;
 
     createJobLog(job_log_payload: IJobLogInputDTO): Promise<void>;
 
-    findAllJobsLogByJobId(): Promise<any>;
+    findAllJobsLogByJobId(job_id: string): Promise<IJobOutputWServiceDTO[] | null>;
 
-    findAllJobsLogByGroupId(): Promise<any>;
+    findAllJobsLogByGroupId(group_id: string): Promise<IJobOutputWServiceDTO[] | null>;
+
 
 
 }
