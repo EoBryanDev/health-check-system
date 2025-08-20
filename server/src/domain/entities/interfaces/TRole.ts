@@ -1,3 +1,3 @@
-type TRole = 'ADMIN' | 'ANALYST' | 'MANAGER'
+type TRole = 'ADMIN' | 'ANALYST' | 'MANAGER' | 'NODE_CRON'
 
 export { TRole }
