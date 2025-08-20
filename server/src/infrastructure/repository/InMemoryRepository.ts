@@ -12,7 +12,7 @@ import { IServiceInputDTO, IServiceOutputDTO } from "../dto/IServiceDTO";
 import { Service } from "../../domain/entities/Service";
 import { IService } from "../../domain/entities/interfaces/IService";
 import { IQueryParams } from "../../domain/use_cases/interfaces/IQueryParams";
-import { IServiceLogInputDTO } from "../dto/IServiceLogDTO";
+import { IServiceLogInputDTO, IServiceLogOutputDTO } from "../dto/IServiceLogDTO";
 import { IJobLogInputDTO, IJobLogOutputDTO } from "../dto/IJobLogDTO";
 import { group } from "console";
 import { JobLog } from "../../domain/entities/JobLog";
@@ -804,16 +804,137 @@ class InMemoryRepository implements IRepository {
         this.service_logs.push(createdServiceLog)
     }
 
-    async findAllServicesLogByJob(job_name: string, params: IQueryParams): Promise<any> {
+    async findAllServicesLogByJobName(job_name: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null> {
 
+        const job = await this.findJobByName(job_name);
+
+        if (!job) {
+            return null
+        }
+        const services = await this.findServicesByJobId(job.job_id, params)
+
+        if (!services) {
+            return null
+        }
+
+        let all_service_logs: IServiceLogOutputDTO[] = []
+
+        for (let i = 0; i < services.length; i++) {
+            const service = services[i];
+
+            const service_logs = this.service_logs.filter(service_log => service_log.getServiceLogInfo().service_id === service.service_id)
+
+            for (let j = 0; j < service_logs.length; j++) {
+                const service_log = service_logs[j];
+
+                const service_log_info = service_log.getServiceLogInfo()
+
+                const service_log_dto: IServiceLogOutputDTO = {
+                    service_log_id: service_log_info.service_log_id,
+                    service_id: service_log_info.service_id,
+                    start_at: service_log_info.start_at,
+                    duration: service_log_info.duration,
+                    method: service_log_info.method,
+                    status_code: service_log_info.status_code,
+                    requester: service_log_info.requester,
+                    device: service_log_info.device,
+                    classification: service_log_info.classification,
+                }
+
+                all_service_logs.push(service_log_dto)
+            }
+
+        }
+
+        if (!all_service_logs) {
+            return null;
+        }
+
+        return all_service_logs
     }
 
-    async findAllServicesLogByGroup(group_name: string, params: IQueryParams): Promise<any> {
+    async findAllServicesLogByGroup(group_name: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null> {
+        const group = await this.findGroupByName(group_name);
 
+        if (!group) {
+            return null
+        }
+        const services = await this.findServicesByGroupId(group.group_id, params)
+
+        if (!services) {
+            return null
+        }
+
+        let all_service_logs: IServiceLogOutputDTO[] = []
+
+        for (let i = 0; i < services.length; i++) {
+            const service = services[i];
+
+            const service_logs = this.service_logs.filter(service_log => service_log.getServiceLogInfo().service_id === service.service_id)
+
+            for (let j = 0; j < service_logs.length; j++) {
+                const service_log = service_logs[j];
+
+                const service_log_info = service_log.getServiceLogInfo()
+
+                const service_log_dto: IServiceLogOutputDTO = {
+                    service_log_id: service_log_info.service_log_id,
+                    service_id: service_log_info.service_id,
+                    start_at: service_log_info.start_at,
+                    duration: service_log_info.duration,
+                    method: service_log_info.method,
+                    status_code: service_log_info.status_code,
+                    requester: service_log_info.requester,
+                    device: service_log_info.device,
+                    classification: service_log_info.classification,
+                }
+
+                all_service_logs.push(service_log_dto)
+            }
+
+        }
+
+        if (!all_service_logs) {
+            return null;
+        }
+
+        return all_service_logs
     }
 
-    async findServiceLogByServiceId(service_id: string): Promise<any> {
+    async findServicesLogByServiceId(service_id: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null> {
 
+        const services = await this.findServiceById(service_id)
+
+        if (!services) {
+            return null
+        }
+
+        const service_logs = this.service_logs.filter(service_log => service_log.getServiceLogInfo().service_id === service_id)
+        let all_service_logs: IServiceLogOutputDTO[] = []
+        for (let j = 0; j < service_logs.length; j++) {
+            const service_log = service_logs[j];
+
+            const service_log_info = service_log.getServiceLogInfo()
+
+            const service_log_dto: IServiceLogOutputDTO = {
+                service_log_id: service_log_info.service_log_id,
+                service_id: service_log_info.service_id,
+                start_at: service_log_info.start_at,
+                duration: service_log_info.duration,
+                method: service_log_info.method,
+                status_code: service_log_info.status_code,
+                requester: service_log_info.requester,
+                device: service_log_info.device,
+                classification: service_log_info.classification,
+            }
+
+        }
+
+        if (!all_service_logs) {
+            return null;
+        }
+
+        return all_service_logs
     }
 
 

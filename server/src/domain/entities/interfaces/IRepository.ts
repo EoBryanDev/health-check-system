@@ -3,7 +3,7 @@ import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput,
 import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceAvailableDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
 import { IJobLogInputDTO, IJobLogOutputDTO } from "../../../infrastructure/dto/IJobLogDTO";
 import { IServiceInputDTO, IServiceOutputDTO } from "../../../infrastructure/dto/IServiceDTO";
-import { IServiceLogInputDTO } from "../../../infrastructure/dto/IServiceLogDTO";
+import { IServiceLogInputDTO, IServiceLogOutputDTO } from "../../../infrastructure/dto/IServiceLogDTO";
 import { IQueryParams } from "../../use_cases/interfaces/IQueryParams";
 import { MonitGroup } from "../MonitGroup";
 import { User } from "../User";
@@ -64,11 +64,11 @@ interface IRepository {
 
     createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void>;
 
-    findAllServicesLogByJob(job_name: string, params: IQueryParams): Promise<any>;
+    findAllServicesLogByJobName(job_name: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null>;
 
-    findAllServicesLogByGroup(group_name: string, params: IQueryParams): Promise<any>;
+    findAllServicesLogByGroup(group_name: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null>;
 
-    findServiceLogByServiceId(service_id: string): Promise<any>;
+    findServicesLogByServiceId(service_id: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null>;
 
     createJobLog(job_log_payload: IJobLogInputDTO): Promise<void>;
 
