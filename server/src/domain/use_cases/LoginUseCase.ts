@@ -1,16 +1,15 @@
 import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
 import { ILoginInputDTO, ILoginOutputDTO } from "../../infrastructure/dto/ILoginDTO";
 import { IHashPassword } from "../entities/interfaces/IHashPassword";
+import { IRepository } from "../entities/interfaces/IRepository";
 import { ITokenGenerator } from "../entities/interfaces/ITokenGenerator";
-import { IUserRepository } from "../entities/interfaces/IUserRepository";
-import { parseERoleTRole } from "../helpers/parseERoleTRole";
 import { parseSecondsToIsoString } from "../helpers/parseSecondsToIsoString";
 
 class LoginUseCase {
-    constructor(private userRepository: IUserRepository, private hashService: IHashPassword, private tokenService: ITokenGenerator) { }
+    constructor(private dbRepository: IRepository, private hashService: IHashPassword, private tokenService: ITokenGenerator) { }
 
     async execute(login_payload: ILoginInputDTO): Promise<ILoginOutputDTO> {
-        const dbUser = await this.userRepository.findByEmail(login_payload.email)
+        const dbUser = await this.dbRepository.findUserByEmail(login_payload.email)
 
         if (!dbUser) {
             throw new Error("E-mail/Password is incorrect!");
