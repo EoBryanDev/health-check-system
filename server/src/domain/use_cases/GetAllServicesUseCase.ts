@@ -1,11 +1,12 @@
 import { IRepository } from "../entities/interfaces/IRepository";
+import { IQueryParams } from "./interfaces/IQueryParams";
 
-class GetServiceById {
+class GetAllServicesUseCase {
     constructor(private dbRepository: IRepository) { }
 
-    async execute(service_id: string) {
+    async execute(params: IQueryParams) {
 
-        const response = await this.dbRepository.findServiceById(service_id);
+        const response = await this.dbRepository.findAllServices(params);
 
         if (!response) {
             throw new Error("There was not found any service with the id informed.");
@@ -15,4 +16,4 @@ class GetServiceById {
     }
 }
 
-export { GetServiceById }
+export { GetAllServicesUseCase }
