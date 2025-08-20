@@ -5,7 +5,18 @@ interface IJobOutputWServiceDTO {
     group_id: string,
     job_name: string,
     job_description?: string,
-    services: Array<IServiceOutputDTO> | null,
+    services: Array<IServiceOutputDTO> | [],
+    interval_time: number, // in miliseconds
+    created_at: string,
+    created_by: string
+}
+
+interface IJobOutputWServiceAvailableDTO {
+    job_id: string,
+    group_id: string,
+    job_name: string,
+    job_description?: string,
+    services: Array<IServiceOutputDTO>,
     interval_time: number, // in miliseconds
     created_at: string,
     created_by: string
@@ -29,4 +40,4 @@ interface IJobInputDTO {
 
 }
 
-export { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceDTO }
+export { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceDTO, IJobOutputWServiceAvailableDTO }

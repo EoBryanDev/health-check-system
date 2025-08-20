@@ -11,6 +11,7 @@ interface IServiceInputDTO {
 }
 
 interface IServiceOutputDTO {
+    service_id: string;
     group_id: string;
     job_id?: string;
     service_name: string;
