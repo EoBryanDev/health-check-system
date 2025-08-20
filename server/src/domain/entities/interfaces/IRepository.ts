@@ -1,7 +1,10 @@
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
-import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
+import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceAvailableDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
+import { IJobLogInputDTO } from "../../../infrastructure/dto/IJobLogDTO";
 import { IServiceInputDTO, IServiceOutputDTO } from "../../../infrastructure/dto/IServiceDTO";
+import { IServiceLogInputDTO } from "../../../infrastructure/dto/IServiceLogDTO";
+import { IQueryParams } from "../../use_cases/interfaces/IQueryParams";
 import { MonitGroup } from "../MonitGroup";
 import { User } from "../User";
 
@@ -41,7 +44,9 @@ interface IRepository {
 
     findJobById(job_id: string): Promise<IJobOutputDTO | null>;
 
-    findAllJobs(): Promise<IJobOutputWServiceDTO[] | null>;
+    findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null>;
+
+    findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
 
     createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO>;
 
@@ -54,6 +59,20 @@ interface IRepository {
     findServicesByJobId(job_id: string): Promise<IServiceOutputDTO[] | null>;
 
     findAllServices(): Promise<IServiceOutputDTO[] | null>;
+
+    createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void>;
+
+    findAllServicesLogByJob(): Promise<any>;
+
+    findAllServicesLogByGroup(): Promise<any>;
+
+    findServiceLogByServiceId(): Promise<any>
+
+    createJobLog(job_log_payload: IJobLogInputDTO): Promise<void>;
+
+    findAllJobsLogByJobId(): Promise<any>;
+
+    findAllJobsLogByGroupId(): Promise<any>;
 
 
 }
