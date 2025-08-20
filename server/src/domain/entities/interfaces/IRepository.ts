@@ -1,7 +1,7 @@
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
 import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceAvailableDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
-import { IJobLogInputDTO } from "../../../infrastructure/dto/IJobLogDTO";
+import { IJobLogInputDTO, IJobLogOutputDTO } from "../../../infrastructure/dto/IJobLogDTO";
 import { IServiceInputDTO, IServiceOutputDTO } from "../../../infrastructure/dto/IServiceDTO";
 import { IServiceLogInputDTO } from "../../../infrastructure/dto/IServiceLogDTO";
 import { IQueryParams } from "../../use_cases/interfaces/IQueryParams";
@@ -72,9 +72,9 @@ interface IRepository {
 
     createJobLog(job_log_payload: IJobLogInputDTO): Promise<void>;
 
-    findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null>;
+    findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null>;
 
-    findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null>;
+    findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null>;
 
 
 

@@ -5,5 +5,12 @@ interface IJobLogInputDTO {
     duration: number,
 
 }
+interface IJobLogOutputDTO {
 
-export { IJobLogInputDTO }
+    job_id: string,
+    start_at: string,
+    duration: number,
+
+}
+
+export { IJobLogInputDTO, IJobLogOutputDTO }

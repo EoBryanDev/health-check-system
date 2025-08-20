@@ -13,7 +13,7 @@ import { Service } from "../../domain/entities/Service";
 import { IService } from "../../domain/entities/interfaces/IService";
 import { IQueryParams } from "../../domain/use_cases/interfaces/IQueryParams";
 import { IServiceLogInputDTO } from "../dto/IServiceLogDTO";
-import { IJobLogInputDTO } from "../dto/IJobLogDTO";
+import { IJobLogInputDTO, IJobLogOutputDTO } from "../dto/IJobLogDTO";
 import { group } from "console";
 import { JobLog } from "../../domain/entities/JobLog";
 import { ServiceLog } from "../../domain/entities/ServiceLog";
@@ -791,7 +791,17 @@ class InMemoryRepository implements IRepository {
     // ini - Service log
 
     async createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void> {
+        const last_service_id = this.service_logs.findLast((job) => job.getServiceLogInfo().service_log_id !== undefined);
+        const new_id = last_service_id ? last_service_id.getServiceLogInfo().service_log_id + 'a' : 'a'
 
+        const service_payload = {
+            service_log_id: new_id,
+            ...service_log_payload
+        }
+
+        const createdServiceLog = new ServiceLog(service_payload)
+
+        this.service_logs.push(createdServiceLog)
     }
 
     async findAllServicesLogByJob(job_name: string, params: IQueryParams): Promise<any> {
@@ -811,17 +821,69 @@ class InMemoryRepository implements IRepository {
 
     // ini - Job log
     async createJobLog(job_log_payload: IJobLogInputDTO): Promise<void> {
+        const last_job_id = this.job_logs.findLast((job) => job.getJobLogInfo().job_log_id !== undefined);
+        const new_id = last_job_id ? last_job_id.getJobLogInfo().job_log_id + 'a' : 'a'
+
+        const job_log = {
+            job_log_id: new_id,
+            ...job_log_payload
+        }
+
+        const new_job_log = new JobLog(job_log)
+        this.job_logs.push(new_job_log)
+    }
+
+    async findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null> {
+        const all_jobs = this.job_logs.filter(job_log => job_log.getJobLogInfo().job_id === job_id)
+
+        if (!all_jobs) {
+            return null
+        }
+
+        const job_log_output: IJobLogOutputDTO[] = all_jobs.map(jobLog => {
+            const info = jobLog.getJobLogInfo();
+            return {
+                job_log_id: info.job_log_id!,
+                job_id: info.job_id!,
+                start_at: info.start_at!,
+                duration: info.duration!
+            };
+        });
+
+        return job_log_output;
 
     }
 
-    async findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<null> {
-        return null
+    async findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null> {
+        const jobsByGroup = await this.findAllJobsLogByGroupId(group_id, params);
 
-    }
+        if (!jobsByGroup) {
+            return null
+        }
 
-    async findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<null> {
+        let all_jobs = [];
 
-        return null
+        for (let i = 0; i < jobsByGroup.length; i++) {
+            const jobGroup = jobsByGroup[i];
+
+            const job_logs_by_job_id = await this.findAllJobsLogByJobId(jobGroup.job_id, params)
+
+            if (job_logs_by_job_id) {
+
+                for (let j = 0; j < job_logs_by_job_id.length; j++) {
+                    const job_log = job_logs_by_job_id[j];
+
+                    all_jobs.push(job_log)
+                }
+            }
+
+        }
+
+        if (!all_jobs) {
+            return null
+        }
+
+        return all_jobs
 
     }
 
