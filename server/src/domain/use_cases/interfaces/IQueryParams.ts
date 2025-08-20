@@ -1,5 +1,5 @@
 interface IQueryParams {
-    active: boolean,
+    active: boolean | undefined,
     offset: number,
     limit: number
 }
