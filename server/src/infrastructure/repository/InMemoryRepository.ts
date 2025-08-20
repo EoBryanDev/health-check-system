@@ -508,6 +508,54 @@ class InMemoryRepository implements IRepository {
         return all_jobs;
     }
 
+    async findAllJobsByGroupId(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
+        const job_filtered = this.jobs.filter(job => job.getJobInfo().group_id === group_id && job.getJobInfo().active! === params.active || params.active === undefined)
+
+        const all_jobs: IJobOutputWServiceDTO[] = []
+
+        for (let i = 0; i < job_filtered.length; i++) {
+            const job = job_filtered[i];
+            const job_info = job.getJobInfo()
+
+            // depois implementar os services que contem job id
+
+            let services_in_job = await this.findServicesByJobId(job_info.job_id!, params)
+
+            if (!services_in_job) {
+                services_in_job = []
+            }
+
+            all_jobs.push({
+                group_id: job_info.group_id!,
+                job_id: job_info.job_id!,
+                job_name: job_info.job_name!,
+                job_description: job_info.job_description!,
+                interval_time: job_info.interval_time,
+                services: services_in_job.map(service => {
+                    return {
+                        service_id: service.service_id,
+                        group_id: service.group_id,
+                        job_id: service.job_id!,
+                        service_name: service.service_name,
+                        service_description: service.service_description ?? '',
+                        service_url: service.service_url,
+                        rate_limit_tolerance: service.rate_limit_tolerance,
+                        created_at: service.created_at,
+                        created_by: service.created_by,
+                    }
+                }),
+                created_at: job_info.created_at!,
+                created_by: job_info.created_by!
+            })
+        }
+
+        if (!all_jobs) {
+            return null
+        }
+
+        return all_jobs;
+    }
+
     async findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
         const job_filtered = this.jobs.filter(job => job.getJobInfo().active! === params.active || params.active === undefined)
 
