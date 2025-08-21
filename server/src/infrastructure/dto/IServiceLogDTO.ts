@@ -1,12 +1,15 @@
+type TClassificafion = 'GOOD' | 'WARNING' | 'ERROR'
+type TMethod = 'HTTP' | 'JOB'
+
 interface IServiceLogInputDTO {
     service_id: string,
     start_at: string,
     duration: number,
-    method: string,
+    method?: TMethod,
     status_code: number,
     requester: string,
     device: string,
-    classification: string,
+    classification: TClassificafion,
 }
 
 interface IServiceLogOutputDTO {

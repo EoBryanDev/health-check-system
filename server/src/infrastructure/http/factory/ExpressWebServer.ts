@@ -4,7 +4,9 @@ import helmet from 'helmet';
 import promBundle from 'express-prom-bundle'
 
 import { IWebServer } from '../interfaces/IWebServer';
-import { home } from '../routes/public_routes/home';
+import { public_routes } from '../routes/public_routes';
+import { private_routes } from '../routes/private_routes';
+
 
 class ExpressWebServer implements IWebServer {
     private server: Express;
@@ -27,7 +29,14 @@ class ExpressWebServer implements IWebServer {
         })
     };
     createRoutes = () => {
-        this.server.use(home);
+        this.server.use(express.json())
+        public_routes.forEach(public_route => {
+            this.server.use(public_route)
+        })
+
+        private_routes.forEach(private_route => {
+            this.server.use(private_route)
+        });
     };
 
     createSecurity = () => {
