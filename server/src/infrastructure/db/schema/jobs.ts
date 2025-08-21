@@ -16,7 +16,7 @@ const jobs = pgTable('jobs', {
     }).notNull(),
     job_name: text().notNull().unique(),
     job_description: text(),
-    interval_time: integer(), // in miliseconds
+    interval_time: integer().notNull(), // in miliseconds
     active: boolean().notNull().default(true),
     created_at: timestamp().defaultNow().notNull(),
     updated_at: timestamp(),
