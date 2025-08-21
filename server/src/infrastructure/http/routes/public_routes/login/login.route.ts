@@ -14,6 +14,6 @@ const login = Router()
 
 const loginController = factory.getLoginControllerInstance();
 
-login.get('/login', (req, res) => loginController.login(req, res))
+login.post('/login', (req, res) => loginController.login(req, res))
 
 export { login }
