@@ -21,14 +21,27 @@ class UserController {
         resp.status(200).json(outputSuccessDTO)
     }
 
-    async findUser(req: Request, resp: Response) {
+    // async findUser(req: Request, resp: Response) {
+    //     const { params } = req
 
+    //     const response = await this.findUser.execute(params)
 
-    }
+    //     const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+    //         data: response
+    //     }
 
-    async findAllUsers(req: Request, resp: Response) {
+    //     resp.status(200).json(outputSuccessDTO) 
 
-    }
+    // }
+
+    // async findAllUsers(req: Request, resp: Response) {
+
+    //     const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+    //         data: response
+    //     }
+
+    //     resp.status(200).json(outputSuccessDTO)
+    // }
 }
 
 export { UserController }
