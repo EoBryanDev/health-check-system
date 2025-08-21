@@ -29,7 +29,7 @@ class ExpressWebServer implements IWebServer {
         })
     };
     createRoutes = () => {
-
+        this.server.use(express.json())
         public_routes.forEach(public_route => {
             this.server.use(public_route)
         })
