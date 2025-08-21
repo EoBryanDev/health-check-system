@@ -1,11 +1,11 @@
 {
-  "id": "d85ddfd9-6b30-4501-a9d3-365c791d65ef",
+  "id": "08e969df-6a33-4518-96af-48921963e817",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.groups": {
-      "name": "groups",
+    "public.group_users": {
+      "name": "group_users",
       "schema": "",
       "columns": {
         "group_id": {
@@ -19,7 +19,48 @@
           "name": "user_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "group_users_user_id_users_user_id_fk": {
+          "name": "group_users_user_id_users_user_id_fk",
+          "tableFrom": "group_users",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.groups": {
+      "name": "groups",
+      "schema": "",
+      "columns": {
+        "group_id": {
+          "name": "group_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "group_name": {
           "name": "group_name",
@@ -62,19 +103,6 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "groups_user_id_users_user_id_fk": {
-          "name": "groups_user_id_users_user_id_fk",
-          "tableFrom": "groups",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
         "groups_created_by_users_user_id_fk": {
           "name": "groups_created_by_users_user_id_fk",
           "tableFrom": "groups",
@@ -90,7 +118,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "groups_group_name_unique": {
+          "name": "groups_group_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "group_name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -120,7 +156,7 @@
         },
         "duration": {
           "name": "duration",
-          "type": "timestamp (3)",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         }
@@ -180,7 +216,7 @@
           "name": "interval_time",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "active": {
           "name": "active",
@@ -239,7 +275,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "jobs_job_name_unique": {
+          "name": "jobs_job_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "job_name"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -269,7 +313,7 @@
         },
         "duration": {
           "name": "duration",
-          "type": "timestamp (3)",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -526,7 +570,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
