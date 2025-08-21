@@ -33,6 +33,7 @@ interface IJobOutputDTO {
 }
 
 interface IJobInputDTO {
+    group_id: string,
     group_name: string,
     job_name: string,
     job_description?: string,

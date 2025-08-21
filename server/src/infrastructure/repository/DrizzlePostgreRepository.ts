@@ -3,140 +3,495 @@ import { schema } from '../db/schema/index'
 import { and, eq, sql } from 'drizzle-orm';
 import { IRepository } from '../../domain/entities/interfaces/IRepository';
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from '../dto/IGroupDTO';
-import { IUser } from '../../domain/entities/interfaces/IUser';
+import { User } from '../../domain/entities/User';
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from '../dto/ICreateUserDTO';
 import { IJobOutputDTO, IJobInputDTO, IJobOutputWServiceDTO, IJobOutputWServiceAvailableDTO } from '../dto/IJobDTO';
 import { IServiceInputDTO, IServiceOutputDTO } from '../dto/IServiceDTO';
 import { IQueryParams } from '../../domain/use_cases/interfaces/IQueryParams';
 import { IServiceLogInputDTO, IServiceLogOutputDTO } from '../dto/IServiceLogDTO';
 import { IJobLogInputDTO, IJobLogOutputDTO } from '../dto/IJobLogDTO';
+import { parseTRoleERole } from '../../domain/helpers/parseTRoleERole';
+import { parseERoleTRole } from '../../domain/helpers/parseERoleTRole';
+import { ERoles } from '../../domain/entities/interfaces/ERoles';
+import { groups } from '../db/schema/groups';
 
 class DrizzlePostgreRepository implements IRepository {
     private db;
     constructor() {
         this.db = db;
     }
+    findGroupMembersById(group_id: string, params: IQueryParams): Promise<IGroupOutputUsersDTO[] | null> {
+        throw new Error('Method not implemented.');
+    }
+    findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+        throw new Error('Method not implemented.');
+    }
+    findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+        throw new Error('Method not implemented.');
+    }
 
     // User methods
     async findUserByEmail(email: string): Promise<ICreateUserOutputWPwdDTO | null> {
-        const user = await this.db.select().from(schema.users).where(eq(schema.users.email, email)).limit(1);
+        const user = await this.db.select().from(schema.users).where(eq(schema.users.email, email));
         if (!user[0]) return null;
-        return user[0];
+        const u = user[0];
+        return {
+            user_id: u.user_id,
+            first_name: u.first_name,
+            last_name: u.last_name,
+            email: u.email,
+            created_at: u.created_at?.toString() ?? '',
+            role: parseTRoleERole(u.role),
+            password: u.password
+        };
     }
 
     async findUserById(id: string): Promise<ICreateUserOutputWPwdDTO | null> {
-        const user = await this.db.select().from(schema.users).where(eq(schema.users.user_id, id)).limit(1);
+        const user = await this.db.select().from(schema.users).where(eq(schema.users.user_id, id));
         if (!user[0]) return null;
-        return user[0];
+        const u = user[0];
+        return {
+            user_id: u.user_id,
+            first_name: u.first_name,
+            last_name: u.last_name,
+            email: u.email,
+            created_at: u.created_at?.toString() ?? '',
+            role: parseTRoleERole(u.role),
+            password: u.password
+        };
     }
 
-    async createUser(user: IUser): Promise<ICreateUserOutputDTO> {
+    async createUser(user: User): Promise<ICreateUserOutputDTO> {
+        const payload_user = user.getUserInfo()
 
-        const [created] = await this.db.insert(schema.users).values(user).returning();
-        return created;
+        const values: typeof schema.users.$inferInsert = {
+            first_name: payload_user.first_name,
+            last_name: payload_user.last_name,
+            email: payload_user.email,
+            password: payload_user.password,
+            cellnumber: payload_user.cellnumber ?? null, // se a coluna aceitar null        // se tiver pgEnum com default
+            active: payload_user.active ?? true,
+            // created_at: new Date(), // opcional se sua coluna tem defaultNow()
+            // updated_at: new Date(),
+        };
+        // Converte para DTO se necessário
+        const [created] = await this.db.insert(schema.users).values(values)
+            .returning();
+
+        const response: ICreateUserOutputDTO = {
+            user_id: created.user_id,
+            first_name: created.first_name,
+            last_name: created.last_name,
+            cellnumber: created.cellnumber ?? '',
+            email: created.email,
+            active: created.active,
+            created_at: created.created_at.toString(),
+        }
+
+        return response
     }
 
     async findAllUsers(params: IQueryParams): Promise<ICreateUserOutputDTO[] | null> {
-        const users = await this.db.select().from(schema.users).where(params.active !== undefined ? schema.users.active.eq(params.active) : undefined);
-        return users.length ? users : null;
+        let users;
+        if (params.active !== undefined) {
+            users = await this.db.select().from(schema.users).where(eq(schema.users.active, params.active));
+        } else {
+            users = await this.db.select().from(schema.users);
+        }
+        if (!users.length) return null;
+        return users.map(u => ({
+            user_id: u.user_id,
+            first_name: u.first_name,
+            last_name: u.last_name,
+            active: u.active,
+            email: u.email,
+            created_at: u.created_at?.toString() ?? '',
+        }));
     }
 
     // Group methods
     async createGroup(group: IGroupInputDTO, user_id: string): Promise<IGroupOutputDTO> {
-        const [created] = await this.db.insert(schema.groups).values({ ...group, created_by: user_id }).returning();
-        return created;
+        const [created] = await this.db.insert(schema.groups).values({
+            group_name: group.group_name,
+            group_description: group.group_description,
+            created_by: user_id
+        }).returning();
+
+        const created_resp: IGroupOutputDTO = {
+            group_id: created.group_id,
+            group_name: created.group_name,
+            group_description: created.group_description ?? '',
+            active: created.active,
+            created_at: created.created_at.toString(),
+            updated_at: created.updated_at?.toString() ?? '',
+            created_by: created.created_by
+        }
+        return created_resp;
     }
 
     async findAllGroups(params: IQueryParams): Promise<IGroupOutputDTO[] | null> {
-        const groups = await this.db.select().from(schema.groups).where(params.active !== undefined ? schema.groups.active.eq(params.active) : undefined);
-        return groups.length ? groups : null;
+        let groups;
+        if (params.active !== undefined) {
+            groups = await this.db.select().from(schema.groups).where(eq(schema.groups.active, params.active));
+        } else {
+            groups = await this.db.select().from(schema.groups);
+        }
+        if (!groups.length) return null;
+        return groups.map(g => ({
+            group_id: g.group_id,
+            group_name: g.group_name,
+            group_description: g.group_description ?? '',
+            active: g.active,
+            created_at: g.created_at?.toString() ?? '',
+            updated_at: g.updated_at?.toString() ?? '',
+            created_by: g.created_by
+        }));
     }
 
     async findGroupById(group_id: string): Promise<IGroupOutputDTO | null> {
-        const group = await this.db.select().from(schema.groups).where(schema.groups.group_id.eq(group_id)).limit(1);
-        return group[0] || null;
+        const group = await this.db.select().from(schema.groups).where(eq(schema.groups.group_id, group_id));
+        if (!group[0]) return null;
+        const g = group[0];
+        return {
+            group_id: g.group_id,
+            group_name: g.group_name,
+            group_description: g.group_description ?? '',
+            active: g.active,
+            created_at: g.created_at?.toString() ?? '',
+            updated_at: g.updated_at?.toString() ?? '',
+            created_by: g.created_by
+        };
     }
 
     async findGroupByName(group_name: string): Promise<IGroupOutputDTO | null> {
-        const group = await this.db.select().from(schema.groups).where(schema.groups.group_name.eq(group_name)).limit(1);
-        return group[0] || null;
+        const group = await this.db.select().from(schema.groups).where(eq(schema.groups.group_name, group_name));
+        if (!group[0]) return null;
+        const g = group[0];
+        return {
+            group_id: g.group_id,
+            group_name: g.group_name,
+            group_description: g.group_description ?? '',
+            active: g.active,
+            created_at: g.created_at?.toString() ?? '',
+            updated_at: g.updated_at?.toString() ?? '',
+            created_by: g.created_by
+        };
     }
 
     async createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup> {
         const [created] = await this.db.insert(schema.group_users).values(user_group_payload).returning();
-        return created;
+
+        const resp: IUserGroup = {
+            group_id: created.group_id,
+            user_id: created.user_id,
+            created_at: created.created_at.toString()
+        }
+        return resp;
     }
 
     async findAllUserByGroupId(group_id: string, params: IQueryParams): Promise<IUserGroup[] | null> {
-        const users = await this.db.select().from(schema.group_users).where(schema.group_users.group_id.eq(group_id));
-        return users.length ? users : null;
+        const users = await this.db.select().from(schema.group_users).where(eq(schema.group_users.group_id, group_id));
+
+        if (users.length) {
+            return null
+        }
+
+        const response: IUserGroup[] = users.map(user => {
+            const u = user
+            return {
+                group_id: u.group_id,
+                user_id: u.user_id,
+                created_at: u.created_at.toString()
+            }
+        })
+        return response;
     }
 
     // Job methods
     async createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO> {
-        const [created] = await this.db.insert(schema.jobs).values({ ...job, created_by }).returning();
-        return created;
+        const [created] = await this.db.insert(schema.jobs).values({
+            group_id: job.group_id,
+            job_name: job.job_name,
+            job_description: job.job_description,
+            interval_time: job.interval_time,
+            created_by
+        }).returning();
+
+        const response: IJobOutputDTO = {
+            job_id: created.job_id,
+            group_id: created.group_id,
+            job_name: created.job_name,
+            interval_time: created.interval_time,
+            created_at: created.created_at.toString(),
+            created_by: created.created_by,
+        }
+        return response;
     }
 
     async findJobById(job_id: string): Promise<IJobOutputDTO | null> {
-        const job = await this.db.select().from(schema.jobs).where(schema.jobs.job_id.eq(job_id)).limit(1);
-        return job[0] || null;
+        const job = await this.db.select().from(schema.jobs).where(eq(schema.jobs.job_id, job_id));
+
+        if (!job) {
+            return null
+        }
+        const response: IJobOutputDTO = {
+            job_id: job[0].job_id,
+            group_id: job[0].group_id,
+            job_name: job[0].job_name,
+            interval_time: job[0].interval_time,
+            created_at: job[0].created_at.toString(),
+            created_by: job[0].created_by,
+        }
+        return response;
     }
 
     async findJobByName(job_name: string): Promise<IJobOutputDTO | null> {
-        const job = await this.db.select().from(schema.jobs).where(schema.jobs.job_name.eq(job_name)).limit(1);
-        return job[0] || null;
+        const job = await this.db.select().from(schema.jobs).where(eq(schema.jobs.job_name, job_name));
+
+        if (!job) {
+            return null
+        }
+
+        const response: IJobOutputDTO = {
+            job_id: job[0].job_id,
+            group_id: job[0].group_id,
+            job_name: job[0].job_name,
+            interval_time: job[0].interval_time,
+            created_at: job[0].created_at.toString(),
+            created_by: job[0].created_by,
+        }
+        return response;
     }
 
     async findJobByGroupId(group_id: string): Promise<IJobOutputDTO | null> {
-        const job = await this.db.select().from(schema.jobs).where(schema.jobs.group_id.eq(group_id)).limit(1);
-        return job[0] || null;
+        const job = await this.db.select().from(schema.jobs).where(eq(schema.jobs.group_id, group_id));
+        if (!job) {
+            return null
+        }
+
+        const response: IJobOutputDTO = {
+            job_id: job[0].job_id,
+            group_id: job[0].group_id,
+            job_name: job[0].job_name,
+            interval_time: job[0].interval_time,
+            created_at: job[0].created_at.toString(),
+            created_by: job[0].created_by,
+        }
+        return response;
     }
 
     async findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
-        const jobs = await this.db.select().from(schema.jobs).where(params.active !== undefined ? schema.jobs.active.eq(params.active) : undefined);
-        return jobs.length ? jobs : null;
+        let jobs;
+        let services;
+        if (params.active !== undefined) {
+            jobs = (await this.db.query.jobs.findMany({
+                with: {
+                    services: true, // isso já puxa os services do job
+                },
+                where: eq(schema.jobs.active, params.active),
+            }))
+        } else {
+            jobs = await this.db.query.jobs.findMany({
+                with: {
+                    services: true, // isso já puxa os services do job
+                }
+            });
+        }
+
+        if (jobs.length === 0) {
+            return null
+        }
+
+        return jobs.map(job => {
+            return {
+                job_id: job.job_id,
+                group_id: job.group_id,
+                job_name: job.job_name,
+                job_description: job.job_description ?? '',
+                interval_time: job.interval_time,
+                active: job.active,
+                created_at: job.created_at?.toString() ?? '',
+                updated_at: job.updated_at?.toString() ?? '',
+                created_by: job.created_by,
+                services: job.services
+            };
+        });
     }
 
     async findAllJobsByGroupId(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
-        const jobs = await this.db.select().from(schema.jobs).where(schema.jobs.group_id.eq(group_id));
-        return jobs.length ? jobs : null;
+        const jobs = await this.db.query.jobs.findMany({
+            with: {
+                services: true, // isso já puxa os services do job
+                groups: true
+            },
+            where: params.active !== undefined
+                ? and(eq(schema.jobs.active, params.active), eq(schema.groups.group_id, group_id))
+                : undefined
+        })
+
+        if (!jobs) {
+            return null
+        }
+
+        return jobs.map(job => {
+            return {
+                job_id: job.job_id,
+                group_id: job.group_id,
+                job_name: job.job_name,
+                job_description: job.job_description ?? '',
+                interval_time: job.interval_time,
+                active: job.active,
+                created_at: job.created_at?.toString() ?? '',
+                updated_at: job.updated_at?.toString() ?? '',
+                created_by: job.created_by,
+                services: job.services
+            };
+        });
     }
 
     // Service methods
     async createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO> {
-        const [created] = await this.db.insert(schema.services).values({ ...service, created_by }).returning();
-        return created;
+        const [created] = await this.db.insert(schema.services).values({
+            group_id: service.group_id,
+            job_id: service.job_id,
+            service_name: service.service_name,
+            service_description: service.service_description,
+            service_url: service.service_url,
+            rate_limit_tolerance: service.rate_limit_tolerance,
+            created_by
+        }).returning();
+
+        const response: IServiceOutputDTO = {
+            service_id: created.service_id,
+            group_id: created.group_id,
+            service_name: created.service_name,
+            service_url: created.service_url,
+            rate_limit_tolerance: created.rate_limit_tolerance,
+            created_at: created.created_at.toString(),
+            created_by: created.created_by,
+        }
+        return response;
     }
 
     async findServiceById(service_id: string): Promise<IServiceOutputDTO | null> {
-        const service = await this.db.select().from(schema.services).where(schema.services.service_id.eq(service_id)).limit(1);
-        return service[0] || null;
+        const service = await this.db.select().from(schema.services).where(eq(schema.services.service_id, service_id));
+        if (!service) {
+            return null
+        }
+
+        const response: IServiceOutputDTO = {
+            service_id: service[0].service_id,
+            group_id: service[0].group_id,
+            service_name: service[0].service_name,
+            service_url: service[0].service_url,
+            rate_limit_tolerance: service[0].rate_limit_tolerance,
+            created_at: service[0].created_at.toString(),
+            created_by: service[0].created_by,
+        }
+        return response;
     }
 
     async findServiceByName(service_name: string): Promise<IServiceOutputDTO | null> {
-        const service = await this.db.select().from(schema.services).where(schema.services.service_name.eq(service_name)).limit(1);
-        return service[0] || null;
+        const service = await this.db.select().from(schema.services).where(eq(schema.services.service_name, service_name));
+        if (!service) {
+            return null
+        }
+
+        const response: IServiceOutputDTO = {
+            service_id: service[0].service_id,
+            group_id: service[0].group_id,
+            service_name: service[0].service_name,
+            service_url: service[0].service_url,
+            rate_limit_tolerance: service[0].rate_limit_tolerance,
+            created_at: service[0].created_at.toString(),
+            created_by: service[0].created_by,
+        }
+        return response;
     }
 
     async findServicesByGroupId(group_id: string, params: IQueryParams): Promise<IServiceOutputDTO[] | null> {
-        const services = await this.db.select().from(schema.services).where(schema.services.group_id.eq(group_id));
-        return services.length ? services : null;
+        const services = await this.db.select().from(schema.services).where(params.active !== undefined ? and(eq(schema.services.group_id, group_id), eq(schema.services.active, params.active)) : undefined);
+
+        if (!services) {
+            return null
+        }
+
+        const service_returned: IServiceOutputDTO[] = services.map(service => {
+            return {
+                service_id: service.service_id,
+                group_id: service.group_id,
+                service_name: service.service_name,
+                service_url: service.service_url,
+                rate_limit_tolerance: service.rate_limit_tolerance,
+                created_at: service.created_at.toString(),
+                created_by: service.created_by,
+            }
+        })
+
+        return service_returned;
     }
 
     async findServicesByJobId(job_id: string, params: IQueryParams): Promise<IServiceOutputDTO[] | null> {
-        const services = await this.db.select().from(schema.services).where(schema.services.job_id.eq(job_id));
-        return services.length ? services : null;
+        const services = await this.db.select().from(schema.services).where(params.active !== undefined ? and(eq(schema.services.group_id, job_id), eq(schema.services.active, params.active)) : undefined);;
+
+        if (!services) {
+            return null
+        }
+
+        const service_returned: IServiceOutputDTO[] = services.map(service => {
+            return {
+                service_id: service.service_id,
+                group_id: service.group_id,
+                service_name: service.service_name,
+                service_url: service.service_url,
+                rate_limit_tolerance: service.rate_limit_tolerance,
+                created_at: service.created_at.toString(),
+                created_by: service.created_by,
+            }
+        })
+
+        return service_returned;
     }
 
     async findAllServices(params: IQueryParams): Promise<IServiceOutputDTO[] | null> {
-        const services = await this.db.select().from(schema.services).where(params.active !== undefined ? schema.services.active.eq(params.active) : undefined);
-        return services.length ? services : null;
+        let services;
+        if (params.active !== undefined) {
+            services = await this.db.select().from(schema.services).where(eq(schema.services.active, params.active));
+        } else {
+            services = await this.db.select().from(schema.services);
+        }
+        if (!services) {
+            return null
+        }
+
+        const service_returned: IServiceOutputDTO[] = services.map(service => {
+            return {
+                service_id: service.service_id,
+                group_id: service.group_id,
+                service_name: service.service_name,
+                service_url: service.service_url,
+                rate_limit_tolerance: service.rate_limit_tolerance,
+                created_at: service.created_at.toString(),
+                created_by: service.created_by,
+            }
+        })
+
+        return service_returned;
     }
 
     // Service log methods
     async createServiceLog(service_log_payload: IServiceLogInputDTO): Promise<void> {
-        await this.db.insert(schema.service_logs).values(service_log_payload);
+        const payload: typeof schema.service_logs.$inferInsert = {
+            service_id: service_log_payload.service_id,
+            start_at: new Date(service_log_payload.start_at),
+            duration: service_log_payload.duration,
+            method: service_log_payload.method,
+            status_code: service_log_payload.status_code,
+            requester: service_log_payload.requester,
+            device: service_log_payload.device,
+            classification: service_log_payload.classification,
+        }
+        await this.db.insert(schema.service_logs).values(payload);
     }
 
     async findAllServicesLogByJobName(job_name: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null> {
@@ -150,18 +505,68 @@ class DrizzlePostgreRepository implements IRepository {
     }
 
     async findServicesLogByServiceId(service_id: string, params: IQueryParams): Promise<IServiceLogOutputDTO[] | null> {
-        const logs = await this.db.select().from(schema.service_logs).where(schema.service_logs.service_id.eq(service_id));
-        return logs.length ? logs : null;
+        let logs;
+        if (params.active !== undefined) {
+            logs = await this.db.select().from(schema.service_logs).where(eq(schema.service_logs.service_id, service_id));
+        } else {
+            logs = await this.db.select().from(schema.service_logs).where(eq(schema.service_logs.service_id, service_id));
+        }
+
+        if (!logs) {
+            return null
+        }
+
+        const response: IServiceLogOutputDTO[] = logs.map(service_log => {
+
+            const resp: IServiceLogOutputDTO = {
+                service_log_id: service_log.service_log_id,
+                service_id: service_log.service_id,
+                start_at: service_log.start_at.toString(),
+                duration: service_log.duration,
+                method: service_log.method,
+                status_code: service_log.status_code,
+                requester: service_log.requester,
+                device: service_log.device,
+                classification: service_log.classification,
+            }
+            return resp
+        })
+
+        return response;
     }
 
     // Job log methods
     async createJobLog(job_log_payload: IJobLogInputDTO): Promise<void> {
-        await this.db.insert(schema.job_logs).values(job_log_payload);
+        const payload: typeof schema.job_logs.$inferInsert = {
+            job_id: job_log_payload.job_id,
+            start_at: new Date(job_log_payload.start_at),
+            duration: job_log_payload.duration
+
+        }
+        await this.db.insert(schema.job_logs).values(payload);
     }
 
     async findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null> {
-        const logs = await this.db.select().from(schema.job_logs).where(schema.job_logs.job_id.eq(job_id));
-        return logs.length ? logs : null;
+        const logs = await this.db.select().from(schema.job_logs).where(eq(schema.job_logs.job_id, job_id));
+
+        if (!logs) {
+            return null
+        }
+
+        const job_logs = logs.map(log => {
+            const resp: IJobLogOutputDTO = {
+                job_log_id: log.job_log_id,
+                job_id: log.job_id,
+                start_at: log.start_at.toString(),
+                duration: log.duration,
+            }
+
+            return resp
+        })
+
+        return job_logs
+
+
     }
 
     async findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null> {
