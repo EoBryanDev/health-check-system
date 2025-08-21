@@ -6,15 +6,13 @@ import { timestamp } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
 
-const groups = pgTable('groups', {
+const group_users = pgTable('group_users', {
     group_id: uuid().primaryKey().defaultRandom(),
-    group_name: text().notNull().unique(),
-    group_description: text(),
-    active: boolean().notNull().default(true),
+    user_id: uuid().references(() => users.user_id, {
+        onDelete: 'cascade'
+    }).notNull(),
     created_at: timestamp().defaultNow().notNull(),
-    updated_at: timestamp(),
-    created_by: uuid().references(() => users.user_id).notNull()
 
 })
 
-export { groups }
+export { group_users }
