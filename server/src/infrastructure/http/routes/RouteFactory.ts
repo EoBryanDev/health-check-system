@@ -5,9 +5,9 @@ import { IHashPassword } from "../../../domain/entities/interfaces/IHashPassword
 import { ITokenGenerator } from "../../../domain/entities/interfaces/ITokenGenerator";
 import { UserController } from "../controllers/UserController";
 import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
-import { GroupController } from "../controllers/GroupController";
 import { GetAllGroupsUseCase } from "../../../domain/use_cases/GetAllGroupsUseCase";
 import { CreateMonitGroupUseCase } from "../../../domain/use_cases/CreateMonitGroupUseCase";
+import { GroupController } from "../controllers/GroupController";
 
 class RouteFactory {
 
