@@ -12,7 +12,7 @@ const service_logs = pgTable('service_logs', {
     service_log_id: uuid().primaryKey().defaultRandom(),
     service_id: uuid().references(() => services.service_id).notNull(),
     start_at: timestamp({ precision: 3 }).notNull(),
-    duration: timestamp({ precision: 3 }).notNull(),
+    duration: integer().notNull(),
     method: EMethods('method').notNull().default('JOB'),
     status_code: integer().notNull(),
     requester: text().notNull().default('NODE_CRON'),
