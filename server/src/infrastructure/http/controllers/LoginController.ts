@@ -1,4 +1,3 @@
-import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
 import { Request, Response } from "express";
 import { IHTTPErrorOutputDTO, IHTTPSuccessOutputDTO } from "../../dto/IHTTPOutputDTO";
 import { LoginUseCase } from "../../../domain/use_cases/LoginUseCase";
