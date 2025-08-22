@@ -4,7 +4,7 @@ import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
 
-class RunJobActiveUseCase {
+class RunAllJobsActiveUseCase {
     constructor(private repository: IRepository) { }
 
     async execute(data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' }, params: IQueryParams, method: 'HTTP' | 'JOB' = 'JOB') {
@@ -81,4 +81,4 @@ class RunJobActiveUseCase {
     }
 }
 
-export { RunJobActiveUseCase }
+export { RunAllJobsActiveUseCase }
