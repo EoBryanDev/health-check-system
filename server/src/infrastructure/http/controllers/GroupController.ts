@@ -31,8 +31,10 @@ class GroupController {
                 }
                 resp.status(400).json(resp_error)
 
+            } else {
+
+                resp.status(500).json(error)
             }
-            resp.status(500).json(error)
         }
     }
 
@@ -61,8 +63,10 @@ class GroupController {
                 }
                 resp.status(400).json(resp_error)
 
+            } else {
+
+                resp.status(500).json(error)
             }
-            resp.status(500).json(error)
         }
     }
 }
