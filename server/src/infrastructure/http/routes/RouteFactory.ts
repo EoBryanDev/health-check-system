@@ -8,6 +8,13 @@ import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
 import { GetAllGroupsUseCase } from "../../../domain/use_cases/GetAllGroupsUseCase";
 import { CreateMonitGroupUseCase } from "../../../domain/use_cases/CreateMonitGroupUseCase";
 import { GroupController } from "../controllers/GroupController";
+import { AddServiceToJobUseCase } from "../../../domain/use_cases/AddServiceToJobUseCase";
+import { GetAllJobsUseCase } from "../../../domain/use_cases/GetAllJobsUseCase";
+import { CreateJobUseCase } from "../../../domain/use_cases/CreateJobUseCase";
+import { RunJobActiveByGroupUseCase } from "../../../domain/use_cases/RunJobActiveByGroupUseCase";
+import { RunJobActiveUseCase } from "../../../domain/use_cases/RunJobActiveUseCase";
+import { RunAllJobsActiveUseCase } from "../../../domain/use_cases/RunAllJobsActiveUseCase";
+import { JobController } from "../controllers/JobController";
 
 class RouteFactory {
 
@@ -56,6 +63,17 @@ class RouteFactory {
         return new GroupController(
             new CreateMonitGroupUseCase(this.dbConnection),
             new GetAllGroupsUseCase(this.dbConnection)
+        );
+    }
+
+    public getJobControllerInstance(): JobController {
+        return new JobController(
+            new CreateJobUseCase(this.dbConnection),
+            new GetAllJobsUseCase(this.dbConnection),
+            new AddServiceToJobUseCase(this.dbConnection),
+            new RunJobActiveByGroupUseCase(this.dbConnection),
+            new RunJobActiveUseCase(this.dbConnection),
+            new RunAllJobsActiveUseCase(this.dbConnection)
         );
     }
 }
