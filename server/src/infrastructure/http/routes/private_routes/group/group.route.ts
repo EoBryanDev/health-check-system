@@ -19,7 +19,7 @@ group.post('/groups', authMiddleware, (req, res) => groupController.createGroup(
 
 // group.get('/groups/:id', (req, res) => groupController.findgroup(req, res))
 
-group.get('/groups', (req, res) => groupController.findAllGroups(req, res))
+group.get('/groups', authMiddleware, (req, res) => groupController.findAllGroups(req, res))
 
 
 export { group }
