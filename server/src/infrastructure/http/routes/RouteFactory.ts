@@ -5,6 +5,7 @@ import { IHashPassword } from "../../../domain/entities/interfaces/IHashPassword
 import { ITokenGenerator } from "../../../domain/entities/interfaces/ITokenGenerator";
 import { UserController } from "../controllers/UserController";
 import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
+import { GroupController } from "../controllers/GroupController";
 
 class RouteFactory {
 
@@ -28,6 +29,15 @@ class RouteFactory {
         }
         return RouteFactory.instance;
     }
+
+    public getTokenService(
+    ): ITokenGenerator {
+
+        if (!RouteFactory.instance) {
+            throw new Error("RouteFactory instance not initialized. Call getInstance() first.");
+        }
+        return RouteFactory.instance.tokenService;
+    }
     public getUserControllerInstance(): UserController {
         return new UserController(
             new CreateUserUseCase(this.dbConnection, this.hashService)
@@ -36,6 +46,12 @@ class RouteFactory {
 
     public getLoginControllerInstance(): LoginController {
         return new LoginController(
+            new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
+        );
+    }
+
+    public getGroupControllerInstance(): GroupController {
+        return new GroupController(
             new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
         );
     }
