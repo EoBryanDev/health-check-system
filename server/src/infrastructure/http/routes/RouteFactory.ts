@@ -6,6 +6,7 @@ import { ITokenGenerator } from "../../../domain/entities/interfaces/ITokenGener
 import { UserController } from "../controllers/UserController";
 import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
 import { GroupController } from "../controllers/GroupController";
+import { GetAllGroupsUseCase } from "../../../domain/use_cases/GetAllGroupsUseCase";
 
 class RouteFactory {
 
@@ -52,7 +53,8 @@ class RouteFactory {
 
     public getGroupControllerInstance(): GroupController {
         return new GroupController(
-            new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
+            new LoginUseCase(this.dbConnection, this.hashService, this.tokenService),
+            new GetAllGroupsUseCase(this.dbConnection)
         );
     }
 }
