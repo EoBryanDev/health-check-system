@@ -5,9 +5,20 @@ import { IHashPassword } from "../../../domain/entities/interfaces/IHashPassword
 import { ITokenGenerator } from "../../../domain/entities/interfaces/ITokenGenerator";
 import { UserController } from "../controllers/UserController";
 import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
-import { GroupController } from "../controllers/GroupController";
 import { GetAllGroupsUseCase } from "../../../domain/use_cases/GetAllGroupsUseCase";
 import { CreateMonitGroupUseCase } from "../../../domain/use_cases/CreateMonitGroupUseCase";
+import { GroupController } from "../controllers/GroupController";
+import { AddServiceToJobUseCase } from "../../../domain/use_cases/AddServiceToJobUseCase";
+import { GetAllJobsUseCase } from "../../../domain/use_cases/GetAllJobsUseCase";
+import { CreateJobUseCase } from "../../../domain/use_cases/CreateJobUseCase";
+import { RunJobActiveByGroupUseCase } from "../../../domain/use_cases/RunJobActiveByGroupUseCase";
+import { RunJobActiveUseCase } from "../../../domain/use_cases/RunJobActiveUseCase";
+import { RunAllJobsActiveUseCase } from "../../../domain/use_cases/RunAllJobsActiveUseCase";
+import { JobController } from "../controllers/JobController";
+import { ServiceController } from "../controllers/ServiceController";
+import { CreateServiceUseCase } from "../../../domain/use_cases/CreateServiceUseCase";
+import { GetAllServicesUseCase } from "../../../domain/use_cases/GetAllServicesUseCase";
+import { GetServiceById } from "../../../domain/use_cases/GetServiceById";
 
 class RouteFactory {
 
@@ -56,6 +67,25 @@ class RouteFactory {
         return new GroupController(
             new CreateMonitGroupUseCase(this.dbConnection),
             new GetAllGroupsUseCase(this.dbConnection)
+        );
+    }
+
+    public getJobControllerInstance(): JobController {
+        return new JobController(
+            new CreateJobUseCase(this.dbConnection),
+            new GetAllJobsUseCase(this.dbConnection),
+            new AddServiceToJobUseCase(this.dbConnection),
+            new RunJobActiveByGroupUseCase(this.dbConnection),
+            new RunJobActiveUseCase(this.dbConnection),
+            new RunAllJobsActiveUseCase(this.dbConnection)
+        );
+    }
+
+    public getServiceControllerInstance(): ServiceController {
+        return new ServiceController(
+            new CreateServiceUseCase(this.dbConnection),
+            new GetAllServicesUseCase(this.dbConnection),
+            new GetServiceById(this.dbConnection)
         );
     }
 }
