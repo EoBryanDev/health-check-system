@@ -15,6 +15,10 @@ import { RunJobActiveByGroupUseCase } from "../../../domain/use_cases/RunJobActi
 import { RunJobActiveUseCase } from "../../../domain/use_cases/RunJobActiveUseCase";
 import { RunAllJobsActiveUseCase } from "../../../domain/use_cases/RunAllJobsActiveUseCase";
 import { JobController } from "../controllers/JobController";
+import { ServiceController } from "../controllers/ServiceController";
+import { CreateServiceUseCase } from "../../../domain/use_cases/CreateServiceUseCase";
+import { GetAllServicesUseCase } from "../../../domain/use_cases/GetAllServicesUseCase";
+import { GetServiceById } from "../../../domain/use_cases/GetServiceById";
 
 class RouteFactory {
 
@@ -74,6 +78,14 @@ class RouteFactory {
             new RunJobActiveByGroupUseCase(this.dbConnection),
             new RunJobActiveUseCase(this.dbConnection),
             new RunAllJobsActiveUseCase(this.dbConnection)
+        );
+    }
+
+    public getServiceControllerInstance(): ServiceController {
+        return new ServiceController(
+            new CreateServiceUseCase(this.dbConnection),
+            new GetAllServicesUseCase(this.dbConnection),
+            new GetServiceById(this.dbConnection)
         );
     }
 }
