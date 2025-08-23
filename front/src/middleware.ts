@@ -4,7 +4,7 @@ export const TOKEN_KEY = 'token'
 const publicRoutes: { path: string | RegExp; whenAuthenticated: 'redirect' | 'next' }[] = [
     { path: '/sign-in', whenAuthenticated: 'redirect' },
     { path: '/', whenAuthenticated: 'next' },
-    { path: '/dashboard', whenAuthenticated: 'next' }
+    { path: '/sign-up', whenAuthenticated: 'next' }
 
 
 ] as const;

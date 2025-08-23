@@ -23,9 +23,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { signInSchema, TSignInSchema } from "@/schemas/sign-in-form.schema";
+import { useLogin } from "@/hooks/mutations/use-login";
+import Link from "next/link";
 
 
 const SignInForm = () => {
+  const userLogin = useLogin()
   const router = useRouter();
   const sign_in_form = useForm<TSignInSchema>({
     resolver: zodResolver(signInSchema),
@@ -36,7 +39,20 @@ const SignInForm = () => {
   });
 
   const onSubmit = async (values: TSignInSchema) => {
-    console.log(values);
+        try {
+
+          await userLogin.mutateAsync(values);
+          toast.success("Login done successfully! Wait to be redirected!");
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 3000); 
+          sign_in_form.reset
+        } catch (error) {
+          toast.error("There was not possible create a new user");
+          console.error(error);
+        }
+        
+  
     
   };
 
@@ -85,6 +101,12 @@ const SignInForm = () => {
                   </FormItem>
                 )}
               />
+                <p className="text-right">
+                  Have you not signed up yet? {" "}
+                  <Link className="text-chart-2" href="/sign-up">
+                     Create your account now!
+                  </Link>
+                </p>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
               <Button type="submit" className="w-full">

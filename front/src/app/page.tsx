@@ -1,6 +1,5 @@
 import Image from "next/image";
 import LoginPage from "../pages/LoginPage"
-import { Card } from "@/components/ui/card";
 
 export default function Home() {
   
@@ -14,7 +13,6 @@ export default function Home() {
           style={{ objectFit: 'cover' }}
           priority
         />
-        {/* Adicionei um contêiner para centralizar o LoginPage */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
             <LoginPage />

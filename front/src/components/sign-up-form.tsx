@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import z from "zod";
+import { useRegister } from "@/hooks/mutations/use-register";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,7 @@ import { signUpSchema, TSignUpSchema } from "@/schemas/sign-up-form.schema";
 
 
 const SignUpForm = () => {
+  const createUser = useRegister()
   const router = useRouter();
   const sign_up_form = useForm<TSignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -41,8 +42,17 @@ const SignUpForm = () => {
   });
 
   const onSubmit = async (values: TSignUpSchema) => {
-    
-    console.log(values);
+    try {
+      await createUser.mutateAsync(values);
+      toast.success("User created successfully! In 3 seconds you'll be redirected to your Dashboard");
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 3000); 
+      sign_up_form.reset
+    } catch (error) {
+      toast.error("There was not possible create a new user");
+      console.error(error);
+    }
     
   };
   return (
