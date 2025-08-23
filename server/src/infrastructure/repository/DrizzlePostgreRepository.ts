@@ -1,6 +1,6 @@
 import { db } from '../db/connection';
 import { schema } from '../db/schema/index'
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { IRepository } from '../../domain/entities/interfaces/IRepository';
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from '../dto/IGroupDTO';
 import { User } from '../../domain/entities/User';
@@ -248,7 +248,8 @@ class DrizzlePostgreRepository implements IRepository {
     async findJobByName(job_name: string): Promise<IJobOutputDTO | null> {
         const job = await this.db.select().from(schema.jobs).where(eq(schema.jobs.job_name, job_name));
 
-        if (!job) {
+        if (!(job.length > 0)) {
+
             return null
         }
 
@@ -281,72 +282,140 @@ class DrizzlePostgreRepository implements IRepository {
     }
 
     async findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
-        let jobs;
-        let services;
-        if (params.active !== undefined) {
-            jobs = (await this.db.query.jobs.findMany({
-                with: {
-                    services: true, // isso já puxa os services do job
-                },
-                where: eq(schema.jobs.active, params.active),
-            }))
-        } else {
-            jobs = await this.db.query.jobs.findMany({
-                with: {
-                    services: true, // isso já puxa os services do job
-                }
-            });
+        const jobsWithServices = await this.db
+            .select({
+                job_id: schema.jobs.job_id,
+                group_id: schema.jobs.group_id,
+                job_name: schema.jobs.job_name,
+                active: schema.jobs.active,
+                created_at: schema.jobs.created_at,
+                updated_at: schema.jobs.updated_at,
+                service_id: schema.services.service_id,
+                service_name: schema.services.service_name,
+                created_by: schema.jobs.created_by,
+                interval_time: schema.jobs.interval_time,
+                service_description: schema.services.service_description,
+                service_url: schema.services.service_url,
+                rate_limit_tolerance: schema.services.rate_limit_tolerance,
+                service_created_at: schema.services.created_at,
+                service_created_by: schema.services.created_by,
+            })
+            .from(schema.jobs)
+            .leftJoin(schema.services, eq(schema.jobs.job_id, schema.services.job_id))
+            .where(params.active !== undefined ? eq(schema.jobs.active, params.active) : undefined);
+
+        if (!jobsWithServices || jobsWithServices.length === 0) {
+            return [];
         }
 
-        if (jobs.length === 0) {
-            return null
+        // Abordagem mais simples - usando um objeto comum
+        const jobsObj: Record<string, any> = {};
+
+        for (const row of jobsWithServices) {
+            if (!jobsObj[row.job_id]) {
+                jobsObj[row.job_id] = {
+                    job_id: row.job_id,
+                    job_name: row.job_name,
+                    created_at: row.created_at?.toString() ?? '',
+                    services: [],
+                    group_id: row.group_id,
+                    interval_time: row.interval_time,
+                    created_by: row.created_by
+                };
+            }
+
+            if (row.service_id) {
+                jobsObj[row.job_id].services.push({
+                    service_id: row.service_id,
+                    group_id: row.group_id,
+                    service_name: row.service_name ?? '',
+                    service_description: row.service_description ?? '',
+                    service_url: row.service_url ?? '',
+                    rate_limit_tolerance: row.rate_limit_tolerance ?? 0,
+                    created_at: row.service_created_at?.toString() ?? '',
+                    created_by: row.service_created_by ?? '',
+                });
+            }
         }
 
-        return jobs.map(job => {
-            return {
-                job_id: job.job_id,
-                group_id: job.group_id,
-                job_name: job.job_name,
-                job_description: job.job_description ?? '',
-                interval_time: job.interval_time,
-                active: job.active,
-                created_at: job.created_at?.toString() ?? '',
-                updated_at: job.updated_at?.toString() ?? '',
-                created_by: job.created_by,
-                services: job.services
-            };
-        });
+        return Object.values(jobsObj) as IJobOutputWServiceDTO[];
     }
 
     async findAllJobsByGroupId(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null> {
-        const jobs = await this.db.query.jobs.findMany({
-            with: {
-                services: true, // isso já puxa os services do job
-                groups: true
-            },
-            where: params.active !== undefined
-                ? and(eq(schema.jobs.active, params.active), eq(schema.groups.group_id, group_id))
-                : undefined
-        })
 
-        if (!jobs) {
-            return null
+        // OPÇÃO 1: Duas queries separadas (mais clara e controlada)
+
+        // 1. Buscar todos os jobs do grupo
+        const jobs = await this.db
+            .select({
+                job_id: schema.jobs.job_id,
+                group_id: schema.jobs.group_id,
+                job_name: schema.jobs.job_name,
+                job_description: schema.jobs.job_description,
+                interval_time: schema.jobs.interval_time,
+                active: schema.jobs.active,
+                created_at: schema.jobs.created_at,
+                updated_at: schema.jobs.updated_at,
+                created_by: schema.jobs.created_by,
+            })
+            .from(schema.jobs)
+            .where(eq(schema.jobs.group_id, group_id));
+
+        if (!jobs || jobs.length === 0) {
+            return [];
         }
 
-        return jobs.map(job => {
-            return {
-                job_id: job.job_id,
-                group_id: job.group_id,
-                job_name: job.job_name,
-                job_description: job.job_description ?? '',
-                interval_time: job.interval_time,
-                active: job.active,
-                created_at: job.created_at?.toString() ?? '',
-                updated_at: job.updated_at?.toString() ?? '',
-                created_by: job.created_by,
-                services: job.services
-            };
-        });
+        // 2. Buscar todos os serviços para esses jobs
+        const jobIds = jobs.map(job => job.job_id);
+
+        const services = await this.db
+            .select({
+                service_id: schema.services.service_id,
+                job_id: schema.services.job_id,
+                group_id: schema.services.group_id,
+                service_name: schema.services.service_name,
+                service_description: schema.services.service_description,
+                service_url: schema.services.service_url,
+                rate_limit_tolerance: schema.services.rate_limit_tolerance,
+                created_at: schema.services.created_at,
+                created_by: schema.services.created_by,
+            })
+            .from(schema.services)
+            .where(inArray(schema.services.job_id, jobIds));
+
+        // 3. Agrupar serviços por job_id
+        const servicesMap = services.reduce((acc, service) => {
+            if (!acc[service.job_id!]) {
+                acc[service.job_id!] = [];
+            }
+            acc[service.job_id!].push({
+                service_id: service.service_id,
+                group_id: service.group_id,
+                service_name: service.service_name ?? '',
+                service_description: service.service_description ?? '',
+                service_url: service.service_url ?? '',
+                rate_limit_tolerance: service.rate_limit_tolerance ?? 0,
+                created_at: service.created_at?.toString() ?? '',
+                created_by: service.created_by ?? '',
+            } as IServiceOutputDTO);
+            return acc;
+        }, {} as Record<string, IServiceOutputDTO[]>);
+
+        // 4. Montar o resultado final
+        const result: IJobOutputWServiceDTO[] = jobs.map(job => ({
+            job_id: job.job_id,
+            group_id: job.group_id,
+            job_name: job.job_name,
+            job_description: job.job_description ?? '',
+            interval_time: job.interval_time,
+            active: job.active,
+            created_at: job.created_at?.toString() ?? '',
+            updated_at: job.updated_at?.toString() ?? '',
+            created_by: job.created_by,
+            services: servicesMap[job.job_id] || [] // Se não tem services, array vazio
+        }));
+
+        return result;
     }
 
     // Service methods

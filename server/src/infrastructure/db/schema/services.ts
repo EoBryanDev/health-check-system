@@ -7,6 +7,7 @@ import { groups } from "./groups";
 import { users } from "./users";
 import { integer } from "drizzle-orm/pg-core";
 import { jobs } from "./jobs";
+import { relations } from "drizzle-orm";
 
 
 const services = pgTable('services', {
@@ -29,5 +30,16 @@ const services = pgTable('services', {
     created_by: uuid().references(() => users.user_id).notNull()
 
 })
+
+export const servicesRelations = relations(services, ({ one }) => ({
+    group: one(groups, {
+        fields: [services.group_id],
+        references: [groups.group_id],
+    }),
+    job: one(jobs, {
+        fields: [services.job_id],
+        references: [jobs.job_id],
+    }),
+}));
 
 export { services }

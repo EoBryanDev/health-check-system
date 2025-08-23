@@ -6,6 +6,7 @@ import { integer } from "drizzle-orm/pg-core";
 import { services } from "./services";
 import { EMethods } from "./EMethods";
 import { EClassifications } from "./EClassifications";
+import { relations } from "drizzle-orm";
 
 
 const service_logs = pgTable('service_logs', {
@@ -20,5 +21,12 @@ const service_logs = pgTable('service_logs', {
     classification: EClassifications('classification').notNull()
 
 })
+
+export const serviceLogsRelations = relations(service_logs, ({ one }) => ({
+    service: one(services, {
+        fields: [service_logs.service_id],
+        references: [services.service_id],
+    }),
+}));
 
 export { service_logs }
