@@ -1,7 +1,7 @@
 interface IQueryParams {
-    active: boolean | undefined,
-    offset: number,
-    limit: number
+  active: boolean | undefined;
+  offset: number;
+  limit: number;
 }
 
-export { IQueryParams }
+export { IQueryParams };

@@ -1,5 +1,5 @@
-import { pgEnum } from "drizzle-orm/pg-core";
+import { pgEnum } from 'drizzle-orm/pg-core';
 
-const EMethods = pgEnum('emethods', ['HTTP', 'JOB'])
+const EMethods = pgEnum('emethods', ['HTTP', 'JOB']);
 
-export { EMethods }
+export { EMethods };
