@@ -1,0 +1,71 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+@userEmail = teste@teste.com.br
+
+### Login
+# @name auth
+POST {{ baseUrl }}/login
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "email": "{{userEmail}}",
+    "password": "123"
+}
+
+### Group
+# @name group 
+GET {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Jobs
+# @name job 
+GET {{baseUrl}}/jobs
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### CreateJob
+# @name createJob
+
+POST {{baseUrl}}/jobs
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_id":"d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
+    "group_name": "Social Media",
+    "job_name": "Job Monitora 10m",
+    "job_description": "Job que roda todos os services ativos a categoria}",
+    "interval_time": 10
+}
+
+### CreateServiceInJob
+# @name CreateServiceInJob
+
+POST {{baseUrl}}/jobs/service
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_id": "d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
+    "group_name": "Social Media",
+    "job_id": "915ca626-0e3f-4101-93cb-14fe22f7d466",
+    "service_name": "Facebook",
+    "service_description": "Monitoramento do facebook",
+    "service_url": "https://www.facebook.com.br",
+    "rate_limit_tolerance": 200
+}
+
+### Run Job Service
+# @name jobRunner
+PUT {{baseUrl}}/jobs/run/d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b?mode=group
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
