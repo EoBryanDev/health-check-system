@@ -3,6 +3,7 @@ import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
 import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
+import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
 
 class RunJobActiveByGroupUseCase {
     constructor(private repository: IRepository) { }
@@ -24,7 +25,7 @@ class RunJobActiveByGroupUseCase {
 
         for (let i = 0; i < jobs.length; i++) {
             const startJob = new Date().toISOString()
-            const startJob_time = new Date().getMilliseconds()
+            const startJob_time = Date.now()
             const job = jobs[i];
 
             if (!job.services) {
@@ -33,10 +34,11 @@ class RunJobActiveByGroupUseCase {
 
             for (let j = 0; j < job.services.length; j++) {
                 const service = job.services[j];
+                const start = new Date().toISOString()
 
 
 
-                const startService_time = new Date().getMilliseconds()
+                const startService_time = Date.now()
                 let response;
 
                 try {
@@ -46,26 +48,30 @@ class RunJobActiveByGroupUseCase {
                     response = axiosError
                 }
 
-                const endService_time = new Date().getMilliseconds()
+                const endService_time = Date.now()
 
                 const duration = endService_time - startService_time
 
-                const service_log = {
+                const service_log: IServiceLogInputDTO = {
                     service_id: service.service_id,
-                    start_at: new Date().toISOString(),
+                    start_at: start,
                     duration,
                     method,
                     status_code: response.status ?? 400,
                     requester: data_in_token.user_id,
                     device: 'Server',
-                    classification: response.status === 200 ? duration > service.rate_limit_tolerance ? 'WARNING' : 'GOOD' : 'ERROR',
+                    classification: response.status === 200
+                        ? duration > service.rate_limit_tolerance
+                            ? 'WARNING'
+                            : 'GOOD'
+                        : 'ERROR',
                 }
 
                 await this.repository.createServiceLog(service_log)
 
             }
 
-            const endJob_time = new Date().getMilliseconds()
+            const endJob_time = Date.now()
 
             const job_log = {
                 job_id: job.job_id,
