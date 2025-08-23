@@ -1,3 +1,4 @@
+import { general_configs } from "./general_configs";
 import { group_users } from "./group_users";
 import { groups } from "./groups";
 import { job_logs } from "./job_logs";
@@ -14,4 +15,5 @@ export const schema = {
     services,
     service_logs,
     job_logs,
+    general_configs
 }
