@@ -6,6 +6,8 @@ import { timestamp } from "drizzle-orm/pg-core";
 import { groups } from "./groups";
 import { users } from "./users";
 import { integer } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { services } from "./services";
 
 
 const jobs = pgTable('jobs', {
@@ -23,5 +25,9 @@ const jobs = pgTable('jobs', {
     created_by: uuid().references(() => users.user_id).notNull()
 
 })
+
+export const jobsRelations = relations(jobs, ({ many }) => ({
+    services: many(services), // um job tem vários serviços
+}));
 
 export { jobs }
