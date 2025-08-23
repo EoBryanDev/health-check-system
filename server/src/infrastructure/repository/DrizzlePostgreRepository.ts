@@ -664,9 +664,9 @@ class DrizzlePostgreRepository implements IRepository {
       .where(
         params.active !== undefined
           ? and(
-            eq(schema.services.group_id, group_id),
-            eq(schema.services.active, params.active)
-          )
+              eq(schema.services.group_id, group_id),
+              eq(schema.services.active, params.active)
+            )
           : undefined
       );
 
@@ -700,9 +700,9 @@ class DrizzlePostgreRepository implements IRepository {
       .where(
         params.active !== undefined
           ? and(
-            eq(schema.services.group_id, job_id),
-            eq(schema.services.active, params.active)
-          )
+              eq(schema.services.group_id, job_id),
+              eq(schema.services.active, params.active)
+            )
           : undefined
       );
 

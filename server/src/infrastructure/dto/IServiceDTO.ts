@@ -3,7 +3,7 @@ interface IServiceInputDTO {
   group_name: string;
   job_id?: string;
   job_name?: string;
-  last_run: Date | null,
+  last_run: Date | null;
   service_name: string;
   service_description?: string;
   service_url: string;
