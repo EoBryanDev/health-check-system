@@ -4,6 +4,7 @@ import { BCryptHashPwd } from "../../../../../domain/services/BCryptHashPwd";
 import { JwtTokenGenerator } from "../../../../../domain/services/JwtTokenGenerator";
 import { RouteFactory } from "../../RouteFactory";
 import { authMiddleware } from "../../../../middlewares/authHandler";
+import { RedisCacheProvider } from "../../../../../domain/services/RedisCacheService";
 
 const db = new DrizzlePostgreRepository();
 const hash = new BCryptHashPwd();
