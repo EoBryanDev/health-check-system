@@ -1,6 +1,6 @@
 import { db } from '../db/connection';
 import { schema } from '../db/schema/index'
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { IRepository } from '../../domain/entities/interfaces/IRepository';
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from '../dto/IGroupDTO';
 import { User } from '../../domain/entities/User';
@@ -11,25 +11,12 @@ import { IQueryParams } from '../../domain/use_cases/interfaces/IQueryParams';
 import { IServiceLogInputDTO, IServiceLogOutputDTO } from '../dto/IServiceLogDTO';
 import { IJobLogInputDTO, IJobLogOutputDTO } from '../dto/IJobLogDTO';
 import { parseTRoleERole } from '../../domain/helpers/parseTRoleERole';
-import { parseERoleTRole } from '../../domain/helpers/parseERoleTRole';
-import { ERoles } from '../../domain/entities/interfaces/ERoles';
-import { groups } from '../db/schema/groups';
 import { IConfigOutputDTO } from '../dto/IConfigDTO';
-import { config } from 'process';
 
 class DrizzlePostgreRepository implements IRepository {
     private db;
     constructor() {
         this.db = db;
-    }
-    findGroupMembersById(group_id: string, params: IQueryParams): Promise<IGroupOutputUsersDTO[] | null> {
-        throw new Error('Method not implemented.');
-    }
-    findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
-        throw new Error('Method not implemented.');
-    }
-    findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
-        throw new Error('Method not implemented.');
     }
 
     // User methods
@@ -163,6 +150,10 @@ class DrizzlePostgreRepository implements IRepository {
             updated_at: g.updated_at?.toString() ?? '',
             created_by: g.created_by
         };
+    }
+
+    async findGroupMembersById(group_id: string, params: IQueryParams): Promise<IGroupOutputUsersDTO[] | null> {
+        throw new Error('Method not implemented.');
     }
 
     async findGroupByName(group_name: string): Promise<IGroupOutputDTO | null> {
@@ -420,6 +411,80 @@ class DrizzlePostgreRepository implements IRepository {
         return result;
     }
 
+    async findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null> {
+
+        // 1. Buscar todos os jobs (sem filtro de group_id)
+        const jobs = await this.db
+            .select({
+                job_id: schema.jobs.job_id,
+                group_id: schema.jobs.group_id,
+                job_name: schema.jobs.job_name,
+                job_description: schema.jobs.job_description,
+                interval_time: schema.jobs.interval_time,
+                active: schema.jobs.active,
+                created_at: schema.jobs.created_at,
+                updated_at: schema.jobs.updated_at,
+                created_by: schema.jobs.created_by,
+            })
+            .from(schema.jobs);
+
+        if (!jobs || jobs.length === 0) {
+            return [];
+        }
+
+        // 2. Buscar todos os serviços para esses jobs
+        const jobIds = jobs.map(job => job.job_id);
+
+        const services = await this.db
+            .select({
+                service_id: schema.services.service_id,
+                job_id: schema.services.job_id,
+                group_id: schema.services.group_id,
+                service_name: schema.services.service_name,
+                service_description: schema.services.service_description,
+                service_url: schema.services.service_url,
+                rate_limit_tolerance: schema.services.rate_limit_tolerance,
+                created_at: schema.services.created_at,
+                created_by: schema.services.created_by,
+            })
+            .from(schema.services)
+            .where(inArray(schema.services.job_id, jobIds));
+
+        // 3. Agrupar serviços por job_id
+        const servicesMap = services.reduce((acc, service) => {
+            if (!acc[service.job_id!]) {
+                acc[service.job_id!] = [];
+            }
+            acc[service.job_id!].push({
+                service_id: service.service_id,
+                group_id: service.group_id,
+                service_name: service.service_name ?? '',
+                service_description: service.service_description ?? '',
+                service_url: service.service_url ?? '',
+                rate_limit_tolerance: service.rate_limit_tolerance ?? 0,
+                created_at: service.created_at?.toString() ?? '',
+                created_by: service.created_by ?? '',
+            } as IServiceOutputDTO);
+            return acc;
+        }, {} as Record<string, IServiceOutputDTO[]>);
+
+        // 4. Montar o resultado final, incluindo a lista de serviços
+        const result: IJobOutputWServiceAvailableDTO[] = jobs.map(job => ({
+            job_id: job.job_id,
+            group_id: job.group_id,
+            job_name: job.job_name,
+            job_description: job.job_description ?? '',
+            interval_time: job.interval_time,
+            active: job.active,
+            created_at: job.created_at?.toString() ?? '',
+            updated_at: job.updated_at?.toString() ?? '',
+            created_by: job.created_by,
+            services: servicesMap[job.job_id] || [] // Adiciona os serviços agrupados
+        }));
+
+        return result;
+    }
+
     // Service methods
     async createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO> {
         const [created] = await this.db.insert(schema.services).values({
@@ -437,6 +502,7 @@ class DrizzlePostgreRepository implements IRepository {
             group_id: created.group_id,
             service_name: created.service_name,
             service_url: created.service_url,
+            last_run: null,
             rate_limit_tolerance: created.rate_limit_tolerance,
             created_at: created.created_at.toString(),
             created_by: created.created_by,
@@ -456,6 +522,7 @@ class DrizzlePostgreRepository implements IRepository {
             group_id: service[0].group_id,
             service_name: service[0].service_name,
             service_url: service[0].service_url,
+            last_run: service[0].last_run,
             rate_limit_tolerance: service[0].rate_limit_tolerance,
             created_at: service[0].created_at.toString(),
             created_by: service[0].created_by,
@@ -474,6 +541,7 @@ class DrizzlePostgreRepository implements IRepository {
             group_id: service[0].group_id,
             service_name: service[0].service_name,
             service_url: service[0].service_url,
+            last_run: service[0].last_run,
             rate_limit_tolerance: service[0].rate_limit_tolerance,
             created_at: service[0].created_at.toString(),
             created_by: service[0].created_by,
@@ -494,6 +562,7 @@ class DrizzlePostgreRepository implements IRepository {
                 group_id: service.group_id,
                 service_name: service.service_name,
                 service_url: service.service_url,
+                last_run: service.last_run,
                 rate_limit_tolerance: service.rate_limit_tolerance,
                 created_at: service.created_at.toString(),
                 created_by: service.created_by,
@@ -516,6 +585,7 @@ class DrizzlePostgreRepository implements IRepository {
                 group_id: service.group_id,
                 service_name: service.service_name,
                 service_url: service.service_url,
+                last_run: service.last_run,
                 rate_limit_tolerance: service.rate_limit_tolerance,
                 created_at: service.created_at.toString(),
                 created_by: service.created_by,
@@ -542,6 +612,7 @@ class DrizzlePostgreRepository implements IRepository {
                 group_id: service.group_id,
                 service_name: service.service_name,
                 service_url: service.service_url,
+                last_run: service.last_run,
                 rate_limit_tolerance: service.rate_limit_tolerance,
                 created_at: service.created_at.toString(),
                 created_by: service.created_by,

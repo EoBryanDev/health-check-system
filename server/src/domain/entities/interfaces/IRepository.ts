@@ -51,8 +51,6 @@ interface IRepository {
 
     findAllJobsWService(params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
 
-    findAllJobsWServiceByGroup(group_id: string, params: IQueryParams): Promise<IJobOutputWServiceAvailableDTO[] | null>;
-
     createService(service: IServiceInputDTO, created_by: string): Promise<IServiceOutputDTO>;
 
     findServiceById(service_id: string): Promise<IServiceOutputDTO | null>;
