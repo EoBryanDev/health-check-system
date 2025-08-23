@@ -1,8 +1,8 @@
 import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
 import { ILoginInputDTO, ILoginOutputDTO } from "../../infrastructure/dto/ILoginDTO";
-import { IHashPassword } from "../entities/interfaces/IHashPassword";
+import { IHashPassword } from "../services/interfaces/IHashPassword";
 import { IRepository } from "../entities/interfaces/IRepository";
-import { ITokenGenerator } from "../entities/interfaces/ITokenGenerator";
+import { ITokenGenerator } from "../services/interfaces/ITokenGenerator";
 import { parseERoleTRole } from "../helpers/parseERoleTRole";
 import { parseSecondsToIsoString } from "../helpers/parseSecondsToIsoString";
 

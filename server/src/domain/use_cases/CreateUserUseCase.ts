@@ -1,6 +1,6 @@
 
 import { ICreateUserInputDTO, ICreateUserOutputDTO } from "../../infrastructure/dto/ICreateUserDTO";
-import { IHashPassword } from "../entities/interfaces/IHashPassword";
+import { IHashPassword } from "../services/interfaces/IHashPassword";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { User } from "../entities/User";
 
