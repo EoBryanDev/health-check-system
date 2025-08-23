@@ -5,12 +5,23 @@
 
   "compilerOptions": {
     "lib": ["es2023"],
-    "module": "nodenext",
+    "module": "es2022",
     "target": "es2022",
 
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "moduleResolution": "node16"
-  }
+    "moduleResolution": "bundler",
+
+    // Opções adicionadas para melhorar o fluxo de trabalho e segurança
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "sourceMap": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "src/__tests__", "**/*.spec.ts"]
 }
