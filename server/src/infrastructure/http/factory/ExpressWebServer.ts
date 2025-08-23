@@ -24,7 +24,9 @@ class ExpressWebServer implements IWebServer {
 
   createServer = (port: number) => {
     this.server.listen(port, () => {
-      console.log(`Server online on: http://localhost:${port} - ${this.starTime}`);
+      console.log(
+        `Server online on: http://localhost:${port} - ${this.starTime}`
+      );
     });
   };
   createRoutes = () => {
