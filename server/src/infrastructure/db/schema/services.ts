@@ -24,6 +24,7 @@ const services = pgTable('services', {
     service_description: text(),
     service_url: text().notNull(),
     rate_limit_tolerance: integer().notNull(), // in miliseconds
+    last_run: timestamp(), // in seconds
     active: boolean().notNull().default(true),
     created_at: timestamp().defaultNow().notNull(),
     updated_at: timestamp(),
