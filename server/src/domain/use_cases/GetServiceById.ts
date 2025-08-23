@@ -1,18 +1,17 @@
-import { IRepository } from "../entities/interfaces/IRepository";
+import { IRepository } from '../entities/interfaces/IRepository';
 
 class GetServiceById {
-    constructor(private dbRepository: IRepository) { }
+  constructor(private dbRepository: IRepository) {}
 
-    async execute(service_id: string) {
+  async execute(service_id: string) {
+    const response = await this.dbRepository.findServiceById(service_id);
 
-        const response = await this.dbRepository.findServiceById(service_id);
-
-        if (!response) {
-            throw new Error("There was not found any service with the id informed.");
-        }
-
-        return response;
+    if (!response) {
+      throw new Error('There was not found any service with the id informed.');
     }
+
+    return response;
+  }
 }
 
-export { GetServiceById }
+export { GetServiceById };
