@@ -1,5 +1,7 @@
 enum ERoles {
-    'ADMIN', 'MANAGER', 'ANALYST'
+  'ADMIN',
+  'MANAGER',
+  'ANALYST',
 }
 
-export { ERoles }
+export { ERoles };
