@@ -1,0 +1,1 @@
+ALTER TABLE "general_configs" ADD CONSTRAINT "general_configs_name_unique" UNIQUE("name");
