@@ -79,7 +79,7 @@ class JobController {
     async addServiceToJob(req: Request, resp: Response) {
         try {
             const { user_id, role } = req.user!
-            const { body } = req.body
+            const { body } = req
 
             const valid_body = createServiceJobSchema.parse(body)
 

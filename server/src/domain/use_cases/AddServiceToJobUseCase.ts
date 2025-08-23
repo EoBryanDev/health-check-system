@@ -19,11 +19,8 @@ class AddServiceToJobUseCase {
             throw new Error("There was not found any group valid to add to this job");
         }
 
-        if (!service_payload.job_name) {
-            throw new Error("This operation can be done withou a job!");
-        }
 
-        const existsJob = await this.repository.findJobByName(service_payload.job_name)
+        const existsJob = await this.repository.findJobById(service_payload.job_id!)
 
         if (!existsJob) {
             throw new Error("There was not found any job valid to add this service");
