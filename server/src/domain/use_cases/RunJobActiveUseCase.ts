@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
-import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
+import { IJobOutputWServiceAvailableDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
 import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
@@ -10,6 +10,13 @@ class RunJobActiveUseCase {
     constructor(private repository: IRepository, private cacheRepository: ICacheProvider) { }
 
     async execute(data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' }, params: IQueryParams, method: 'HTTP' | 'JOB' = 'JOB') {
+
+        const isJobRunning = await this.cacheRepository.get<boolean>('is_job_running');
+
+        if (isJobRunning) {
+            throw new Error("There is already a job running.");
+        }
+
 
         if (data_in_token.role === 'ANALYST') {
             throw new Error("");
@@ -23,6 +30,7 @@ class RunJobActiveUseCase {
 
         let jobRecoveryTime = await this.cacheRepository.get<Number>('recovery_time_in_seconds');
 
+        const now = new Date();
         if (!jobRecoveryTime) {
             const config = await this.repository.findConfigByName('recovery_time_in_seconds')
 
@@ -36,8 +44,7 @@ class RunJobActiveUseCase {
         }
 
         if (lastRun) {
-            const now = new Date();
-            const future = new Date(lastRun.getTime() + Number(jobRecoveryTime) * 1000);
+            const future = new Date(new Date(lastRun).getTime() + Number(jobRecoveryTime) * 1000);
 
             if (now < future) {
                 throw new Error("There was not time enought to recovery the last verification.");
@@ -51,6 +58,29 @@ class RunJobActiveUseCase {
             throw new Error("There was not found any job active/registered");
 
         }
+
+        const elegive_job: IJobOutputWServiceAvailableDTO[] = []
+
+        jobs.forEach(job => {
+            const run_interval = job.interval_time
+            let non_elegible = false
+
+            for (const service of job.services) {
+                if (service.last_run) {
+                    const future = new Date(service.last_run.getTime() + run_interval * 1000);
+
+                    if (now < future) {
+                        non_elegible = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!non_elegible) {
+                elegive_job.push(job)
+            }
+
+        })
 
         await this.cacheRepository.del('last_run');
         await this.cacheRepository.set<Date>('last_run', new Date());

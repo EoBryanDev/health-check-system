@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
-import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
+import { IJobOutputWServiceAvailableDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
 import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
@@ -11,6 +11,12 @@ class RunJobActiveByGroupUseCase {
 
     async execute(group_id: string, data_in_token: IDataInToken, params: IQueryParams, method: 'HTTP') {
 
+        const isJobRunning = await this.cacheRepository.get<boolean>('is_job_running');
+
+        if (isJobRunning) {
+            throw new Error("There is already a job running.");
+        }
+
         if (data_in_token.role === 'ANALYST') {
             throw new Error("");
         }
@@ -18,22 +24,23 @@ class RunJobActiveByGroupUseCase {
         let lastRun = await this.cacheRepository.get<Date>('last_run');
 
         let jobRecoveryTime = await this.cacheRepository.get<Number>('recovery_time_in_seconds');
+        const now = new Date();
 
         if (!jobRecoveryTime) {
             const config = await this.repository.findConfigByName('recovery_time_in_seconds')
 
             if (!config) {
-                jobRecoveryTime = 120 /*  min */
+                jobRecoveryTime = 120 /*  2 minutos de padrão para fazer uma consutla */
             }
 
             jobRecoveryTime = Number(config!.value)
 
-            await this.cacheRepository.set<Number>('recovery_time_in_seconds', Number(config!.value), 360);
+            await this.cacheRepository.set<Number>('recovery_time_in_seconds', Number(config!.value), 3600);
         }
 
         if (lastRun) {
-            const now = new Date();
-            const future = new Date(lastRun.getTime() + Number(jobRecoveryTime) * 1000);
+
+            const future = new Date(new Date(lastRun).getTime() + Number(jobRecoveryTime) * 1000);
 
             if (now < future) {
                 throw new Error("There was not time enought to recovery the last verification.");
@@ -48,6 +55,29 @@ class RunJobActiveByGroupUseCase {
 
         }
 
+        const elegive_job: IJobOutputWServiceAvailableDTO[] = []
+
+        jobs.forEach(job => {
+            const run_interval = job.interval_time
+            let non_elegible = false
+
+            for (const service of job.services) {
+                if (service.last_run) {
+                    const future = new Date(service.last_run.getTime() + run_interval * 1000);
+
+                    if (now < future) {
+                        non_elegible = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!non_elegible) {
+                elegive_job.push(job)
+            }
+
+        })
+
         await this.cacheRepository.del('last_run');
         await this.cacheRepository.set<Date>('last_run', new Date());
 
@@ -55,7 +85,7 @@ class RunJobActiveByGroupUseCase {
 
 
 
-        for (let i = 0; i < jobs.length; i++) {
+        for (let i = 0; i < elegive_job.length; i++) {
             const startJob = new Date().toISOString()
             const startJob_time = Date.now()
             const job = jobs[i];
