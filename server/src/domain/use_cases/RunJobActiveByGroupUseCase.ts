@@ -4,9 +4,10 @@ import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
 import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
+import { ICacheProvider } from "../services/interfaces/ICacheProvider";
 
 class RunJobActiveByGroupUseCase {
-    constructor(private repository: IRepository) { }
+    constructor(private repository: IRepository, private cacheRepository: ICacheProvider) { }
 
     async execute(group_id: string, data_in_token: IDataInToken, params: IQueryParams, method: 'HTTP') {
 
@@ -14,12 +15,43 @@ class RunJobActiveByGroupUseCase {
             throw new Error("");
         }
 
+        let lastRun = await this.cacheRepository.get<Date>('last_run');
+
+        let jobRecoveryTime = await this.cacheRepository.get<Number>('recovery_time_in_seconds');
+
+        if (!jobRecoveryTime) {
+            const config = await this.repository.findConfigByName('recovery_time_in_seconds')
+
+            if (!config) {
+                jobRecoveryTime = 120 /*  min */
+            }
+
+            jobRecoveryTime = Number(config!.value)
+
+            await this.cacheRepository.set<Number>('recovery_time_in_seconds', Number(config!.value), 360);
+        }
+
+        if (lastRun) {
+            const now = new Date();
+            const future = new Date(lastRun.getTime() + Number(jobRecoveryTime) * 1000);
+
+            if (now < future) {
+                throw new Error("There was not time enought to recovery the last verification.");
+            }
+        }
+
+
         let jobs = await this.repository.findAllJobsByGroupId(group_id, params);
 
         if (!jobs) {
             throw new Error("There was not found any job active/registered");
 
         }
+
+        await this.cacheRepository.del('last_run');
+        await this.cacheRepository.set<Date>('last_run', new Date());
+
+        await this.cacheRepository.set<boolean>('is_job_running', true);
 
 
 
@@ -80,6 +112,8 @@ class RunJobActiveByGroupUseCase {
             }
             await this.repository.createJobLog(job_log)
         }
+
+        await this.cacheRepository.del('is_job_running');
 
 
     }
