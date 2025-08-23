@@ -15,13 +15,16 @@ export class JobRunner {
     const token = new JwtTokenGenerator();
 
     const factory = RouteFactory.getInstance(db, hash, token);
+    const db_instance = factory.getDbConnection();
 
-    const db_instance = factory.getDbConnection(); // se tiver private, você pode expor no factory também
+    let isRunning = false; // flag para evitar sobreposição
 
-    // a cada 10 sec, executa o use case
-    cron.schedule('*/5 * * * *', async () => {
-      // a cada 5 minutos, executa o use case
-      // cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/1 * * * *", async () => {
+      if (isRunning) {
+        console.warn('JobRunner: execução anterior ainda em andamento, pulando tick.');
+        return;
+      }
+      isRunning = true;
       console.log('Executando RunAllJobsActiveUseCase...');
       try {
         const cache = new RedisCacheProvider();
@@ -29,10 +32,11 @@ export class JobRunner {
           db_instance,
           cache
         );
-
         await runAllJobsActiveUseCase.execute(undefined, queryParams(), 'JOB');
       } catch (err) {
         console.error('Erro ao rodar cron:', err);
+      } finally {
+        isRunning = false;
       }
     });
   }
