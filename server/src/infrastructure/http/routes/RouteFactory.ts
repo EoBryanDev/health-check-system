@@ -15,10 +15,13 @@ import { RunJobActiveByGroupUseCase } from "../../../domain/use_cases/RunJobActi
 import { RunJobActiveUseCase } from "../../../domain/use_cases/RunJobActiveUseCase";
 import { RunAllJobsActiveUseCase } from "../../../domain/use_cases/RunAllJobsActiveUseCase";
 import { JobController } from "../controllers/JobController";
-import { ServiceController } from "../controllers/ServiceController";
+
 import { CreateServiceUseCase } from "../../../domain/use_cases/CreateServiceUseCase";
 import { GetAllServicesUseCase } from "../../../domain/use_cases/GetAllServicesUseCase";
 import { GetServiceById } from "../../../domain/use_cases/GetServiceById";
+import { ICacheProvider } from "../../../domain/services/interfaces/ICacheProvider";
+import { ServiceController } from "../controllers/ServiceController";
+import { RedisCacheProvider } from "../../../domain/services/RedisCacheService";
 
 class RouteFactory {
 
@@ -51,6 +54,17 @@ class RouteFactory {
         }
         return RouteFactory.instance.tokenService;
     }
+
+    public getDbConnection(
+    ): IRepository {
+
+        if (!RouteFactory.instance) {
+            throw new Error("RouteFactory instance not initialized. Call getInstance() first.");
+        }
+        return RouteFactory.instance.dbConnection;
+    }
+
+
     public getUserControllerInstance(): UserController {
         return new UserController(
             new CreateUserUseCase(this.dbConnection, this.hashService)
@@ -71,13 +85,14 @@ class RouteFactory {
     }
 
     public getJobControllerInstance(): JobController {
+        const cache = new RedisCacheProvider()
         return new JobController(
             new CreateJobUseCase(this.dbConnection),
             new GetAllJobsUseCase(this.dbConnection),
             new AddServiceToJobUseCase(this.dbConnection),
-            new RunJobActiveByGroupUseCase(this.dbConnection),
-            new RunJobActiveUseCase(this.dbConnection),
-            new RunAllJobsActiveUseCase(this.dbConnection)
+            new RunJobActiveByGroupUseCase(this.dbConnection, cache),
+            new RunJobActiveUseCase(this.dbConnection, cache),
+            new RunAllJobsActiveUseCase(this.dbConnection, cache)
         );
     }
 
