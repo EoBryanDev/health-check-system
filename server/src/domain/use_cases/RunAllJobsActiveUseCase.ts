@@ -1,11 +1,12 @@
 import axios, { AxiosError } from "axios";
 import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
-import { IJobInputDTO } from "../../infrastructure/dto/IJobDTO";
 import { IRepository } from "../entities/interfaces/IRepository";
 import { IQueryParams } from "./interfaces/IQueryParams";
+import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
+import { ICacheProvider } from "../services/interfaces/ICacheProvider";
 
 class RunAllJobsActiveUseCase {
-    constructor(private repository: IRepository) { }
+    constructor(private repository: IRepository, private cacheRepository: ICacheProvider) { }
 
     async execute(data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' }, params: IQueryParams, method: 'HTTP' | 'JOB' = 'JOB') {
 
@@ -17,6 +18,31 @@ class RunAllJobsActiveUseCase {
             throw new Error("");
         }
 
+        let lastRun = await this.cacheRepository.get<Date>('last_run');
+
+        let jobRecoveryTime = await this.cacheRepository.get<Number>('recovery_time_in_seconds');
+
+        if (!jobRecoveryTime) {
+            const config = await this.repository.findConfigByName('recovery_time_in_seconds')
+
+            if (!config) {
+                jobRecoveryTime = 120 /*  min */
+            }
+
+            jobRecoveryTime = Number(config!.value)
+
+            await this.cacheRepository.set<Number>('recovery_time_in_seconds', Number(config!.value), 360);
+        }
+
+        if (lastRun) {
+            const now = new Date();
+            const future = new Date(lastRun.getTime() + Number(jobRecoveryTime) * 1000);
+
+            if (now < future) {
+                throw new Error("There was not time enought to recovery the last verification.");
+            }
+        }
+
         const jobs = await this.repository.findAllJobsWService(params)
 
         if (!jobs) {
@@ -24,9 +50,14 @@ class RunAllJobsActiveUseCase {
 
         }
 
+        await this.cacheRepository.del('last_run');
+        await this.cacheRepository.set<Date>('last_run', new Date());
+
+        await this.cacheRepository.set<boolean>('is_job_running', true);
+
         for (let i = 0; i < jobs.length; i++) {
             const startJob = new Date().toISOString()
-            const startJob_time = new Date().getMilliseconds()
+            const startJob_time = Date.now()
             const job = jobs[i];
 
             if (!job.services) {
@@ -35,10 +66,11 @@ class RunAllJobsActiveUseCase {
 
             for (let j = 0; j < job.services.length; j++) {
                 const service = job.services[j];
+                const start = new Date().toISOString()
 
 
 
-                const startService_time = new Date().getMilliseconds()
+                const startService_time = Date.now()
                 let response;
 
                 try {
@@ -48,26 +80,30 @@ class RunAllJobsActiveUseCase {
                     response = axiosError
                 }
 
-                const endService_time = new Date().getMilliseconds()
+                const endService_time = Date.now()
 
                 const duration = endService_time - startService_time
 
-                const service_log = {
+                const service_log: IServiceLogInputDTO = {
                     service_id: service.service_id,
-                    start_at: new Date().toISOString(),
+                    start_at: start,
                     duration,
                     method,
                     status_code: response.status ?? 400,
                     requester: data_in_token.user_id,
                     device: 'Server',
-                    classification: response.status === 200 ? duration > service.rate_limit_tolerance ? 'WARNING' : 'GOOD' : 'ERROR',
+                    classification: response.status === 200
+                        ? duration > service.rate_limit_tolerance
+                            ? 'WARNING'
+                            : 'GOOD'
+                        : 'ERROR',
                 }
 
                 await this.repository.createServiceLog(service_log)
 
             }
 
-            const endJob_time = new Date().getMilliseconds()
+            const endJob_time = Date.now()
 
             const job_log = {
                 job_id: job.job_id,
@@ -76,6 +112,8 @@ class RunAllJobsActiveUseCase {
             }
             await this.repository.createJobLog(job_log)
         }
+
+        await this.cacheRepository.del('is_job_running');
 
 
     }

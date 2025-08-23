@@ -1,6 +1,6 @@
 
 import bcrypt from "bcrypt";
-import { IHashPassword } from "../entities/interfaces/IHashPassword";
+import { IHashPassword } from "./interfaces/IHashPassword";
 
 class BCryptHashPwd implements IHashPassword {
     async hash(password: string): Promise<string> {
