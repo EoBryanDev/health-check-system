@@ -2,6 +2,7 @@ import { uuid } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core";
 import { timestamp, integer } from "drizzle-orm/pg-core";
 import { jobs } from "./jobs";
+import { relations } from "drizzle-orm";
 
 
 const job_logs = pgTable('job_logs', {
@@ -10,5 +11,12 @@ const job_logs = pgTable('job_logs', {
     start_at: timestamp({ precision: 3 }).notNull(),
     duration: integer().notNull(),
 })
+
+export const jobLogsRelations = relations(job_logs, ({ one }) => ({
+    job: one(jobs, {
+        fields: [job_logs.job_id],
+        references: [jobs.job_id],
+    }),
+}));
 
 export { job_logs }
