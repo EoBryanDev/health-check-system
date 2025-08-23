@@ -29,6 +29,45 @@ services:
     ports:
       - "8081:8081"
 
+  hcs-server:
+    build: .
+    container_name: hcs-server
+    environment:
+      SERVER_PORT: 3000
+      POSTGRES_URL: postgresql://admin:root@postgres-hcs:5432/health-checker-system
+      JWT_SECRET: 2b2d6513-1322-47fe-b43b-28c5f9399265
+      JWT_EXPIRES_INT: 3600
+      REDIS_HOST: redis-hcs
+      REDIS_PORT: 6379
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres-hcs
+      - redis-hcs
+
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    depends_on:
+      - hcs-server
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana
+
 volumes:
   postgres_data:
   redis_data:
+  grafana_data:
