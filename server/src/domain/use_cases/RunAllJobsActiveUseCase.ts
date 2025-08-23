@@ -91,7 +91,7 @@ class RunAllJobsActiveUseCase {
       for (const service of job.services) {
         if (service.last_run) {
           const future = new Date(
-            service.last_run.getTime() + run_interval * 1000
+            new Date(service.last_run).getTime() + run_interval * 1000
           );
 
           if (now < future) {
