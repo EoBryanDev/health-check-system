@@ -53,12 +53,8 @@
           "name": "general_configs_created_by_users_user_id_fk",
           "tableFrom": "general_configs",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -68,9 +64,7 @@
         "general_configs_name_unique": {
           "name": "general_configs_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -108,12 +102,8 @@
           "name": "group_users_user_id_users_user_id_fk",
           "tableFrom": "group_users",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -180,12 +170,8 @@
           "name": "groups_created_by_users_user_id_fk",
           "tableFrom": "groups",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -195,9 +181,7 @@
         "groups_group_name_unique": {
           "name": "groups_group_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "group_name"
-          ]
+          "columns": ["group_name"]
         }
       },
       "policies": {},
@@ -240,12 +224,8 @@
           "name": "job_logs_job_id_jobs_job_id_fk",
           "tableFrom": "job_logs",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "job_id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["job_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -324,12 +304,8 @@
           "name": "jobs_group_id_groups_group_id_fk",
           "tableFrom": "jobs",
           "tableTo": "groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "group_id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["group_id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         },
@@ -337,12 +313,8 @@
           "name": "jobs_created_by_users_user_id_fk",
           "tableFrom": "jobs",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -352,9 +324,7 @@
         "jobs_job_name_unique": {
           "name": "jobs_job_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "job_name"
-          ]
+          "columns": ["job_name"]
         }
       },
       "policies": {},
@@ -432,12 +402,8 @@
           "name": "service_logs_service_id_services_service_id_fk",
           "tableFrom": "service_logs",
           "tableTo": "services",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "service_id"
-          ],
+          "columnsFrom": ["service_id"],
+          "columnsTo": ["service_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -534,12 +500,8 @@
           "name": "services_group_id_groups_group_id_fk",
           "tableFrom": "services",
           "tableTo": "groups",
-          "columnsFrom": [
-            "group_id"
-          ],
-          "columnsTo": [
-            "group_id"
-          ],
+          "columnsFrom": ["group_id"],
+          "columnsTo": ["group_id"],
           "onDelete": "cascade",
           "onUpdate": "cascade"
         },
@@ -547,12 +509,8 @@
           "name": "services_job_id_jobs_job_id_fk",
           "tableFrom": "services",
           "tableTo": "jobs",
-          "columnsFrom": [
-            "job_id"
-          ],
-          "columnsTo": [
-            "job_id"
-          ],
+          "columnsFrom": ["job_id"],
+          "columnsTo": ["job_id"],
           "onDelete": "set null",
           "onUpdate": "cascade"
         },
@@ -560,12 +518,8 @@
           "name": "services_created_by_users_user_id_fk",
           "tableFrom": "services",
           "tableTo": "users",
-          "columnsFrom": [
-            "created_by"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["created_by"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -653,9 +607,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -667,28 +619,17 @@
     "public.eclassifications": {
       "name": "eclassifications",
       "schema": "public",
-      "values": [
-        "GOOD",
-        "WARNING",
-        "ERROR"
-      ]
+      "values": ["GOOD", "WARNING", "ERROR"]
     },
     "public.emethods": {
       "name": "emethods",
       "schema": "public",
-      "values": [
-        "HTTP",
-        "JOB"
-      ]
+      "values": ["HTTP", "JOB"]
     },
     "public.eroles": {
       "name": "eroles",
       "schema": "public",
-      "values": [
-        "ADMIN",
-        "MANAGER",
-        "ANALYST"
-      ]
+      "values": ["ADMIN", "MANAGER", "ANALYST"]
     }
   },
   "schemas": {},

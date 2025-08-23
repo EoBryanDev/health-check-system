@@ -1,17 +1,16 @@
-import { ERoles } from "../entities/interfaces/ERoles"
-import { TRole } from "../entities/interfaces/TRole"
+import { ERoles } from '../entities/interfaces/ERoles';
+import { TRole } from '../entities/interfaces/TRole';
 
 const parseTRoleERole = (TRoles: TRole): ERoles => {
+  if (TRoles === 'ADMIN') {
+    return ERoles.ADMIN;
+  }
 
-    if (TRoles === 'ADMIN') {
-        return ERoles.ADMIN
-    }
+  if (TRoles === 'MANAGER') {
+    return ERoles.MANAGER;
+  }
 
-    if (TRoles === 'MANAGER') {
-        return ERoles.MANAGER
-    }
+  return ERoles.ANALYST;
+};
 
-    return ERoles.ANALYST
-}
-
-export { parseTRoleERole }
+export { parseTRoleERole };
