@@ -14,6 +14,8 @@ import { parseTRoleERole } from '../../domain/helpers/parseTRoleERole';
 import { parseERoleTRole } from '../../domain/helpers/parseERoleTRole';
 import { ERoles } from '../../domain/entities/interfaces/ERoles';
 import { groups } from '../db/schema/groups';
+import { IConfigOutputDTO } from '../dto/IConfigDTO';
+import { config } from 'process';
 
 class DrizzlePostgreRepository implements IRepository {
     private db;
@@ -642,6 +644,47 @@ class DrizzlePostgreRepository implements IRepository {
     async findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null> {
         // You may need to join jobs and job_logs tables here
         return null;
+    }
+
+    async findAllConfigs(): Promise<IConfigOutputDTO[] | null> {
+        const configs = await this.db.select().from(schema.general_configs);
+
+        if (!(configs.length > 0)) {
+            return null
+        }
+
+        const config_return: IConfigOutputDTO[] = configs.map(config => {
+
+            const c: IConfigOutputDTO = {
+                name: config.name,
+                value: config.value,
+                created_by: config.created_by,
+                created_at: config.created_at.toString(),
+                updated_at: config.updated_at?.toString() ?? '',
+            }
+
+            return c
+        })
+
+        return config_return
+    }
+
+    async findConfigByName(config_name: string): Promise<IConfigOutputDTO | null> {
+        const configs = await this.db.select().from(schema.general_configs).where(eq(schema.general_configs.name, config_name));
+
+        if (!(configs.length > 0)) {
+            return null
+        }
+
+        const config_return: IConfigOutputDTO = {
+            name: configs[0].name,
+            value: configs[0].value,
+            created_by: configs[0].created_by,
+            created_at: configs[0].created_at.toString(),
+            updated_at: configs[0].updated_at?.toString() ?? '',
+        }
+
+        return config_return
     }
 }
 

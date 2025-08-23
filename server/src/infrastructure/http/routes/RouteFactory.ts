@@ -1,8 +1,8 @@
 import { LoginUseCase } from "../../../domain/use_cases/LoginUseCase";
 import { LoginController } from "../controllers/LoginController";
 import { IRepository } from "../../../domain/entities/interfaces/IRepository";
-import { IHashPassword } from "../../../domain/entities/interfaces/IHashPassword";
-import { ITokenGenerator } from "../../../domain/entities/interfaces/ITokenGenerator";
+import { IHashPassword } from "../../../domain/services/interfaces/IHashPassword";
+import { ITokenGenerator } from "../../../domain/services/interfaces/ITokenGenerator";
 import { UserController } from "../controllers/UserController";
 import { CreateUserUseCase } from "../../../domain/use_cases/CreateUserUseCase";
 import { GetAllGroupsUseCase } from "../../../domain/use_cases/GetAllGroupsUseCase";

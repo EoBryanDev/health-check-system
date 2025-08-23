@@ -1,3 +1,4 @@
+import { IConfigOutputDTO } from "../../../infrastructure/dto/IConfigDTO";
 import { ICreateUserOutputDTO, ICreateUserOutputWPwdDTO } from "../../../infrastructure/dto/ICreateUserDTO";
 import { IGroupInputDTO, IGroupOutputDTO, IGroupOutputUsersDTO, IUserGroupInput, IUserGroup } from "../../../infrastructure/dto/IGroupDTO";
 import { IJobInputDTO, IJobOutputDTO, IJobOutputWServiceAvailableDTO, IJobOutputWServiceDTO } from "../../../infrastructure/dto/IJobDTO";
@@ -77,6 +78,10 @@ interface IRepository {
     findAllJobsLogByJobId(job_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null>;
 
     findAllJobsLogByGroupId(group_id: string, params: IQueryParams): Promise<IJobLogOutputDTO[] | null>;
+
+    findAllConfigs(): Promise<IConfigOutputDTO[] | null>
+
+    findConfigByName(config_name: string): Promise<IConfigOutputDTO | null>
 
 
 

@@ -1,7 +1,7 @@
 // infra/security/JwtTokenGenerator.ts
 import jwt, { SignOptions } from "jsonwebtoken";
 import { env } from "../../../env";
-import { ITokenGenerator } from "../entities/interfaces/ITokenGenerator";
+import { ITokenGenerator } from "./interfaces/ITokenGenerator";
 
 export class JwtTokenGenerator implements ITokenGenerator {
     private readonly secret: string;
