@@ -1,5 +1,5 @@
-import { pgEnum } from "drizzle-orm/pg-core";
+import { pgEnum } from 'drizzle-orm/pg-core';
 
-const ERoles = pgEnum('eroles', ['ADMIN', 'MANAGER', 'ANALYST'])
+const ERoles = pgEnum('eroles', ['ADMIN', 'MANAGER', 'ANALYST']);
 
-export { ERoles }
+export { ERoles };

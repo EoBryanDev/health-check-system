@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 interface IHTTPSuccessOutputDTO {
-    data: any
+  data: any;
 }
 
 interface IHTTPErrorOutputDTO {
-    error: any
+  error: any;
 }
 
-export { IHTTPSuccessOutputDTO, IHTTPErrorOutputDTO }
+export { IHTTPSuccessOutputDTO, IHTTPErrorOutputDTO };

@@ -1,5 +1,5 @@
 interface IWebServerFactory {
-    startup: (port: number) => void
+  startup: (port: number) => void;
 }
 
-export { IWebServerFactory }
+export { IWebServerFactory };
