@@ -1,0 +1,38 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+@userEmail = test@teste.com.br
+
+### Login
+# @name auth
+POST {{ baseUrl }}/login
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "email": "{{userEmail}}",
+    "password": "123"
+}
+
+### Group
+# @name group 
+GET {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### CreateGroup
+# @name createGroup
+
+POST {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_name":"Social Media",
+    "group_description": "Group used to check social media status",
+    "users_email": "{{userEmail}}"
+}
+
+
