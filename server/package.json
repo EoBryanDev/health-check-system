@@ -1,10 +1,10 @@
 {
-  "name": "server",
+  "name": "health-check-system-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "",
+    "start": "node dist/server.js ",
     "dev": "tsx watch --env-file .env src/server.ts",
     "test": "vitest run",
     "test:coverage": "vitest --coverage run",
@@ -14,7 +14,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "node src/db/seed.ts",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "docker:create": "docker build -t hcs-server:v1 ."
   },
   "keywords": [],
   "author": "",
