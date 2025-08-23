@@ -444,7 +444,8 @@ class DrizzlePostgreRepository implements IRepository {
 
     async findServiceById(service_id: string): Promise<IServiceOutputDTO | null> {
         const service = await this.db.select().from(schema.services).where(eq(schema.services.service_id, service_id));
-        if (!service) {
+
+        if (!(service.length > 0)) {
             return null
         }
 
