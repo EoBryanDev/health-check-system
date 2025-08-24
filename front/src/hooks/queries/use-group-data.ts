@@ -1,19 +1,21 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { IGroup, TAnyConfigItem } from "@/interfaces/IConfigurations";
-
-const getGroupsMock = async (): Promise<IGroup[]> => {
-    await new Promise((res) => setTimeout(res, 500));
-    return [
-        { group_id: "1", name: "group1", user: "user1" },
-        { group_id: "2", name: "group2", user: "user2" },
-    ];
-};
+import { useQuery } from "@tanstack/react-query";
+import { IGroupOutputDTO } from "@/interfaces/IConfigurations";
+import { getAllGroups } from "@/services/group.service";
+import { IApiResponse } from "@/interfaces/IApiResponse";
 
 export const getGroupsQueryKey = () => ["groups"] as const;
 
-export function useGroupsQuery() {
-    return useQuery<IGroup[]>({
+export const useGroupsQuery = () => {
+    return useQuery<IGroupOutputDTO[] | null, Error>({
         queryKey: getGroupsQueryKey(),
-        queryFn: getGroupsMock,
+        queryFn: async () => {
+            const response: IApiResponse<IGroupOutputDTO[] | null> = await getAllGroups();
+
+            if (response.success && response.data) {
+                return response.data;
+            }
+
+            return null;
+        },
     });
-}
+};

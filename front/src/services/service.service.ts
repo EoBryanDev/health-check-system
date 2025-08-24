@@ -1,27 +1,50 @@
-import { IService, IServiceInputDTO } from "@/interfaces/IConfigurations";
+import { IApiResponse } from "@/interfaces/IApiResponse";
+import { IServiceInputDTO, IServiceOutputDTO, IServiceDetailOutputDTO } from "@/interfaces/IService";
 
-export const addService = async (item: IServiceInputDTO): Promise<IService> => {
-    const newService: IService = {
-        service_id: Date.now().toString(),
-        name: item.service_name,
-        url: item.service_url,
-        description: item.service_description,
-        group_id: item.group_id,
-        group: item.group_name,
-        job_id: item.job_id,
-        job_name: item.job_name,
-        last_run: item.last_run,
-        rate_limit_tolerance: item.rate_limit_tolerance,
-    };
-    return new Promise((resolve) => setTimeout(() => resolve(newService), 500));
+const API_INTERNAL_URL = '/api';
+
+export const createService = async (serviceData: IServiceInputDTO): Promise<IApiResponse<IServiceOutputDTO>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/services`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceData),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create service");
+    }
+
+    return response.json();
 };
 
-export const removeService = async (id: string): Promise<string> => {
-    return new Promise((resolve) => setTimeout(() => resolve(id), 500));
+export const getAllServices = async (): Promise<IApiResponse<IServiceOutputDTO[] | null>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/services`, {
+        method: "GET"
+    });
+
+    if (!response.ok) {
+        if (response.status === 404 || response.status === 204) {
+            return { success: true, data: null };
+        }
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch services");
+    }
+
+    return response.json();
 };
 
+export const getServiceById = async (id: string): Promise<IApiResponse<IServiceDetailOutputDTO>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/services/${id}`, {
+        method: "GET"
+    });
 
-export const editService = async (item: IService): Promise<IService> => {
-    // Lógica da API real para editar um serviço.
-    return new Promise((resolve) => setTimeout(() => resolve(item), 500));
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to fetch service");
+    }
+
+    return response.json();
 };

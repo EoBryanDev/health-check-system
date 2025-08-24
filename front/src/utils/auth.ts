@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 export async function logout() {
     try {
@@ -20,3 +20,5 @@ export async function logout() {
         return false;
     }
 }
+
+

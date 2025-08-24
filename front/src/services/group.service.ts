@@ -1,19 +1,39 @@
-import { IGroup, IGroupInputDTO } from "@/interfaces/IConfigurations";
+// src/services/group.service.ts
+import { IApiResponse } from "@/interfaces/IApiResponse";
+import { IGroupInputDTO, IGroupOutputDTO } from "@/interfaces/IConfigurations";
 
-export const addGroup = async (item: IGroupInputDTO): Promise<IGroup> => {
+const API_INTERNAL_URL = '/api';
 
-    const newGroup: IGroup = {
-        group_id: Date.now().toString(),
-        name: item.group_name,
-        user: item.users_email,
-    };
-    return new Promise((resolve) => setTimeout(() => resolve(newGroup), 500));
+export const addGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGroupOutputDTO>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/groups`, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(item),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to create group");
+    }
+
+    return response.json();
 };
 
-export const removeGroup = async (id: string): Promise<string> => {
-    return new Promise((resolve) => setTimeout(() => resolve(id), 500));
-};
+export const getAllGroups = async (): Promise<IApiResponse<IGroupOutputDTO[] | null>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/groups`, {
+        method: "GET"
+    });
 
-export const editGroup = async (item: IGroup): Promise<IGroup> => {
-    return new Promise((resolve) => setTimeout(() => resolve(item), 500));
+    if (!response.ok) {
+        const error = await response.json();
+        return { success: false, data: null, error: error.message };
+    }
+
+    if (response.status === 204) {
+        return { success: true, data: null };
+    }
+
+    return response.json();
 };

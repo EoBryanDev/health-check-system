@@ -1,15 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getServicesQueryKey } from "@/hooks/queries/use-service-data";
-import { IServiceInputDTO } from "@/interfaces/IConfigurations";
-import { addService } from "@/services/service.service";
+import { createService } from "@/services/service.service";
+import { IServiceInputDTO, IServiceOutputDTO } from "@/interfaces/IService";
+import { getServicesQueryKey } from "../queries/use-service-data";
 
-// O tipo de 'mutationFn' agora é 'IServiceInputDTO'
-export function useAddServiceMutation() {
+export const useCreateService = () => {
     const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (item: IServiceInputDTO) => addService(item),
+    return useMutation<IServiceOutputDTO, Error, IServiceInputDTO>({
+        mutationFn: async (newServiceData) => {
+            const response = await createService(newServiceData);
+            return response.data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: getServicesQueryKey() });
         },
+        onError: (error) => {
+            console.error("Error creating service:", error);
+        },
     });
-}
+};

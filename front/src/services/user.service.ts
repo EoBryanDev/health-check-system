@@ -1,10 +1,10 @@
-import { ICreateUserDTO } from "@/dto/user.dtos";
-import { TSignUpInputDTO } from "@/schemas/sign-up-form.schema";
-import { ILoginUserDTO } from "@/dto/user.dtos";
 import { TSignInSchema } from "@/schemas/sign-in-form.schema";
+import { TSignUpSchema } from "@/schemas/sign-up-form.schema";
 
-export async function createUser(userData: TSignUpInputDTO): Promise<ICreateUserDTO> {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_WS}/users`, {
+const API_INTERNAL_URL = '/api/auth';
+
+export async function createUser(userData: TSignUpSchema) {
+    const response = await fetch(`${API_INTERNAL_URL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -20,12 +20,8 @@ export async function createUser(userData: TSignUpInputDTO): Promise<ICreateUser
     return response.json();
 }
 
-
-
-export async function login(userData: TSignInSchema): Promise<ILoginUserDTO> {
-
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_WS}/login`, {
+export async function login(userData: TSignInSchema) {
+    const response = await fetch(`${API_INTERNAL_URL}/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -39,6 +35,4 @@ export async function login(userData: TSignInSchema): Promise<ILoginUserDTO> {
     }
 
     return response.json();
-
 }
-
