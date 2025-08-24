@@ -6,6 +6,7 @@ import { ThemeToggle } from "./theme-toggle"
 import { MenuSm } from "./sm-menu"
 import { useRouter } from 'next/navigation';
 import { logout } from "@/utils/auth";
+import Link from "next/link"
 
 
 export function MenuHeader() {
@@ -20,30 +21,28 @@ export function MenuHeader() {
   return (
     <header className="border-b bg-card">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
-        {/* Logo */}
         <div className="flex items-center space-x-2 sm:space-x-8">
           <h1 className="text-xl sm:text-2xl font-bold">HC</h1>
 
           <nav className="hidden sm:flex items-center space-x-6">
-            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-              <Settings className="h-4 w-4" />
-              <span className="text-xs">CONFIGURATION</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-              <BarChart3 className="h-4 w-4" />
-              <span className="text-xs">MONITORING</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-              <Terminal className="h-4 w-4" />
-              <span className="text-xs">COMMAND CENTER</span>
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Settings className="h-5 w-5" />
+              <Link href="/v1/configs" className="text-xs cursor-pointer">CONFIGURATION</Link>
+            </div>
+            <div className="flex items-center space-x-2">
+              <BarChart3 className="h-5 w-5" />
+              <Link href="/v1/services" className="text-xs cursor-pointer">MONITORING</Link>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Terminal className="h-5 w-5" />
+              <Link href="/v1/command-center" className="text-xs cursor-pointer">COMMAND CENTER</Link>
+            </div>
           </nav>
 
           <MenuSm />
           
         </div>
 
-        {/* User Profile and Theme Toggle */}
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="flex items-center space-x-2">
             <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
