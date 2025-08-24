@@ -7,8 +7,8 @@ export async function POST(request: NextRequest) {
         const { email, password } = await request.json();
 
 
-        const { access_token, expires_in } = (await login({ email, password })).data;
-        console.log({ access_token, expires_in });
+        const resp = await login({ email, password });
+        const { access_token, expires_in } = resp.data
 
         const response = NextResponse.json({ success: true });
         response.cookies.set(TOKEN_KEY, access_token, {
@@ -19,7 +19,6 @@ export async function POST(request: NextRequest) {
         });
         return response;
     } catch (error) {
-        console.error('Login failed:', error);
         return NextResponse.json(
             { success: false, error: 'Falha no login. Verifique suas credenciais.' },
             { status: 401 }

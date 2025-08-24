@@ -3,6 +3,8 @@ import { TSignInSchema } from "@/schemas/sign-in-form.schema";
 
 
 export async function login(userData: TSignInSchema): Promise<ILoginUserDTO> {
+
+
     const response = await fetch(`${process.env.NEXT_PUBLIC_WS}/login`, {
         method: 'POST',
         headers: {
@@ -17,5 +19,6 @@ export async function login(userData: TSignInSchema): Promise<ILoginUserDTO> {
     }
 
     return response.json();
+
 }
 
