@@ -31,7 +31,7 @@ export function useRegister() {
 
         onSuccess: () => {
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push('/v1/dashboard');
             }, 3000);
         },
 

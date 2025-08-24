@@ -27,7 +27,7 @@ export const useLogin = () => {
 
         onSuccess: () => {
             setTimeout(() => {
-                router.push('/dashboard');
+                router.push('/v1/dashboard');
             }, 3000);
         },
 
