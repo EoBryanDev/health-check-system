@@ -16,7 +16,7 @@ export function DashboardMain() {
         return <LoadingState />
     }
   const filteredVolumetryData = isSmallScreen 
-    ? volumetryData.filter((_, index) => index % 3 === 0) 
+    ? volumetryData?.filter((_, index) => index % 3 === 0) 
     : volumetryData;
 
   return (
@@ -27,7 +27,7 @@ export function DashboardMain() {
           <CardHeader className="flex flex-row items-center justify-between pb-2 sm:pb-4">
             <CardTitle className="text-sm font-medium">Groups</CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {groupStats.totalGroups} groups
+              {groupStats?.totalGroups ?? 0} groups
             </Badge>
           </CardHeader>
           <CardContent className="space-y-3 sm:space-y-4">
@@ -38,7 +38,7 @@ export function DashboardMain() {
               >
                 <Users className="h-4 w-4 sm:h-6 sm:w-6" />
                 <span className="text-xs">GROUPS</span>
-                <span className="text-xs font-semibold text-blue-600">{groupStats.totalGroups}</span>
+                <span className="text-xs font-semibold text-blue-600">{groupStats?.totalGroups ?? 0}</span>
               </Button>
               <Button
                 variant="outline"
@@ -46,7 +46,7 @@ export function DashboardMain() {
               >
                 <UserCheck className="h-4 w-4 sm:h-6 sm:w-6" />
                 <span className="text-xs">USERS</span>
-                <span className="text-xs font-semibold text-green-600">{groupStats.totalUsers}</span>
+                <span className="text-xs font-semibold text-green-600">{groupStats?.totalUsers ?? 0}</span>
               </Button>
             </div>
           </CardContent>
@@ -62,7 +62,7 @@ export function DashboardMain() {
               <div className="text-center">
                 <Activity className="h-4 w-4 sm:h-6 sm:w-6 mx-auto mb-1" />
                 <span className="text-xs text-muted-foreground">ACTIVE JOBS</span>
-                <div className="text-base sm:text-lg font-bold text-blue-600">{jobStats.activeJobs}</div>
+                <div className="text-base sm:text-lg font-bold text-blue-600">{jobStats?.activeJobs ?? 0}</div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-1 sm:gap-2">
@@ -76,7 +76,7 @@ export function DashboardMain() {
                   <span className="text-xs hidden sm:inline">SUCCESS</span>
                   <span className="text-xs sm:hidden">SUC</span>
                 </div>
-                <span className="text-xs font-semibold text-green-600">{jobStats.successJobs}</span>
+                <span className="text-xs font-semibold text-green-600">{jobStats?.successJobs ?? 0}</span>
               </Button>
               <Button
                 variant="outline"
@@ -88,7 +88,7 @@ export function DashboardMain() {
                   <span className="text-xs hidden sm:inline">WARNING</span>
                   <span className="text-xs sm:hidden">WAR</span>
                 </div>
-                <span className="text-xs font-semibold text-yellow-600">{jobStats.warningJobs}</span>
+                <span className="text-xs font-semibold text-yellow-600">{jobStats?.warningJobs ?? 0}</span>
               </Button>
               <Button
                 variant="outline"
@@ -100,7 +100,7 @@ export function DashboardMain() {
                   <span className="text-xs hidden sm:inline">ERROR</span>
                   <span className="text-xs sm:hidden">ERR</span>
                 </div>
-                <span className="text-xs font-semibold text-red-600">{jobStats.errorJobs}</span>
+                <span className="text-xs font-semibold text-red-600">{jobStats?.errorJobs ?? 0}</span>
               </Button>
             </div>
           </CardContent>
@@ -114,22 +114,22 @@ export function DashboardMain() {
             <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
               <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
                 <div className="text-xs text-muted-foreground">SYSTEM UPTIME</div>
-                <div className="text-sm sm:text-lg font-semibold text-green-500">{dashboardStats.systemUptime}</div>
+                <div className="text-sm sm:text-lg font-semibold text-green-500">{dashboardStats?.systemUptime ?? 0}</div>
               </div>
               <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
                 <div className="text-xs text-muted-foreground">AVG SERVICE INTERVAL</div>
-                <div className="text-sm sm:text-lg font-semibold">{dashboardStats.averageServiceInterval}</div>
+                <div className="text-sm sm:text-lg font-semibold">{dashboardStats?.averageServiceInterval ?? 0}</div>
               </div>
               <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
                 <div className="text-xs text-muted-foreground">SERVICES CREATED</div>
                 <div className="text-sm sm:text-lg font-semibold">
-                  {dashboardStats.servicesCreated.toLocaleString()}
+                  {dashboardStats?.servicesCreated.toLocaleString() ?? 0}
                 </div>
               </div>
               <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
                 <div className="text-xs text-muted-foreground">SERVICES ACTIVE</div>
                 <div className="text-sm sm:text-lg font-semibold">
-                  {dashboardStats.servicesActiveCreated.toLocaleString()}
+                  {dashboardStats?.servicesActiveCreated.toLocaleString() ?? 0}
                 </div>
               </div>
             </div>
@@ -143,10 +143,10 @@ export function DashboardMain() {
         </CardHeader>
         <CardContent>
           <div className="h-48 sm:h-64 border rounded-lg flex items-center justify-center bg-muted/20">
-            {volumetryData.length > 0 ? (
+            {volumetryData && volumetryData.length > 0 ? (
               <div className="w-full h-full p-2 sm:p-4">
                 <div className="flex items-end justify-between h-full space-x-1">
-                  {filteredVolumetryData.map((data, index) => (
+                  {filteredVolumetryData?.map((data, index) => (
                     <div key={index} className="flex flex-col items-center flex-1">
                       <div
                         className="bg-blue-500 w-full rounded-t"
