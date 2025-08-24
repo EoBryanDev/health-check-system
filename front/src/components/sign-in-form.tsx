@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -30,7 +29,6 @@ import { Separator } from "./ui/separator";
 
 const SignInForm = () => {
   const userLogin = useLogin()
-  const router = useRouter();
   const sign_in_form = useForm<TSignInSchema>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -44,13 +42,10 @@ const SignInForm = () => {
 
           await userLogin.mutateAsync(values);
           toast.success("Login done successfully! Wait to be redirected!");
-          setTimeout(() => {
-            router.push('/dashboard');
-          }, 3000); 
+          
           sign_in_form.reset
         } catch (error) {
-          toast.error("There was not possible create a new user");
-          console.error(error);
+          toast.error("There was not possible login!");
         }
         
   
