@@ -1,3 +1,4 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -23,6 +24,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { signUpSchema, TSignUpSchema } from "@/schemas/sign-up-form.schema";
+import { Separator } from "@radix-ui/react-separator";
 
 
 
@@ -58,6 +60,14 @@ const SignUpForm = () => {
   return (
     <>
       <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-4xl">Health Check System</CardTitle>
+          <CardDescription>Here you will be always know what is your system health. 
+            Made to intuitive manage, you can run checking, see the historic and control your system future. </CardDescription>
+        </CardHeader>
+        <div className="py-3 px-25">
+          <Separator />
+        </div>
         <CardHeader>
           <CardTitle>Sign up</CardTitle>
           <CardDescription>Create an account to continue</CardDescription>

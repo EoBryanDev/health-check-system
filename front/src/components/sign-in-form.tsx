@@ -1,8 +1,8 @@
+"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import z from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { signInSchema, TSignInSchema } from "@/schemas/sign-in-form.schema";
 import { useLogin } from "@/hooks/mutations/use-login";
 import Link from "next/link";
+import { Separator } from "./ui/separator";
 
 
 const SignInForm = () => {
@@ -59,6 +60,14 @@ const SignInForm = () => {
   return (
     <>
       <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-4xl">Health Check System</CardTitle>
+          <CardDescription>Here you will be always know what is your system health. 
+            Made to intuitive manage, you can run checking, see the historic and control your system future. </CardDescription>
+        </CardHeader>
+        <div className="py-3 px-25">
+          <Separator />
+        </div>
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
           <CardDescription>Sign in to continue</CardDescription>
