@@ -1,7 +1,5 @@
-"use client"
-
 import { useQuery } from "@tanstack/react-query"
-import type { DashboardStats, JobStats, GroupStats, VolumetryData } from "@/types/dashboard"
+import type { DashboardStats, JobStats, GroupStats, VolumetryData } from "@/interfaces/IDashboard"
 
 async function fetchDashboardData() {
     // Exemplo de chamada para API real
