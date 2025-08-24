@@ -10,7 +10,9 @@ export async function POST(request: NextRequest) {
 
         await createUser({ email, password, cellnumber, first_name, last_name });
 
-        const { access_token, expires_in } = (await login({ email, password })).data;
+        const resp = await login({ email, password });
+
+        const { access_token, expires_in } = resp.data
 
         const response = NextResponse.json({ success: true });
 

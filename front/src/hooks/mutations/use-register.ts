@@ -2,10 +2,14 @@
 import { useMutation } from '@tanstack/react-query';
 import { TSignUpSchema } from '@/schemas/sign-up-form.schema';
 
+import { useRouter } from "next/navigation";
+
 export const userRegisterMutationKey = () =>
     ["user-register"] as const;
 
 export function useRegister() {
+
+    const router = useRouter();
 
     return useMutation({
         mutationKey: userRegisterMutationKey(),
@@ -24,6 +28,13 @@ export function useRegister() {
 
             return response.json();
         },
+
+        onSuccess: () => {
+            setTimeout(() => {
+                router.push('/dashboard');
+            }, 3000);
+        },
+
         onError: (error) => {
             console.error('Registration error:', error.message);
         },

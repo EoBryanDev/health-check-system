@@ -1,6 +1,5 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { useRegister } from "@/hooks/mutations/use-register";
@@ -30,7 +29,6 @@ import { Separator } from "@radix-ui/react-separator";
 
 const SignUpForm = () => {
   const createUser = useRegister()
-  const router = useRouter();
   const sign_up_form = useForm<TSignUpSchema>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -47,9 +45,7 @@ const SignUpForm = () => {
     try {
       await createUser.mutateAsync(values);
       toast.success("User created successfully! In 3 seconds you'll be redirected to your Dashboard");
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 3000); 
+      
       sign_up_form.reset
     } catch (error) {
       toast.error("There was not possible create a new user");
