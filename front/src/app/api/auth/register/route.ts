@@ -1,6 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { createUser } from '@/services/create-user.service';
-import { login } from '@/services/auth-user.service';
+import { createUser, login } from '@/services/user.service';
 import { TOKEN_KEY } from '@/middleware';
 import { TSignUpSchema } from '@/schemas/sign-up-form.schema';
 
