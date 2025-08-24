@@ -2,15 +2,19 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, UserCheck, Activity, AlertTriangle, CheckCircle, XCircle, BarChart3, RefreshCw } from "lucide-react";
+import { Users, UserCheck, Activity, AlertTriangle, CheckCircle, XCircle, BarChart3 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardData } from "@/hooks/queries/use-dashboard-data";
 import { useMediaQuery } from 'react-responsive';
+import { LoadingState } from "@/components/loading";
 
 export function DashboardMain() {
-  const { dashboardStats, jobStats, groupStats, volumetryData, loading, refetch } = useDashboardData();
-  const isSmallScreen = useMediaQuery({ maxWidth: 640 }); // Define 'sm' como 640px
+  const { dashboardStats, jobStats, groupStats, volumetryData, loading } = useDashboardData();
+  const isSmallScreen = useMediaQuery({ maxWidth: 640 });
 
+   if (loading) {
+        return <LoadingState />
+    }
   const filteredVolumetryData = isSmallScreen 
     ? volumetryData.filter((_, index) => index % 3 === 0) 
     : volumetryData;
@@ -139,12 +143,7 @@ export function DashboardMain() {
         </CardHeader>
         <CardContent>
           <div className="h-48 sm:h-64 border rounded-lg flex items-center justify-center bg-muted/20">
-            {loading ? (
-              <div className="text-center text-muted-foreground">
-                <RefreshCw className="h-6 w-6 sm:h-8 sm:w-8 mx-auto mb-2 animate-spin" />
-                <p className="text-sm">Carregando dados...</p>
-              </div>
-            ) : volumetryData.length > 0 ? (
+            {volumetryData.length > 0 ? (
               <div className="w-full h-full p-2 sm:p-4">
                 <div className="flex items-end justify-between h-full space-x-1">
                   {filteredVolumetryData.map((data, index) => (

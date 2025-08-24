@@ -37,7 +37,6 @@ export function useDashboardData() {
     const {
         data,
         isLoading,
-        refetch,
     } = useQuery({
         queryKey: ["dashboardData"],
         queryFn: fetchDashboardData,
@@ -50,6 +49,5 @@ export function useDashboardData() {
         groupStats: data?.groups as GroupStats,
         volumetryData: data?.volumetry as VolumetryData[],
         loading: isLoading,
-        refetch,
     }
 }
