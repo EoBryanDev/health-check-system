@@ -1,6 +1,9 @@
 import { type NextRequest, type MiddlewareConfig, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 
 export const TOKEN_KEY = 'token';
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+
 const publicRoutes: { path: string | RegExp; whenAuthenticated: 'redirect' | 'next' }[] = [
     { path: '/', whenAuthenticated: 'redirect' },
     { path: '/sign-up', whenAuthenticated: 'redirect' },
@@ -21,13 +24,26 @@ export async function middleware(request: NextRequest) {
         }
     });
 
-    if (!authToken && !publicRoute) {
+    let isValidToken = false;
+    if (authToken) {
+        try {
+            await jwtVerify(authToken.value, JWT_SECRET, {
+                issuer: 'urn:example:issuer',
+                audience: 'urn:example:audience',
+            });
+            isValidToken = true;
+        } catch (error) {
+            console.error('Token validation failed:', error);
+        }
+    }
+
+    if (!isValidToken && !publicRoute) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE;
         return NextResponse.redirect(redirectUrl);
     }
 
-    if (authToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
+    if (isValidToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = REDIRECT_WHEN_AUTHENTICATED_ROUTE;
         return NextResponse.redirect(redirectUrl);
