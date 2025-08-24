@@ -27,10 +27,7 @@ export async function middleware(request: NextRequest) {
     let isValidToken = false;
     if (authToken) {
         try {
-            await jwtVerify(authToken.value, JWT_SECRET, {
-                issuer: 'urn:example:issuer',
-                audience: 'urn:example:audience',
-            });
+            await jwtVerify(authToken.value, JWT_SECRET);
             isValidToken = true;
         } catch (error) {
             console.error('Token validation failed:', error);
