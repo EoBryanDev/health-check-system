@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddServiceMutation } from "@/hooks/mutations/use-add-service";
-import { useEditServiceMutation } from "@/hooks/mutations/use-edit-service";
-import { useRemoveServiceMutation } from "@/hooks/mutations/use-remove-service";
+// import { useEditServiceMutation } from "@/hooks/mutations/use-edit-service";
+// import { useRemoveServiceMutation } from "@/hooks/mutations/use-remove-service";
 import { useServicesQuery } from "@/hooks/queries/use-service-data";
 import { Pencil, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,11 +19,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
-import { IService } from "@/interfaces/IConfigurations";
+// import { IService } from "@/interfaces/IConfigurations";
 import { TServiceSchema } from "@/schemas/configurations.schema";
+import { useCreateService } from "@/hooks/mutations/use-add-service";
 
 export function ServicesForm() {
-  const [editingItem, setEditingItem] = useState<IService | null>(null);
+  // const [editingItem, setEditingItem] = useState<IService | null>(null);
 
   const {
     register,
@@ -43,52 +43,53 @@ export function ServicesForm() {
   });
 
   const { data: servicesData } = useServicesQuery();
-  const addServiceMutation = useAddServiceMutation();
-  const editServiceMutation = useEditServiceMutation();
-  const removeServiceMutation = useRemoveServiceMutation();
+  const addServiceMutation = useCreateService();
+  // const editServiceMutation = useEditServiceMutation();
+  // const removeServiceMutation = useRemoveServiceMutation();
 
-  const isMutating = addServiceMutation.isPending || editServiceMutation.isPending || removeServiceMutation.isPending;
+  const isMutating = addServiceMutation.isPending 
+  //|| editServiceMutation.isPending || removeServiceMutation.isPending;
 
-  const onEditClick = (item: IService) => {
-    setEditingItem(item);
-    setValue("group_id", item.group_id || "");
-    setValue("group_name", item.group || "");
-    setValue("job_id", item.job_id || "");
-    setValue("job_name", item.job_name || "");
-    setValue("service_name", item.name);
-    setValue("service_description", item.description || "");
-    setValue("service_url", item.url);
-    setValue("rate_limit_tolerance", item.rate_limit_tolerance);
-    setValue("last_run", item.last_run);
-  };
+  // const onEditClick = (item: IService) => {
+  //   setEditingItem(item);
+  //   setValue("group_id", item.group_id || "");
+  //   setValue("group_name", item.group || "");
+  //   setValue("job_id", item.job_id || "");
+  //   setValue("job_name", item.job_name || "");
+  //   setValue("service_name", item.name);
+  //   setValue("service_description", item.description || "");
+  //   setValue("service_url", item.url);
+  //   setValue("rate_limit_tolerance", item.rate_limit_tolerance);
+  //   setValue("last_run", item.last_run);
+  // };
 
-  const onRemoveClick = (id: string) => {
-    removeServiceMutation.mutate(id);
-  };
+  // const onRemoveClick = (id: string) => {
+  //   removeServiceMutation.mutate(id);
+  // };
 
-  const onCancelClick = () => {
-    setEditingItem(null);
-    reset();
-  };
+  // const onCancelClick = () => {
+  //   setEditingItem(null);
+  //   reset();
+  // };
 
   const onSubmit = (data: TServiceSchema) => {
-    if (editingItem) {
-      editServiceMutation.mutate({ 
-        ...editingItem,
-        group_id: data.group_id,
-        group: data.group_name,
-        job_id: data.job_id,
-        job_name: data.job_name,
-        name: data.service_name,
-        description: data.service_description,
-        url: data.service_url,
-        rate_limit_tolerance: data.rate_limit_tolerance,
-        last_run: data.last_run,
-      });
-      setEditingItem(null);
-    } else {
+    // if (editingItem) {
+    //   editServiceMutation.mutate({ 
+    //     ...editingItem,
+    //     group_id: data.group_id,
+    //     group: data.group_name,
+    //     job_id: data.job_id,
+    //     job_name: data.job_name,
+    //     name: data.service_name,
+    //     description: data.service_description,
+    //     url: data.service_url,
+    //     rate_limit_tolerance: data.rate_limit_tolerance,
+    //     last_run: data.last_run,
+    //   });
+    //   setEditingItem(null);
+    // } else {
       addServiceMutation.mutate(data);
-    }
+    // }
     reset();
   };
 
@@ -148,7 +149,7 @@ export function ServicesForm() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-2">
+          {/* <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
                 editingItem ? "Save Changes" : "Add Service"
@@ -159,7 +160,7 @@ export function ServicesForm() {
                 Cancel
               </Button>
             )}
-          </div>
+          </div> */}
         </form>
         
         <div className="border rounded-lg overflow-hidden">
@@ -175,9 +176,9 @@ export function ServicesForm() {
               <tbody className="divide-y">
                 {servicesData?.map((item) => (
                   <tr key={item.service_id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm">{item.name}</td>
-                    <td className="px-4 py-3 text-sm">{item.url}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">{item.service_name}</td>
+                    <td className="px-4 py-3 text-sm">{item.service_url}</td>
+                    {/* <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -207,7 +208,7 @@ export function ServicesForm() {
                           <Minus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddJobMutation } from "@/hooks/mutations/use-add-job";
-import { useEditJobMutation } from "@/hooks/mutations/use-edit-job";
-import { useRemoveJobMutation } from "@/hooks/mutations/use-remove-job";
+// import { useEditJobMutation } from "@/hooks/mutations/use-edit-job";
+// import { useRemoveJobMutation } from "@/hooks/mutations/use-remove-job";
 import { useJobsQuery } from "@/hooks/queries/use-job-data";
 import { Pencil, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,10 +19,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
-import { IJob } from "@/interfaces/IConfigurations";
+import { useCreateJob } from "@/hooks/mutations/use-add-job";
+// import { IJob } from "@/interfaces/IConfigurations";
 
 export function JobsForm() {
-  const [editingItem, setEditingItem] = useState<IJob | null>(null);
+  // const [editingItem, setEditingItem] = useState<IJob | null>(null);
 
   const {
     register,
@@ -36,37 +36,41 @@ export function JobsForm() {
   });
 
   const { data: jobsData } = useJobsQuery();
-  const addJobMutation = useAddJobMutation();
-  const editJobMutation = useEditJobMutation();
-  const removeJobMutation = useRemoveJobMutation();
 
-  const isMutating = addJobMutation.isPending || editJobMutation.isPending || removeJobMutation.isPending;
+  console.log(jobsData);
+  
+  const createJobMutation = useCreateJob();
+  // const editJobMutation = useEditJobMutation();
+  // const removeJobMutation = useRemoveJobMutation();
 
-  const onEditClick = (item: IJob) => {
-    setEditingItem(item);
-    setValue("group_id", item.group_id);
-    setValue("group_name", item.group);
-    setValue("job_name", item.name);
-    setValue("job_description", item.description || "");
-    setValue("interval_time", item.interval_time);
-  };
+  const isMutating = createJobMutation.isPending 
+  //|| editJobMutation.isPending || removeJobMutation.isPending;
 
-  const onRemoveClick = (id: string) => {
-    removeJobMutation.mutate(id);
-  };
+  // const onEditClick = (item: IJob) => {
+  //   setEditingItem(item);
+  //   setValue("group_id", item.group_id);
+  //   setValue("group_name", item.group);
+  //   setValue("job_name", item.name);
+  //   setValue("job_description", item.description || "");
+  //   setValue("interval_time", item.interval_time);
+  // };
 
-  const onCancelClick = () => {
-    setEditingItem(null);
-    reset();
-  };
+  // const onRemoveClick = (id: string) => {
+  //   removeJobMutation.mutate(id);
+  // };
+
+  // const onCancelClick = () => {
+  //   setEditingItem(null);
+  //   reset();
+  // };
 
   const onSubmit = (data: TJobSchema) => {
-    if (editingItem) {
-      editJobMutation.mutate({ ...editingItem, name: data.job_name, group: data.group_name, interval_time: data.interval_time, description: data.job_description, group_id: data.group_id });
-      setEditingItem(null);
-    } else {
-      addJobMutation.mutate(data);
-    }
+    // if (editingItem) {
+    //   editJobMutation.mutate({ ...editingItem, name: data.job_name, group: data.group_name, interval_time: data.interval_time, description: data.job_description, group_id: data.group_id });
+    //   setEditingItem(null);
+    // } else {
+      createJobMutation.mutate(data);
+    // }
     reset();
   };
 
@@ -111,14 +115,15 @@ export function JobsForm() {
           <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
-                editingItem ? "Save Changes" : "Add Job"
+                // editingItem ? "Save Changes" : 
+                "Add Job"
               )}
             </Button>
-            {editingItem && (
+            {/* {editingItem && (
               <Button type="button" onClick={onCancelClick} variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
-            )}
+            )} */}
           </div>
         </form>
         
@@ -129,15 +134,15 @@ export function JobsForm() {
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Group</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th>
+                  {/* <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th> */}
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {jobsData?.map((item) => (
                   <tr key={item.job_id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm">{item.name}</td>
-                    <td className="px-4 py-3 text-sm">{item.group}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">{item.job_name}</td>
+                    <td className="px-4 py-3 text-sm">{item.group_name}</td>
+                    {/* <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -167,7 +172,7 @@ export function JobsForm() {
                           <Minus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>

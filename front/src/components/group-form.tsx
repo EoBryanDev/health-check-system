@@ -7,9 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useAddGroupMutation } from "@/hooks/mutations/use-add-group";
-import { useEditGroupMutation } from "@/hooks/mutations/use-edit-group";
-import { useRemoveGroupMutation } from "@/hooks/mutations/use-remove-group";
 import { useGroupsQuery } from "@/hooks/queries/use-group-data";
 import { Pencil, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,53 +16,54 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useState } from "react";
-import { IGroup } from "@/interfaces/IConfigurations";
+// import { useState } from "react";
+import { useCreateGroup } from "@/hooks/mutations/use-add-group";
 
 
 export function GroupsForm() {
-  const [editingItem, setEditingItem] = useState<IGroup | null>(null);
+  // const [editingItem, setEditingItem] = useState<IGroup | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
+    // setValue,
   } = useForm<TGroupSchema>({
     resolver: zodResolver(groupSchema),
   });
 
   const { data: groupsData } = useGroupsQuery();
-  const addGroupMutation = useAddGroupMutation();
-  const editGroupMutation = useEditGroupMutation();
-  const removeGroupMutation = useRemoveGroupMutation();
+  const createGroupMutation = useCreateGroup();
+  // const editGroupMutation = useEditGroupMutation();
+  // const removeGroupMutation = useRemoveGroupMutation();
 
-  const isMutating = addGroupMutation.isPending || editGroupMutation.isPending || removeGroupMutation.isPending;
+  const isMutating = createGroupMutation.isPending 
+  /*|| editGroupMutation.isPending || removeGroupMutation.isPending;*/
 
-  const onEditClick = (item: IGroup) => {
-    setEditingItem(item);
-    setValue("group_name", item.name);
-    setValue("users_email", item.user);
-    setValue("group_description", item.description || "");
-  };
+  // const onEditClick = (item: IGroup) => {
+  //   setEditingItem(item);
+  //   setValue("group_name", item.name);
+  //   setValue("users_email", item.user);
+  //   setValue("group_description", item.description || "");
+  // };
 
-  const onRemoveClick = (id: string) => {
-    removeGroupMutation.mutate(id);
-  };
+  // const onRemoveClick = (id: string) => {
+  //   removeGroupMutation.mutate(id);
+  // };
   
-  const onCancelClick = () => {
-    setEditingItem(null);
-    reset();
-  };
+  // const onCancelClick = () => {
+  //   setEditingItem(null);
+  //   reset();
+  // };
 
   const onSubmit = (data: TGroupSchema) => {
-    if (editingItem) {
+    /*if (editingItem) {
       editGroupMutation.mutate({ ...editingItem, name: data.group_name, user: data.users_email, description: data.group_description });
       setEditingItem(null);
-    } else {
-      addGroupMutation.mutate(data);
-    }
+    } else {*/
+      createGroupMutation.mutate(data);
+    /*}*/
     reset();
   };
 
@@ -95,17 +93,18 @@ export function GroupsForm() {
             </div>
           </div>
 
-          <div className="flex justify-center gap-2">
+         <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
-                editingItem ? "Save Changes" : "Add Group"
+                // editingItem ? "Save Changes" :
+                 "Add Group"
               )}
             </Button>
-            {editingItem && (
+            {/* {editingItem && (
               <Button type="button" onClick={onCancelClick} variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
-            )}
+            )} */}
           </div>
         </form>
         
@@ -115,16 +114,16 @@ export function GroupsForm() {
               <thead className="bg-muted">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">User</th>
+                  {/* <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">User</th> */}
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {groupsData?.map((item) => (
                   <tr key={item.group_id} className="hover:bg-muted/50">
-                    <td className="px-4 py-3 text-sm">{item.name}</td>
-                    <td className="px-4 py-3 text-sm">{item.user}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">{item.group_name}</td>
+                    {/* <td className="px-4 py-3 text-sm">{item.created_by}</td> */}
+                    {/* <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -154,7 +153,7 @@ export function GroupsForm() {
                           <Minus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
