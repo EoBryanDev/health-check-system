@@ -1,9 +1,22 @@
+"use client"
 import { Button } from "./ui/button"
 import { Avatar, AvatarFallback } from "./ui/avatar"
-import { Settings, BarChart3, Terminal, Menu } from "lucide-react"
+import { Settings, BarChart3, Terminal, LogOutIcon} from "lucide-react"
 import { ThemeToggle } from "./theme-toggle"
+import { MenuSm } from "./sm-menu"
+import { useRouter } from 'next/navigation';
+import { logout } from "@/utils/auth";
+
 
 export function MenuHeader() {
+  const router = useRouter();
+    const handleLogout = async () => {
+    const success = await logout();
+
+    if (success) {
+      router.push('/'); 
+    }
+  };
   return (
     <header className="border-b bg-card">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
@@ -26,9 +39,8 @@ export function MenuHeader() {
             </Button>
           </nav>
 
-          <Button variant="ghost" size="sm" className="sm:hidden">
-            <Menu className="h-4 w-4" />
-          </Button>
+          <MenuSm />
+          
         </div>
 
         {/* User Profile and Theme Toggle */}
@@ -43,6 +55,14 @@ export function MenuHeader() {
             </div>
           </div>
           <ThemeToggle />
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+          >
+            <LogOutIcon />
+          </Button>
         </div>
       </div>
     </header>
