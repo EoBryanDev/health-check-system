@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { login } from '@/services/auth-user.service'; // Use seu service aqui
 import { TOKEN_KEY } from '@/middleware';
+import { login } from '@/services/user.service';
 
 export async function POST(request: NextRequest) {
     try {

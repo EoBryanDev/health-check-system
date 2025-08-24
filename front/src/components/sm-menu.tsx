@@ -5,13 +5,15 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
+import { useState } from "react";
 
 
 export function MenuSm() {
+  const [open, setOpen] = useState(false)
     
   return (
     <div className="flex items-center gap-3">
-        <Sheet>
+        <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="sm" className="sm:hidden">
               <Menu />
@@ -53,15 +55,15 @@ export function MenuSm() {
             <nav className="flex flex-col items-start space-x-6 ml-6 gap-8">
               <div className="flex items-center space-x-2">
                 <Settings className="h-5 w-5" />
-                <Link href="/v1/configs" className="text-xs cursor-pointer">CONFIGURATION</Link>
+                <Link href="/v1/configs" className="text-xs cursor-pointer" onClick={() => setOpen(false)}>CONFIGURATION</Link>
               </div>
               <div className="flex items-center space-x-2">
                 <BarChart3 className="h-5 w-5" />
-                <Link href="/v1/services" className="text-xs cursor-pointer">MONITORING</Link>
+                <Link href="/v1/services" className="text-xs cursor-pointer" onClick={() => setOpen(false)}>MONITORING</Link>
               </div>
               <div className="flex items-center space-x-2">
                 <Terminal className="h-5 w-5" />
-                <Link href="/v1/command-center" className="text-xs cursor-pointer">COMMAND CENTER</Link>
+                <Link href="/v1/command-center" className="text-xs cursor-pointer" onClick={() => setOpen(false)}>COMMAND CENTER</Link>
               </div>
           </nav>
              
