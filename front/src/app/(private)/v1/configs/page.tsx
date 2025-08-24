@@ -1,10 +1,10 @@
+import ConfigMain from "@/pages/ConfigMain";
 
 
 export default function Configs() {
   return (
-    <>
-      Configs
-    </>
-  )  
-  ;
+    <main className="flex-1">
+      <ConfigMain />
+    </main>
+  );
 }
