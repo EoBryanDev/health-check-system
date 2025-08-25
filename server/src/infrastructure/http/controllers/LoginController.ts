@@ -5,9 +5,10 @@ import {
 } from '../../dto/IHTTPOutputDTO';
 import { LoginUseCase } from '../../../domain/use_cases/LoginUseCase';
 import { LoginUserSchema } from '../zodSchemas/login.post';
+import { GetLoginUserInfo } from '../../../domain/use_cases/GetLoginUserInfo';
 
 class LoginController {
-  constructor(private loginUseCase: LoginUseCase) {}
+  constructor(private loginUseCase: LoginUseCase, private findUserLoggedById: GetLoginUserInfo) { }
 
   async login(req: Request, resp: Response) {
     try {
@@ -32,6 +33,21 @@ class LoginController {
       resp.status(500).json(error);
     }
   }
+
+  async findUser(req: Request, resp: Response) {
+    const { role, user_id } = req.user!
+
+    const response = await this.findUserLoggedById.execute({ role, user_id })
+
+    const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+      data: response
+    }
+
+    resp.status(200).json(outputSuccessDTO)
+
+  }
+
+
 }
 
 export { LoginController };

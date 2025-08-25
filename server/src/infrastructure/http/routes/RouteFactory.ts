@@ -21,6 +21,7 @@ import { GetAllServicesUseCase } from '../../../domain/use_cases/GetAllServicesU
 import { GetServiceById } from '../../../domain/use_cases/GetServiceById';
 import { ServiceController } from '../controllers/ServiceController';
 import { RedisCacheProvider } from '../../../domain/services/RedisCacheService';
+import { GetLoginUserInfo } from '../../../domain/use_cases/GetLoginUserInfo';
 
 class RouteFactory {
   private static instance: RouteFactory;
@@ -29,7 +30,7 @@ class RouteFactory {
     private readonly dbConnection: IRepository,
     private readonly hashService: IHashPassword,
     private readonly tokenService: ITokenGenerator
-  ) {}
+  ) { }
 
   public static getInstance(
     dbConnection: IRepository,
@@ -72,7 +73,8 @@ class RouteFactory {
 
   public getLoginControllerInstance(): LoginController {
     return new LoginController(
-      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
+      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService),
+      new GetLoginUserInfo(this.dbConnection)
     );
   }
 
