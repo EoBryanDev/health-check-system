@@ -499,7 +499,7 @@ class DrizzlePostgreRepository implements IRepository {
   }
 
   async findAllJobsWService(
-    _params: IQueryParams
+    params: IQueryParams
   ): Promise<IJobOutputWServiceAvailableDTO[] | null> {
     // 1. Buscar todos os jobs (sem filtro de group_id)
     const jobs = await this.db
@@ -514,7 +514,8 @@ class DrizzlePostgreRepository implements IRepository {
         updated_at: schema.jobs.updated_at,
         created_by: schema.jobs.created_by,
       })
-      .from(schema.jobs);
+      .from(schema.jobs)
+      .where(eq(schema.jobs.active, params.active!));
 
     if (!jobs || jobs.length === 0) {
       return [];
@@ -664,9 +665,9 @@ class DrizzlePostgreRepository implements IRepository {
       .where(
         params.active !== undefined
           ? and(
-              eq(schema.services.group_id, group_id),
-              eq(schema.services.active, params.active)
-            )
+            eq(schema.services.group_id, group_id),
+            eq(schema.services.active, params.active)
+          )
           : undefined
       );
 
@@ -700,9 +701,9 @@ class DrizzlePostgreRepository implements IRepository {
       .where(
         params.active !== undefined
           ? and(
-              eq(schema.services.group_id, job_id),
-              eq(schema.services.active, params.active)
-            )
+            eq(schema.services.group_id, job_id),
+            eq(schema.services.active, params.active)
+          )
           : undefined
       );
 
@@ -748,9 +749,9 @@ class DrizzlePostgreRepository implements IRepository {
         group_id: service.group_id,
         service_name: service.service_name,
         service_url: service.service_url,
-        last_run: service.last_run!.toString() ?? '',
+        last_run: service.last_run ? service.last_run.toString() : '',
         rate_limit_tolerance: service.rate_limit_tolerance,
-        created_at: service.created_at.toString(),
+        created_at: service.created_at.toString() ?? '',
         created_by: service.created_by,
       };
     });

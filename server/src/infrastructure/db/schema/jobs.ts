@@ -28,8 +28,12 @@ const jobs = pgTable('jobs', {
     .notNull(),
 });
 
-export const jobsRelations = relations(jobs, ({ many }) => ({
+export const jobsRelations = relations(jobs, ({ one, many }) => ({
   services: many(services), // um job tem vários serviços
+  group: one(groups, {
+    fields: [jobs.group_id],
+    references: [groups.group_id],
+  }),
 }));
 
 export { jobs };

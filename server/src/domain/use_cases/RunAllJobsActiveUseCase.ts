@@ -10,7 +10,7 @@ class RunAllJobsActiveUseCase {
   constructor(
     private repository: IRepository,
     private cacheRepository: ICacheProvider
-  ) {}
+  ) { }
 
   async execute(
     data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' },
@@ -23,27 +23,38 @@ class RunAllJobsActiveUseCase {
     if (isJobRunning) {
       throw new Error('There is already a job running.');
     }
+    if (method === 'HTTP') {
 
-    if (data_in_token.role === 'ANALYST') {
-      throw new Error('');
+      if (data_in_token.role === 'ANALYST') {
+        throw new Error('');
+      }
+
+      if (data_in_token.role === 'MANAGER') {
+        throw new Error('');
+      }
     }
 
-    if (data_in_token.role === 'MANAGER') {
-      throw new Error('');
-    }
 
     let lastRun = await this.cacheRepository.get<Date>('last_run');
+
 
     let jobRecoveryTime = await this.cacheRepository.get<number>(
       'recovery_time_in_seconds'
     );
 
+
+
+
+
     const now = new Date();
 
     if (!jobRecoveryTime) {
+
       const config = await this.repository.findConfigByName(
         'recovery_time_in_seconds'
       );
+
+
 
       if (!config) {
         jobRecoveryTime = 300; /*  5 min */
