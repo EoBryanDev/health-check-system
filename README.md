@@ -16,4 +16,6 @@ To support project's decisions I've created docs directory that compiles all pro
 
 `docs/5_db_modeling.dio`: Here I've elaborated DB schema to build the application.
 
-`server`: I chosed to use Node TS with Express Framework to build my solution, to persist data I going to use PostgreSQL.
+`server`: I chosed to use Node TS with Express Framework to build my solution, to persist data I going to use PostgreSQL and to help on manipulate use cases I used Redis.
+
+`front`: I chosed Next.js with TypeScript and Tailwind CSS to build the frontend.
