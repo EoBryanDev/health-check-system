@@ -1,6 +1,6 @@
 interface IServiceInputDTO {
   group_id: string;
-  group_name: string;
+  group_name?: string;
   job_id?: string;
   job_name?: string;
   last_run: Date | null;
