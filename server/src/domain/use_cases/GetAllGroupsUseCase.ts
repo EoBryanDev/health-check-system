@@ -4,7 +4,7 @@ import { IRepository } from '../entities/interfaces/IRepository';
 import { IQueryParams } from './interfaces/IQueryParams';
 
 class GetAllGroupsUseCase {
-  constructor(private inMemoryRepository: IRepository) {}
+  constructor(private inMemoryRepository: IRepository) { }
 
   public async execute(
     data_in_token: IDataInToken,
