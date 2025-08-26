@@ -46,9 +46,9 @@ Content-Type: application/json
 {
     "group_id":"d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
     "group_name": "Social Media",
-    "job_name": "Job Monitora 10m",
-    "job_description": "Job que roda todos os services ativos a categoria}",
-    "interval_time": 10
+    "service_name": "Instagram",
+    "service_url": "https://www.instagram.com.br",
+    "rate_limit_tolerance": 1000
 }
 
 ### Service By id

@@ -19,13 +19,21 @@ job.post('/jobs', authMiddleware, (req: Request, res: Response) =>
   jobController.createJob(req, res)
 );
 
+job.put('/jobs', authMiddleware, (req: Request, res: Response) =>
+  jobController.editJob(req, res)
+);
+
 // job.get('/jobs/:id', (req: Request, res: Response) => jobController.findjob(req, res))
+
+job.delete('/jobs/:id', authMiddleware, (req: Request, res: Response) =>
+  jobController.deleteGroup(req, res)
+);
 
 job.get('/jobs', authMiddleware, (req: Request, res: Response) =>
   jobController.findAll(req, res)
 );
 
-job.post('/jobs/service', authMiddleware, (req: Request, res: Response) =>
+job.post('/jobs/:job_id/services/:service_id', authMiddleware, (req: Request, res: Response) =>
   jobController.addServiceToJob(req, res)
 );
 
