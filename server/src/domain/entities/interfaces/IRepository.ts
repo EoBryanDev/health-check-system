@@ -9,6 +9,7 @@ import {
   IGroupOutputUsersDTO,
   IUserGroupInput,
   IUserGroup,
+  IGroupMembersOutputDTO,
 } from '../../../infrastructure/dto/IGroupDTO';
 import {
   IJobInputDTO,
@@ -60,14 +61,26 @@ interface IRepository {
     params: IQueryParams
   ): Promise<IUserGroup[] | null>;
 
-  findGroupMembersById(
+  findGroupMemberById(
+    group_user_id: string
+  ): Promise<IGroupMembersOutputDTO | null>;
+
+  findGroupMembersByGroupId(
     group_id: string,
     params: IQueryParams
-  ): Promise<IGroupOutputUsersDTO[] | null>;
+  ): Promise<IGroupMembersOutputDTO[] | null>;
 
   findJobByGroupId(group_id: string): Promise<IJobOutputDTO | null>;
 
+  editGroup(user_group_payload: IGroupInputDTO, user_id: string): Promise<IGroupOutputUsersDTO>;
+
+  deleteGroup(group_id: string): Promise<void>;
+
   createJob(job: IJobInputDTO, created_by: string): Promise<IJobOutputDTO>;
+
+  editJob(user_group_payload: IJobInputDTO, user_id: string): Promise<IJobOutputDTO>;
+
+  deleteJob(job_id: string): Promise<void>;
 
   findJobByName(job_name: string): Promise<IJobOutputDTO | null>;
 
