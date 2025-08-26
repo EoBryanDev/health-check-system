@@ -11,8 +11,9 @@ import {
   IHTTPSuccessOutputDTO,
 } from '../../dto/IHTTPOutputDTO';
 import { createJobchema } from '../zodSchemas/job.post.schema';
-import { createServiceJobSchema } from '../zodSchemas/service_job.post.schema';
-import { IServiceInputDTO } from '../../dto/IServiceDTO';
+import { editJobchema } from '../zodSchemas/job.put.schema';
+import { EditJobUseCase } from '../../../domain/use_cases/EditJobUseCase';
+import { DeleteJobUseCase } from '../../../domain/use_cases/DeleteJobUseCase';
 
 class JobController {
   constructor(
@@ -21,7 +22,9 @@ class JobController {
     private addServiceToJobUseCase: AddServiceToJobUseCase,
     private runJobActiveByGroupUseCase: RunJobActiveByGroupUseCase,
     private runJobActiveUseCase: RunJobActiveUseCase,
-    private runAllJobsActiveUseCase: RunAllJobsActiveUseCase
+    private runAllJobsActiveUseCase: RunAllJobsActiveUseCase,
+    private editJobUseCase: EditJobUseCase,
+    private deleteJobUseCase: DeleteJobUseCase
   ) { }
 
   async createJob(req: Request, resp: Response) {
@@ -32,6 +35,35 @@ class JobController {
 
       const valid_body = createJobchema.parse(body);
       const response = await this.createJobUseCase.execute(valid_body, {
+        user_id,
+        role,
+      });
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async editJob(req: Request, resp: Response) {
+    try {
+      const { user_id, role } = req.user!;
+
+      const { body } = req;
+
+      const valid_body = editJobchema.parse(body);
+      const response = await this.editJobUseCase.execute(valid_body, {
         user_id,
         role,
       });
@@ -87,14 +119,10 @@ class JobController {
   async addServiceToJob(req: Request, resp: Response) {
     try {
       const { user_id, role } = req.user!;
-      const { body } = req;
+      const { job_id, service_id } = req.params
 
-      const valid_body = createServiceJobSchema.parse(body);
-      const serviceInput: IServiceInputDTO = {
-        ...valid_body,
-        last_run: valid_body.last_run ?? null, // or new Date() if you want to set current time
-      };
-      const response = await this.addServiceToJobUseCase.execute(serviceInput, {
+
+      const response = await this.addServiceToJobUseCase.execute({ job_id, service_id }, {
         user_id,
         role,
       });
@@ -158,6 +186,29 @@ class JobController {
 
       resp.status(200).json(outputSuccessDTO);
       // esqueci de implementar o rodar
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async deleteGroup(req: Request, resp: Response) {
+    try {
+      const { id } = req.params
+
+      await this.deleteJobUseCase.execute(id)
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: null
+      }
+
+      resp.status(204).json(outputSuccessDTO)
     } catch (error) {
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
