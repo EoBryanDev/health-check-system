@@ -8,6 +8,7 @@ import {
   IGroupOutputUsersDTO,
   IUserGroupInput,
   IUserGroup,
+  IGroupMembersOutputDTO,
 } from '../dto/IGroupDTO';
 import { User } from '../../domain/entities/User';
 import {
@@ -51,6 +52,7 @@ class DrizzlePostgreRepository implements IRepository {
       first_name: u.first_name,
       last_name: u.last_name,
       email: u.email,
+      active: u.active,
       created_at: u.created_at?.toString() ?? '',
       role: parseTRoleERole(u.role),
       password: u.password,
@@ -69,6 +71,7 @@ class DrizzlePostgreRepository implements IRepository {
       first_name: u.first_name,
       last_name: u.last_name,
       email: u.email,
+      active: u.active,
       created_at: u.created_at?.toString() ?? '',
       role: parseTRoleERole(u.role),
       password: u.password,
@@ -157,15 +160,19 @@ class DrizzlePostgreRepository implements IRepository {
   }
 
   async findAllGroups(params: IQueryParams): Promise<IGroupOutputDTO[] | null> {
-    let groups;
-    if (params.active !== undefined) {
-      groups = await this.db
-        .select()
-        .from(schema.groups)
-        .where(eq(schema.groups.active, params.active));
-    } else {
-      groups = await this.db.select().from(schema.groups);
-    }
+    const groups = await this.db
+      .select()
+      .from(schema.groups)
+      .where(eq(schema.groups.active, params.active ?? schema.groups.active));
+
+    // } else {
+    //   console.log('2');
+    //   groups = await this.db
+    //     .select()
+    //     .from(schema.groups);
+    //   console.log(groups);
+    // }
+
     if (!groups.length) return null;
     return groups.map((g) => ({
       group_id: g.group_id,
@@ -196,11 +203,66 @@ class DrizzlePostgreRepository implements IRepository {
     };
   }
 
-  async findGroupMembersById(
-    _group_id: string,
-    _params: IQueryParams
-  ): Promise<IGroupOutputUsersDTO[] | null> {
-    throw new Error('Method not implemented.');
+  async findGroupMemberById(
+    group_user_id: string
+  ): Promise<IGroupMembersOutputDTO | null> {
+
+    const response = await this.db
+      .select()
+      .from(schema.group_users)
+      .where(eq(schema.group_users.user_id, group_user_id))
+
+
+    if (response.length < 1) {
+      return null
+    }
+
+    const user_info = await this.findUserById(response[0].user_id)
+
+    if (!user_info) {
+      return null
+
+    }
+    const returned = {
+      user_name: `${user_info.first_name} ${user_info.last_name}`,
+      active: true,
+      email: user_info.email
+
+
+    }
+
+    return returned
+  }
+
+  async findGroupMembersByGroupId(
+    group_id: string,
+    _params: IQueryParams | undefined
+  ): Promise<IGroupMembersOutputDTO[] | null> {
+
+    const response = await this.db
+      .select()
+      .from(schema.group_users)
+      .where(eq(schema.group_users.group_id, group_id))
+
+    const returned: IGroupMembersOutputDTO[] = [];
+
+    for (let i = 0; i < response.length; i++) {
+      const group_user = response[i];
+
+      const user_info = await this.findUserById(group_user.user_id)
+
+      if (user_info) {
+
+        returned.push({
+          user_name: `${user_info.first_name} ${user_info.last_name}`,
+          active: true,
+          email: user_info.email
+
+        })
+      }
+    }
+
+    return returned
   }
 
   async findGroupByName(group_name: string): Promise<IGroupOutputDTO | null> {
@@ -221,12 +283,52 @@ class DrizzlePostgreRepository implements IRepository {
     };
   }
 
+  async editGroup(user_group_payload: IGroupInputDTO, user_id: string): Promise<IGroupOutputUsersDTO> {
+
+    if (!(user_id || user_group_payload.group_id)) {
+      throw new Error("It was informed invalid data");
+    }
+    const [updated] = await this.db
+      .update(schema.groups)
+      .set({
+        group_name: user_group_payload.group_name,
+        group_description: user_group_payload.group_description,
+        updated_at: new Date(),
+        updated_by: user_id
+      })
+      .where(eq(schema.groups.group_id, user_group_payload.group_id!))
+      .returning();
+
+    const user = await this.findGroupMembersByGroupId(user_group_payload.group_id!, undefined)
+
+    return {
+      group_id: updated.group_id,
+      group_name: updated.group_name,
+      group_description: updated.group_description ?? '',
+      user: user ? user : null,
+      active: updated.active,
+      created_at: updated.created_at.toString(),
+      updated_at: updated.created_at.toString(),
+      created_by: updated.created_by,
+    }
+  }
+
+  async deleteGroup(group_id: string): Promise<void> {
+
+    await this.db
+      .delete(schema.groups)
+      .where(eq(schema.groups.group_id, group_id))
+  }
+
   async createUserGroup(
     user_group_payload: IUserGroupInput
   ): Promise<IUserGroup> {
     const [created] = await this.db
       .insert(schema.group_users)
-      .values(user_group_payload)
+      .values({
+        user_id: user_group_payload.user_code,
+        group_id: user_group_payload.group_id
+      })
       .returning();
 
     const resp: IUserGroup = {
@@ -286,6 +388,76 @@ class DrizzlePostgreRepository implements IRepository {
       created_by: created.created_by,
     };
     return response;
+  }
+
+  async editJob(user_job_payload: IJobInputDTO, user_id: string): Promise<IJobOutputDTO> {
+
+    if (user_job_payload.active) {
+
+      const [updated] = await this.db
+        .update(schema.jobs)
+        .set({
+          group_id: user_job_payload.group_id,
+          job_name: user_job_payload.job_name,
+          job_description: user_job_payload.job_description,
+          interval_time: user_job_payload.interval_time,
+          active: user_job_payload.active,
+          updated_by: user_id,
+          updated_at: new Date()
+        })
+        .where(eq(schema.jobs.job_id, user_job_payload.job_id!))
+        .returning();
+
+      const returning = {
+        job_id: updated.job_id,
+        group_id: updated.group_id,
+        job_name: updated.job_name,
+        job_description: updated.job_description ?? '',
+        interval_time: updated.interval_time,
+        created_at: updated.created_at.toString(),
+        created_by: updated.created_by,
+        updated_at: updated.updated_at?.toString(),
+        updated_by: updated.updated_by ?? ''
+      }
+
+      return returning
+    } else {
+      const [updated] = await this.db
+        .update(schema.jobs)
+        .set({
+          group_id: user_job_payload.group_id,
+          job_name: user_job_payload.job_name,
+          job_description: user_job_payload.job_description,
+          interval_time: user_job_payload.interval_time,
+          updated_by: user_id,
+          updated_at: new Date()
+        })
+        .where(eq(schema.jobs.job_id, user_job_payload.job_id!))
+        .returning();
+
+      const returning = {
+        job_id: updated.job_id,
+        group_id: updated.group_id,
+        job_name: updated.job_name,
+        job_description: updated.job_description ?? '',
+        interval_time: updated.interval_time,
+        created_at: updated.created_at.toString(),
+        created_by: updated.created_by,
+        updated_at: updated.updated_at?.toString(),
+        updated_by: updated.updated_by ?? ''
+      }
+
+      return returning
+    }
+
+
+  }
+
+  async deleteJob(job_id: string): Promise<void> {
+    await this.db
+      .delete(schema.jobs)
+      .where(eq(schema.jobs.job_id, job_id))
+
   }
 
   async findJobById(job_id: string): Promise<IJobOutputDTO | null> {
@@ -637,7 +809,8 @@ class DrizzlePostgreRepository implements IRepository {
       .select()
       .from(schema.services)
       .where(eq(schema.services.service_name, service_name));
-    if (!service) {
+
+    if (service.length < 1) {
       return null;
     }
 
