@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 interface IGroupInputDTO {
+  group_id?: string;
   group_name: string;
   group_description?: string;
   users_email: string;
+}
+
+interface IAddUserToGroup {
+  group_id: string,
+  user_code: string
 }
 
 interface IGroupOutputDTO {
@@ -17,7 +23,7 @@ interface IGroupOutputDTO {
 
 interface IUserGroupInput {
   group_id: string;
-  user_id: string;
+  user_code: string;
 }
 
 interface IUserGroup {
@@ -26,17 +32,17 @@ interface IUserGroup {
   created_at: string;
 }
 
+interface IGroupMembersOutputDTO {
+  user_name: string;
+  email: string;
+  active: boolean;
+}
+
 interface IGroupOutputUsersDTO {
   group_id: string;
   group_name: string;
   group_description: string;
-  user:
-    | Array<{
-        user_name: string;
-        email: string;
-        active: boolean;
-      }>
-    | Array<{}>;
+  user: Array<IGroupMembersOutputDTO> | null
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -49,4 +55,6 @@ export {
   IGroupInputDTO,
   IUserGroupInput,
   IUserGroup,
+  IGroupMembersOutputDTO,
+  IAddUserToGroup
 };
