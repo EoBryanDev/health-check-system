@@ -23,6 +23,7 @@ const jobs = pgTable('jobs', {
   active: boolean().notNull().default(true),
   created_at: timestamp().defaultNow().notNull(),
   updated_at: timestamp(),
+  updated_by: uuid().references(() => users.user_id),
   created_by: uuid()
     .references(() => users.user_id)
     .notNull(),

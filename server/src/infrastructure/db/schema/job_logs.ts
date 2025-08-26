@@ -6,9 +6,7 @@ import { relations } from 'drizzle-orm';
 
 const job_logs = pgTable('job_logs', {
   job_log_id: uuid().primaryKey().defaultRandom(),
-  job_id: uuid()
-    .references(() => jobs.job_id)
-    .notNull(),
+  job_id: uuid().notNull(),
   start_at: timestamp({ precision: 3 }).notNull(),
   duration: integer().notNull(),
 });

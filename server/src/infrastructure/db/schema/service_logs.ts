@@ -10,9 +10,7 @@ import { relations } from 'drizzle-orm';
 
 const service_logs = pgTable('service_logs', {
   service_log_id: uuid().primaryKey().defaultRandom(),
-  service_id: uuid()
-    .references(() => services.service_id)
-    .notNull(),
+  service_id: uuid().notNull(),
   start_at: timestamp({ precision: 3 }).notNull(),
   duration: integer().notNull(),
   method: EMethods('method').notNull().default('JOB'),
