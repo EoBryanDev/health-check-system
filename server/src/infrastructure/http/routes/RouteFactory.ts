@@ -22,6 +22,11 @@ import { GetServiceById } from '../../../domain/use_cases/GetServiceById';
 import { ServiceController } from '../controllers/ServiceController';
 import { RedisCacheProvider } from '../../../domain/services/RedisCacheService';
 import { GetLoginUserInfo } from '../../../domain/use_cases/GetLoginUserInfo';
+import { EditMonitGroupUseCase } from '../../../domain/use_cases/EditMonitGroupUseCase';
+import { DeleteMonitGroupUseCase } from '../../../domain/use_cases/DeleteMonitGroupUseCase';
+import { AddUserToGroupUseCase } from '../../../domain/use_cases/AddUserToGroupUseCase';
+import { EditJobUseCase } from '../../../domain/use_cases/EditJobUseCase';
+import { DeleteJobUseCase } from '../../../domain/use_cases/DeleteJobUseCase';
 
 class RouteFactory {
   private static instance: RouteFactory;
@@ -81,7 +86,10 @@ class RouteFactory {
   public getGroupControllerInstance(): GroupController {
     return new GroupController(
       new CreateMonitGroupUseCase(this.dbConnection),
-      new GetAllGroupsUseCase(this.dbConnection)
+      new GetAllGroupsUseCase(this.dbConnection),
+      new EditMonitGroupUseCase(this.dbConnection),
+      new DeleteMonitGroupUseCase(this.dbConnection),
+      new AddUserToGroupUseCase(this.dbConnection)
     );
   }
 
@@ -93,7 +101,9 @@ class RouteFactory {
       new AddServiceToJobUseCase(this.dbConnection),
       new RunJobActiveByGroupUseCase(this.dbConnection, cache),
       new RunJobActiveUseCase(this.dbConnection, cache),
-      new RunAllJobsActiveUseCase(this.dbConnection, cache)
+      new RunAllJobsActiveUseCase(this.dbConnection, cache),
+      new EditJobUseCase(this.dbConnection),
+      new DeleteJobUseCase(this.dbConnection)
     );
   }
 

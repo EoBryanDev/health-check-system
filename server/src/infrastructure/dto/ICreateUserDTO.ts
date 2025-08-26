@@ -25,6 +25,7 @@ interface ICreateUserOutputWPwdDTO {
   email: string;
   password: string;
   role: ERoles;
+  active: boolean,
   cellnumber?: string;
   created_at: string;
 }
