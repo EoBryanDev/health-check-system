@@ -69,7 +69,7 @@ Content-Type: application/json
 
 ### Run Job By Id
 # @name jobRunner
-PUT {{baseUrl}}/jobs/run/96bef3dd-1bad-4a48-b8b6-39df96790590?mode=job
+PUT {{baseUrl}}/jobs/run/i?mode=all
 Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json
@@ -100,7 +100,7 @@ Content-Type: application/json
 ### Get Job logs by job id
 # @name jobLogs
 
-GET {{baseUrl}}/jobs/915ca626-0e3f-4101-93cb-14fe22f7d466/job-logs
+GET {{baseUrl}}/jobs/915ca626-0e3f-4101-93cb-14fe22f7d466/job-logs?offset=0&limit=2
 Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json
