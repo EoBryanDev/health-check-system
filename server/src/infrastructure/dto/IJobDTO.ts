@@ -7,6 +7,7 @@ interface IJobOutputWServiceDTO {
   job_description?: string;
   services: Array<IServiceOutputDTO> | [];
   interval_time: number; // in miliseconds
+  active: boolean;
   created_at: string;
   created_by: string;
 }
@@ -19,6 +20,7 @@ interface IJobOutputWServiceAvailableDTO {
   services: Array<IServiceOutputDTO>;
   interval_time: number; // in miliseconds
   created_at: string;
+  active: boolean;
   created_by: string;
 }
 
@@ -31,6 +33,7 @@ interface IJobOutputDTO {
   created_at: string;
   created_by: string;
   updated_at?: string;
+  active: boolean;
   updated_by?: string;
 }
 

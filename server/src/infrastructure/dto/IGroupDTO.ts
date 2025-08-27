@@ -2,6 +2,7 @@
 interface IGroupInputDTO {
   group_id?: string;
   group_name: string;
+  active?: boolean;
   group_description?: string;
   users_email: string;
 }
