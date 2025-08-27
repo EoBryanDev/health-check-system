@@ -14,6 +14,9 @@ import { createJobchema } from '../zodSchemas/job.post.schema';
 import { editJobchema } from '../zodSchemas/job.put.schema';
 import { EditJobUseCase } from '../../../domain/use_cases/EditJobUseCase';
 import { DeleteJobUseCase } from '../../../domain/use_cases/DeleteJobUseCase';
+import { GetAllJobLogByJobIdUseCase } from '../../../domain/use_cases/GetAllJobLogByJobIdUseCase';
+import { queryParams } from '../../../domain/helpers/queryParams';
+import { RemoveServiceFromJobUseCase } from '../../../domain/use_cases/RemoveServiceFromJobUseCase';
 
 class JobController {
   constructor(
@@ -24,7 +27,9 @@ class JobController {
     private runJobActiveUseCase: RunJobActiveUseCase,
     private runAllJobsActiveUseCase: RunAllJobsActiveUseCase,
     private editJobUseCase: EditJobUseCase,
-    private deleteJobUseCase: DeleteJobUseCase
+    private deleteJobUseCase: DeleteJobUseCase,
+    private getAllJobLogByJobIdUseCase: GetAllJobLogByJobIdUseCase,
+    private removeServiceFromJobUseCase: RemoveServiceFromJobUseCase
   ) { }
 
   async createJob(req: Request, resp: Response) {
@@ -116,6 +121,30 @@ class JobController {
     }
   }
 
+  async findJobLogsById(req: Request, resp: Response) {
+    try {
+      // const { user_id, role } = req.user!
+      const { id } = req.params;
+      const params = queryParams()
+      const response = await this.getAllJobLogByJobIdUseCase.execute(id, params);
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
   async addServiceToJob(req: Request, resp: Response) {
     try {
       const { user_id, role } = req.user!;
@@ -132,6 +161,34 @@ class JobController {
       };
 
       resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async removeServicefromJob(req: Request, resp: Response) {
+    try {
+      const { user_id, role } = req.user!;
+      const { job_id, service_id } = req.params
+
+
+      const response = await this.removeServiceFromJobUseCase.execute({ job_id, service_id }, {
+        user_id,
+        role,
+      });
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(204).json(outputSuccessDTO);
     } catch (error) {
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
@@ -173,8 +230,8 @@ class JobController {
       } else {
         // preciso voltar para implementar esse cara
         await this.runJobActiveUseCase.execute(
+          id,
           { user_id, role },
-          params,
           'HTTP'
         );
       }
@@ -184,7 +241,7 @@ class JobController {
         },
       };
 
-      resp.status(200).json(outputSuccessDTO);
+      resp.status(204).json(outputSuccessDTO);
       // esqueci de implementar o rodar
     } catch (error) {
       if (error instanceof Error) {

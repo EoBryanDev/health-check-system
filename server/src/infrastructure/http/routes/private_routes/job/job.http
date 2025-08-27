@@ -37,9 +37,10 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "group_id":"d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
+    "group_id":"bb0150be-409d-4e08-976a-ddbb4dc331e9",
     "group_name": "Search Site",
     "job_name": "Job Monitora 15m",
+    "job_description": "Job que roda todos os services ativos",
     "interval_time": 15
 }
 
@@ -51,9 +52,24 @@ Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json
 
+### deleteServiceFromJob
+# @name deleteServiceFromJob
+
+DELETE {{baseUrl}}/jobs/915ca626-0e3f-4101-93cb-14fe22f7d466/services/2f645a66-a9dd-44d8-83d5-c190b90af47d
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
 ### Run Job Service
 # @name jobRunner
 PUT {{baseUrl}}/jobs/run/d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b?mode=group
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Run Job By Id
+# @name jobRunner
+PUT {{baseUrl}}/jobs/run/96bef3dd-1bad-4a48-b8b6-39df96790590?mode=job
 Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json
@@ -67,17 +83,26 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "group_id": "d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
-    "job_id": "0639d9e8-f0ca-4b9c-a325-4f584194e24f",
-    "job_name": "Job Monitora 20m",
-    "job_description": "Outra modif",
-    "interval_time": 20
+    "group_id": "bb0150be-409d-4e08-976a-ddbb4dc331e9",
+    "job_id": "96bef3dd-1bad-4a48-b8b6-39df96790590",
+    "job_name": "Job Monitora 15m",
+    "interval_time": 900
 }
 
-### Edit job
+### Delete job
 # @name deletejob
 
 DELETE {{baseUrl}}/jobs/0639d9e8-f0ca-4b9c-a325-4f584194e24f
 Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json
+
+### Get Job logs by job id
+# @name jobLogs
+
+GET {{baseUrl}}/jobs/915ca626-0e3f-4101-93cb-14fe22f7d466/job-logs
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+

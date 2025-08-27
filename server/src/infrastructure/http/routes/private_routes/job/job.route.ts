@@ -25,6 +25,10 @@ job.put('/jobs', authMiddleware, (req: Request, res: Response) =>
 
 // job.get('/jobs/:id', (req: Request, res: Response) => jobController.findjob(req, res))
 
+job.get('/jobs/:id/job-logs', authMiddleware, (req: Request, res: Response) =>
+  jobController.findJobLogsById(req, res)
+);
+
 job.delete('/jobs/:id', authMiddleware, (req: Request, res: Response) =>
   jobController.deleteGroup(req, res)
 );
@@ -35,6 +39,10 @@ job.get('/jobs', authMiddleware, (req: Request, res: Response) =>
 
 job.post('/jobs/:job_id/services/:service_id', authMiddleware, (req: Request, res: Response) =>
   jobController.addServiceToJob(req, res)
+);
+
+job.delete('/jobs/:job_id/services/:service_id', authMiddleware, (req: Request, res: Response) =>
+  jobController.removeServicefromJob(req, res)
 );
 
 job.put('/jobs/run/:id', authMiddleware, (req: Request, res: Response) =>
