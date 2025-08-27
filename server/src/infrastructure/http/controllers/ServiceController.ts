@@ -9,12 +9,22 @@ import {
 } from '../../dto/IHTTPOutputDTO';
 import { IQueryParams } from '../../../domain/use_cases/interfaces/IQueryParams';
 import { IServiceInputDTO } from '../../dto/IServiceDTO';
+import { EditServiceUseCase } from '../../../domain/use_cases/EditServiceUseCase';
+import { DeleteServiceUseCase } from '../../../domain/use_cases/DeleteServiceUseCase';
+import { editServiceSchema } from '../zodSchemas/service.put.schema';
+import { GetAllServiceLogByServiceIdUseCase } from '../../../domain/use_cases/GetAllServiceLogByServiceIdUseCase';
+import { queryParams } from '../../../domain/helpers/queryParams';
+import { RunServiceByIdUseCase } from '../../../domain/use_cases/RunServiceByIdUseCase';
 
 class ServiceController {
   constructor(
     private createServiceUseCase: CreateServiceUseCase,
     private getAllServicesUseCase: GetAllServicesUseCase,
-    private getServiceById: GetServiceById
+    private getServiceById: GetServiceById,
+    private editServiceUseCase: EditServiceUseCase,
+    private deleteServiceUseCase: DeleteServiceUseCase,
+    private getAllServiceLogByServiceIdUseCase: GetAllServiceLogByServiceIdUseCase,
+    private runServiceByIdUseCase: RunServiceByIdUseCase
   ) { }
 
   async createService(req: Request, resp: Response) {
@@ -50,7 +60,37 @@ class ServiceController {
     }
   }
 
-  async findAllServices(req: Request, resp: Response) {
+  async editService(req: Request, resp: Response) {
+    try {
+      const { user_id, role } = req.user!;
+      const { body } = req;
+
+      const valid_body = editServiceSchema.parse(body);
+
+
+      const response = await this.editServiceUseCase.execute(valid_body, {
+        user_id,
+        role,
+      });
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async findAllServices(_req: Request, resp: Response) {
     try {
       // const { user_id, role } = req.user!
 
@@ -90,6 +130,76 @@ class ServiceController {
       };
 
       resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async findServiceLogsById(req: Request, resp: Response) {
+    try {
+      // const { user_id, role } = req.user!
+      const { id } = req.params;
+      const params = queryParams()
+      const response = await this.getAllServiceLogByServiceIdUseCase.execute(id, params);
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async runServiceById(req: Request, resp: Response) {
+    try {
+      const { id } = req.params;
+      const { user_id, role } = req.user!
+      const response = await this.runServiceByIdUseCase.execute(id, { user_id, role });
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(204).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async deleteService(req: Request, resp: Response) {
+    try {
+      const { id } = req.params
+
+      await this.deleteServiceUseCase.execute(id)
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: null
+      }
+
+      resp.status(204).json(outputSuccessDTO)
     } catch (error) {
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
