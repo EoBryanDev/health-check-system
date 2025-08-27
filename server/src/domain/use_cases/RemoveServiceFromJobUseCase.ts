@@ -1,7 +1,7 @@
 import { IDataInToken } from '../../infrastructure/dto/IDataInToken';
 import { IRepository } from '../entities/interfaces/IRepository';
 
-class AddServiceToJobUseCase {
+class RemoveServiceFromJobUseCase {
   constructor(private repository: IRepository) { }
 
   async execute(
@@ -9,7 +9,7 @@ class AddServiceToJobUseCase {
     data_in_token: IDataInToken
   ) {
     if (data_in_token.role === 'ANALYST') {
-      throw new Error('');
+      throw new Error("The current user does not have privileges to do this action.");
     }
 
     const existsJob = await this.repository.findJobById(
@@ -26,19 +26,12 @@ class AddServiceToJobUseCase {
       throw new Error('There was not found any service valid');
     }
 
-    const payload = {
-      ...service,
-      last_run: null,
-      job_id: service_payload.job_id
-    }
-
-    const response = await this.repository.createService(
-      payload,
-      data_in_token.user_id
+    await this.repository.deleteServiceFromJob(
+      service_payload.service_id,
+      service_payload.job_id
     );
 
-    return response;
   }
 }
 
-export { AddServiceToJobUseCase };
+export { RemoveServiceFromJobUseCase };

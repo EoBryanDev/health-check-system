@@ -29,6 +29,7 @@ const services = pgTable('services', {
   active: boolean().notNull().default(true),
   created_at: timestamp().defaultNow().notNull(),
   updated_at: timestamp(),
+  updated_by: uuid().references(() => users.user_id),
   created_by: uuid()
     .references(() => users.user_id)
     .notNull(),
@@ -42,7 +43,7 @@ export const servicesRelations = relations(services, ({ one }) => ({
   job: one(jobs, {
     fields: [services.job_id],
     references: [jobs.job_id],
-  }),
+  })
 }));
 
 export { services };

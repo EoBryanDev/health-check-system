@@ -21,6 +21,19 @@ import { GetAllServicesUseCase } from '../../../domain/use_cases/GetAllServicesU
 import { GetServiceById } from '../../../domain/use_cases/GetServiceById';
 import { ServiceController } from '../controllers/ServiceController';
 import { RedisCacheProvider } from '../../../domain/services/RedisCacheService';
+import { GetLoginUserInfo } from '../../../domain/use_cases/GetLoginUserInfo';
+import { EditMonitGroupUseCase } from '../../../domain/use_cases/EditMonitGroupUseCase';
+import { DeleteMonitGroupUseCase } from '../../../domain/use_cases/DeleteMonitGroupUseCase';
+import { AddUserToGroupUseCase } from '../../../domain/use_cases/AddUserToGroupUseCase';
+import { EditJobUseCase } from '../../../domain/use_cases/EditJobUseCase';
+import { DeleteJobUseCase } from '../../../domain/use_cases/DeleteJobUseCase';
+import { EditServiceUseCase } from '../../../domain/use_cases/EditServiceUseCase';
+import { DeleteServiceUseCase } from '../../../domain/use_cases/DeleteServiceUseCase';
+import { GetAllJobLogByJobIdUseCase } from '../../../domain/use_cases/GetAllJobLogByJobIdUseCase';
+import { GetAllServiceLogByServiceIdUseCase } from '../../../domain/use_cases/GetAllServiceLogByServiceIdUseCase';
+import { RemoveServiceFromJobUseCase } from '../../../domain/use_cases/RemoveServiceFromJobUseCase';
+import { RemoveUserFromGroupUseCase } from '../../../domain/use_cases/RemoveUserFromGroupUseCase';
+import { RunServiceByIdUseCase } from '../../../domain/use_cases/RunServiceByIdUseCase';
 
 class RouteFactory {
   private static instance: RouteFactory;
@@ -29,7 +42,7 @@ class RouteFactory {
     private readonly dbConnection: IRepository,
     private readonly hashService: IHashPassword,
     private readonly tokenService: ITokenGenerator
-  ) {}
+  ) { }
 
   public static getInstance(
     dbConnection: IRepository,
@@ -72,14 +85,19 @@ class RouteFactory {
 
   public getLoginControllerInstance(): LoginController {
     return new LoginController(
-      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
+      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService),
+      new GetLoginUserInfo(this.dbConnection)
     );
   }
 
   public getGroupControllerInstance(): GroupController {
     return new GroupController(
       new CreateMonitGroupUseCase(this.dbConnection),
-      new GetAllGroupsUseCase(this.dbConnection)
+      new GetAllGroupsUseCase(this.dbConnection),
+      new EditMonitGroupUseCase(this.dbConnection),
+      new DeleteMonitGroupUseCase(this.dbConnection),
+      new AddUserToGroupUseCase(this.dbConnection),
+      new RemoveUserFromGroupUseCase(this.dbConnection)
     );
   }
 
@@ -91,7 +109,11 @@ class RouteFactory {
       new AddServiceToJobUseCase(this.dbConnection),
       new RunJobActiveByGroupUseCase(this.dbConnection, cache),
       new RunJobActiveUseCase(this.dbConnection, cache),
-      new RunAllJobsActiveUseCase(this.dbConnection, cache)
+      new RunAllJobsActiveUseCase(this.dbConnection, cache),
+      new EditJobUseCase(this.dbConnection),
+      new DeleteJobUseCase(this.dbConnection),
+      new GetAllJobLogByJobIdUseCase(this.dbConnection),
+      new RemoveServiceFromJobUseCase(this.dbConnection)
     );
   }
 
@@ -99,7 +121,11 @@ class RouteFactory {
     return new ServiceController(
       new CreateServiceUseCase(this.dbConnection),
       new GetAllServicesUseCase(this.dbConnection),
-      new GetServiceById(this.dbConnection)
+      new GetServiceById(this.dbConnection),
+      new EditServiceUseCase(this.dbConnection),
+      new DeleteServiceUseCase(this.dbConnection),
+      new GetAllServiceLogByServiceIdUseCase(this.dbConnection),
+      new RunServiceByIdUseCase(this.dbConnection, new RedisCacheProvider())
     );
   }
 }

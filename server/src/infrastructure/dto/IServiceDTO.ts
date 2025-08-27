@@ -1,6 +1,8 @@
 interface IServiceInputDTO {
+  service_id?: string;
   group_id: string;
-  group_name: string;
+  active?: boolean;
+  group_name?: string;
   job_id?: string;
   job_name?: string;
   last_run: Date | null;
@@ -14,6 +16,7 @@ interface IServiceOutputDTO {
   service_id: string;
   group_id: string;
   job_id?: string;
+  active: boolean;
   service_name: string;
   service_description?: string;
   service_url: string;
@@ -21,6 +24,8 @@ interface IServiceOutputDTO {
   rate_limit_tolerance: number;
   created_at: string;
   created_by: string;
+  updated_by?: string;
+  updated_at?: string;
 }
 
 export { IServiceInputDTO, IServiceOutputDTO };

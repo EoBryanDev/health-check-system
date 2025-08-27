@@ -17,9 +17,9 @@ export class JobRunner {
     const factory = RouteFactory.getInstance(db, hash, token);
     const db_instance = factory.getDbConnection();
 
-    let isRunning = false; // flag para evitar sobreposição
+    let isRunning = false;
 
-    cron.schedule("*/1 * * * *", async () => {
+    cron.schedule("*/2 * * * *", async () => {
       if (isRunning) {
         console.warn('JobRunner: execução anterior ainda em andamento, pulando tick.');
         return;

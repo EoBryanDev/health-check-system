@@ -23,13 +23,18 @@ const jobs = pgTable('jobs', {
   active: boolean().notNull().default(true),
   created_at: timestamp().defaultNow().notNull(),
   updated_at: timestamp(),
+  updated_by: uuid().references(() => users.user_id),
   created_by: uuid()
     .references(() => users.user_id)
     .notNull(),
 });
 
-export const jobsRelations = relations(jobs, ({ many }) => ({
+export const jobsRelations = relations(jobs, ({ one, many }) => ({
   services: many(services), // um job tem vários serviços
+  group: one(groups, {
+    fields: [jobs.group_id],
+    references: [groups.group_id],
+  }),
 }));
 
 export { jobs };
