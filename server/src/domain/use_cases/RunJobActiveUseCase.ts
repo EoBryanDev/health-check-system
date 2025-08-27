@@ -1,20 +1,19 @@
 import axios, { AxiosError } from 'axios';
 import { IDataInToken } from '../../infrastructure/dto/IDataInToken';
-import { IJobOutputWServiceAvailableDTO } from '../../infrastructure/dto/IJobDTO';
 import { IRepository } from '../entities/interfaces/IRepository';
-import { IQueryParams } from './interfaces/IQueryParams';
 import { IServiceLogInputDTO } from '../../infrastructure/dto/IServiceLogDTO';
 import { ICacheProvider } from '../services/interfaces/ICacheProvider';
+import { IServiceInputDTO } from '../../infrastructure/dto/IServiceDTO';
 
 class RunJobActiveUseCase {
   constructor(
     private repository: IRepository,
     private cacheRepository: ICacheProvider
-  ) {}
+  ) { }
 
   async execute(
+    job_id: string,
     data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' },
-    params: IQueryParams,
     method: 'HTTP' | 'JOB' = 'JOB'
   ) {
     const isJobRunning =
@@ -24,93 +23,84 @@ class RunJobActiveUseCase {
       throw new Error('There is already a job running.');
     }
 
-    if (data_in_token.role === 'ANALYST') {
-      throw new Error('');
-    }
+    await this.cacheRepository.set<boolean>('is_job_running', true);
 
-    if (data_in_token.role === 'MANAGER') {
-      throw new Error('');
-    }
+    try {
 
-    let lastRun = await this.cacheRepository.get<Date>('last_run');
 
-    let jobRecoveryTime = await this.cacheRepository.get<number>(
-      'recovery_time_in_seconds'
-    );
 
-    const now = new Date();
-    if (!jobRecoveryTime) {
-      const config = await this.repository.findConfigByName(
-        'recovery_time_in_seconds'
-      );
-
-      if (!config) {
-        jobRecoveryTime = 120; /*  min */
+      if (data_in_token.role === 'ANALYST') {
+        throw new Error("You don't have priviledges enough to run a job");
       }
 
-      jobRecoveryTime = Number(config!.value);
-
-      await this.cacheRepository.set<number>(
-        'recovery_time_in_seconds',
-        Number(config!.value),
-        360
-      );
-    }
-
-    if (lastRun) {
-      const future = new Date(
-        new Date(lastRun).getTime() + Number(jobRecoveryTime) * 1000
+      const job_recovery = await this.cacheRepository.get<boolean>(
+        `job_recovery_${job_id}`
       );
 
-      if (now < future) {
-        throw new Error(
-          'There was not time enought to recovery the last verification.'
+      if (job_recovery) {
+        throw new Error("There was not time enought to recovery the last verification.");
+      }
+
+      const job = await this.repository.findJobById(job_id);
+
+      if (!job) {
+        throw new Error('There was not found any job active/registered');
+      }
+
+      if (job.services.length < 1) {
+        throw new Error("There is not service in this job!");
+      }
+
+
+      for (let i = 0; i < job.services.length; i++) {
+        const service = job.services[i];
+
+        const service_recovery = await this.cacheRepository.get<boolean>(
+          `service_recovery_${service.service_id}`
         );
-      }
-    }
 
-    const jobs = await this.repository.findAllJobsWService(params);
-
-    if (!jobs) {
-      throw new Error('There was not found any job active/registered');
-    }
-
-    const elegive_job: IJobOutputWServiceAvailableDTO[] = [];
-
-    jobs.forEach((job) => {
-      const run_interval = job.interval_time;
-      let non_elegible = false;
-
-      for (const service of job.services) {
-        if (service.last_run) {
-          const future = new Date(
-            service.last_run.getTime() + run_interval * 1000
-          );
-
-          if (now < future) {
-            non_elegible = true;
-            break;
-          }
+        if (service_recovery) {
+          throw new Error("There was not time enought to recovery the last verification.");
         }
       }
 
-      if (!non_elegible) {
-        elegive_job.push(job);
+      let cached_config = await this.cacheRepository.get<number>('recovery_time_in_seconds')
+      if (!cached_config) {
+
+        const config = await this.repository.findConfigByName(
+          'recovery_time_in_seconds'
+        );
+
+        if (config?.value) {
+
+          cached_config = config.value ? config.value : 120
+        } else {
+          cached_config = 120
+        }
+
       }
-    });
 
-    await this.cacheRepository.del('last_run');
-    await this.cacheRepository.set<Date>('last_run', new Date());
+      await this.cacheRepository.set<boolean>(
+        `job_recovery_${job_id}`,
+        true,
+        job.interval_time
+      );
 
-    await this.cacheRepository.set<boolean>('is_job_running', true);
+      for (let i = 0; i < job.services.length; i++) {
+        const service = job.services[i];
 
-    for (let i = 0; i < jobs.length; i++) {
+        await this.cacheRepository.set<boolean>(
+          `service_recovery_${service.service_id}`,
+          true,
+          cached_config!
+        );
+      }
+
+
+
       const startJob = new Date().toISOString();
       const startJob_time = Date.now();
-      const job = jobs[i];
 
-      if (!job.services) {
-      }
 
       for (let j = 0; j < job.services.length; j++) {
         const service = job.services[j];
@@ -147,6 +137,15 @@ class RunJobActiveUseCase {
         };
 
         await this.repository.createServiceLog(service_log);
+        const update_service: IServiceInputDTO = {
+          service_id: service.service_id,
+          group_id: service.group_id,
+          last_run: new Date(),
+          service_name: service.service_name,
+          service_url: service.service_url,
+          rate_limit_tolerance: service.rate_limit_tolerance
+        }
+        await this.repository.editService(update_service, data_in_token.user_id)
       }
 
       const endJob_time = Date.now();
@@ -157,9 +156,16 @@ class RunJobActiveUseCase {
         duration: endJob_time - startJob_time,
       };
       await this.repository.createJobLog(job_log);
+
+
+    } catch (error) {
+      console.log(error)
+    } finally {
+      await this.cacheRepository.del('is_job_running');
     }
-    await this.cacheRepository.del('is_job_running');
   }
+
 }
+
 
 export { RunJobActiveUseCase };
