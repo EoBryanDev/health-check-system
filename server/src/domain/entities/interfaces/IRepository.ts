@@ -56,13 +56,17 @@ interface IRepository {
   // inativeGroup(group_id: string): Promise<void>;
   createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup>;
 
+  deleteUserFromGroup(user_id: string, group_id: string): Promise<void>;
+
+
   findAllUserByGroupId(
     group_id: string,
     params: IQueryParams
   ): Promise<IUserGroup[] | null>;
 
   findGroupMemberById(
-    group_user_id: string
+    group_user_id: string,
+    group_id: string
   ): Promise<IGroupMembersOutputDTO | null>;
 
   findGroupMembersByGroupId(
@@ -84,7 +88,7 @@ interface IRepository {
 
   findJobByName(job_name: string): Promise<IJobOutputDTO | null>;
 
-  findJobById(job_id: string): Promise<IJobOutputDTO | null>;
+  findJobById(job_id: string): Promise<IJobOutputWServiceAvailableDTO | null>;
 
   findAllJobs(params: IQueryParams): Promise<IJobOutputWServiceDTO[] | null>;
 
@@ -101,6 +105,12 @@ interface IRepository {
     service: IServiceInputDTO,
     created_by: string
   ): Promise<IServiceOutputDTO>;
+
+  editService(edit_service_payload: IServiceInputDTO, user_id: string): Promise<IServiceOutputDTO>;
+
+  deleteService(service_id: string): Promise<void>;
+
+  deleteServiceFromJob(service_id: string, job_id: string): Promise<void>;
 
   findServiceById(service_id: string): Promise<IServiceOutputDTO | null>;
 
