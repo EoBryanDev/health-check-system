@@ -1096,20 +1096,14 @@ class DrizzlePostgreRepository implements IRepository {
     service_id: string,
     params: IQueryParams
   ): Promise<IServiceLogOutputDTO[] | null> {
-    let logs;
-    if (params.active !== undefined) {
-      logs = await this.db
-        .select()
-        .from(schema.service_logs)
-        .where(eq(schema.service_logs.service_id, service_id));
-    } else {
-      logs = await this.db
-        .select()
-        .from(schema.service_logs)
-        .where(eq(schema.service_logs.service_id, service_id));
-    }
+    const logs = await this.db
+      .select()
+      .from(schema.service_logs)
+      .where(eq(schema.service_logs.service_id, service_id))
+      .limit(params.limit)
+      .offset(params.offset);
 
-    if (!logs) {
+    if (!logs || logs.length === 0) {
       return null;
     }
 
@@ -1143,14 +1137,16 @@ class DrizzlePostgreRepository implements IRepository {
 
   async findAllJobsLogByJobId(
     job_id: string,
-    _params: IQueryParams
+    params: IQueryParams
   ): Promise<IJobLogOutputDTO[] | null> {
     const logs = await this.db
       .select()
       .from(schema.job_logs)
-      .where(eq(schema.job_logs.job_id, job_id));
+      .where(eq(schema.job_logs.job_id, job_id))
+      .limit(params.limit)
+      .offset(params.offset);
 
-    if (!logs) {
+    if (!logs || logs.length === 0) {
       return null;
     }
 
