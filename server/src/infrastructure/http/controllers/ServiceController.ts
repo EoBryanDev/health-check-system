@@ -146,11 +146,16 @@ class ServiceController {
     try {
       // const { user_id, role } = req.user!
       const { id } = req.params;
-      const params = queryParams()
+      const { offset, limit } = req.query;
+
+
+      const params = queryParams({ active: true, offset: parseInt(offset as string, 10), limit: parseInt(limit as string, 10) })
       const response = await this.getAllServiceLogByServiceIdUseCase.execute(id, params);
 
       const outputSuccessDTO: IHTTPSuccessOutputDTO = {
         data: response,
+        offset: params.offset,
+        limit: params.limit,
       };
 
       resp.status(200).json(outputSuccessDTO);
