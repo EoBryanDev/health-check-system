@@ -38,7 +38,15 @@ Content-Type: application/json
 ### Add User to group
 # @name addUserToGroup
 
-POST {{baseUrl}}/groups/d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b/users/a85fba03-de1f-4ca4-a960-fc0e0466d57a
+POST {{baseUrl}}/groups/bb0150be-409d-4e08-976a-ddbb4dc331e9/users/a85fba03-de1f-4ca4-a960-fc0e0466d57a
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Remove User from group
+# @name removeUserFromGroup
+
+DELETE {{baseUrl}}/groups/bb0150be-409d-4e08-976a-ddbb4dc331e9/users/a85fba03-de1f-4ca4-a960-fc0e0466d57a
 Authorization: Bearer {{auth.response.body.data.access_token}}
 Accept: application/json 
 Content-Type: application/json

@@ -23,6 +23,10 @@ group.post('/groups/:group_id/users/:id', authMiddleware, (req: Request, res: Re
   groupController.addUserToGroup(req, res)
 );
 
+group.delete('/groups/:group_id/users/:id', authMiddleware, (req: Request, res: Response) =>
+  groupController.removeUserFromGroup(req, res)
+);
+
 group.put('/groups', authMiddleware, (req: Request, res: Response) =>
   groupController.editGroup(req, res)
 );
