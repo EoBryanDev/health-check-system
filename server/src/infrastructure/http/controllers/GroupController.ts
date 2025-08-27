@@ -11,6 +11,7 @@ import { EditMonitGroupUseCase } from '../../../domain/use_cases/EditMonitGroupU
 import { editGroupSchema } from '../zodSchemas/group.put';
 import { DeleteMonitGroupUseCase } from '../../../domain/use_cases/DeleteMonitGroupUseCase';
 import { AddUserToGroupUseCase } from '../../../domain/use_cases/AddUserToGroupUseCase';
+import { RemoveUserFromGroupUseCase } from '../../../domain/use_cases/RemoveUserFromGroupUseCase';
 
 class GroupController {
   constructor(
@@ -18,7 +19,8 @@ class GroupController {
     private getAllGroupsUseCase: GetAllGroupsUseCase,
     private editMonitGroupUseCase: EditMonitGroupUseCase,
     private deleteMonitGroupUseCase: DeleteMonitGroupUseCase,
-    private addUserToGroupUseCase: AddUserToGroupUseCase
+    private addUserToGroupUseCase: AddUserToGroupUseCase,
+    private removeUserFromGroupUseCase: RemoveUserFromGroupUseCase
   ) { }
 
   async createGroup(req: Request, resp: Response) {
@@ -29,6 +31,14 @@ class GroupController {
       const valid_body = createGroupSchema.parse(body);
 
       const response = await this.createMonitGroupUseCase.execute(valid_body, {
+        user_id,
+        role,
+      });
+
+      await this.addUserToGroupUseCase.execute({
+        group_id: response[0].group_id!,
+        user_code: user_id,
+      }, {
         user_id,
         role,
       });
@@ -69,6 +79,37 @@ class GroupController {
       };
 
       resp.status(200).json(outputSuccessDTO);
+    } catch (error) {
+      if (error instanceof Error) {
+        const resp_error: IHTTPErrorOutputDTO = {
+          error: error.message,
+        };
+        resp.status(400).json(resp_error);
+      } else {
+        resp.status(500).json(error);
+      }
+    }
+  }
+
+  async removeUserFromGroup(req: Request, resp: Response) {
+    try {
+      const { group_id, id } = req.params
+      const { user_id, role } = req.user!;
+
+
+      const response = await this.removeUserFromGroupUseCase.execute({
+        group_id,
+        user_code: id,
+      }, {
+        user_id,
+        role,
+      });
+
+      const outputSuccessDTO: IHTTPSuccessOutputDTO = {
+        data: response,
+      };
+
+      resp.status(204).json(outputSuccessDTO);
     } catch (error) {
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
