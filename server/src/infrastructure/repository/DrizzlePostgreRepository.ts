@@ -630,6 +630,7 @@ class DrizzlePostgreRepository implements IRepository {
           job_name: row.job_name,
           created_at: row.created_at?.toString() ?? '',
           services: [],
+          active: row.active,
           group_id: row.group_id,
           interval_time: row.interval_time,
           created_by: row.created_by,
