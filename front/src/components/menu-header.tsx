@@ -7,17 +7,27 @@ import { MenuSm } from "./sm-menu"
 import { useRouter } from 'next/navigation';
 import { logout } from "@/utils/auth";
 import Link from "next/link"
-
+import { useUserInfoQuery } from "@/hooks/queries/use-user-info"
+import { AvatarImprovisedImg } from "./menu/avatar-img"
 
 export function MenuHeader() {
+  
   const router = useRouter();
-    const handleLogout = async () => {
+
+   const { data, isLoading } = useUserInfoQuery();
+
+  const handleLogout = async () => {
     const success = await logout();
 
     if (success) {
       router.push('/'); 
     }
   };
+
+  if (isLoading) {
+    return <></>;
+  }
+
   return (
     <header className="border-b bg-card">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
@@ -48,12 +58,12 @@ export function MenuHeader() {
 
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="flex items-center space-x-2">
-            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-              <AvatarFallback className="text-xs">AD</AvatarFallback>
+            <Avatar className="h-6 w-6 justify-center items-center bg-secondary text-primary sm:h-8 sm:w-8">
+              <AvatarImprovisedImg data={data} />
             </Avatar>
             <div className="hidden sm:block text-xs">
-              <div className="font-medium">ADMIN</div>
-              <div className="text-muted-foreground">SUPERVISOR</div>
+              <div className="font-medium">{data?.first_name?.toUpperCase()}</div>
+              <div className="text-muted-foreground">{data?.role?.toUpperCase()}</div>
             </div>
           </div>
           <ThemeToggle />

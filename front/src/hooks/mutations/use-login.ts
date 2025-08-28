@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { TSignInSchema } from "@/schemas/sign-in-form.schema";
 import { login } from "@/services/user.service";
+import { ILoginInputDTO } from "@/interfaces/IUser";
 
 export const postUserLoginMutationKey = () => ["user-login"] as const;
 
@@ -9,7 +9,7 @@ export const useLogin = () => {
     const router = useRouter();
     return useMutation({
         mutationKey: postUserLoginMutationKey(),
-        mutationFn: async (data: TSignInSchema) => {
+        mutationFn: async (data: ILoginInputDTO) => {
             // A camada de serviço agora lida com o fetch
             return login(data);
         },

@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
-import { TSignUpSchema } from '@/schemas/sign-up-form.schema';
 import { useRouter } from "next/navigation";
 import { createUser } from '@/services/user.service';
+import { ICreateUserInputDTO } from '@/interfaces/IUser';
 
 export const userRegisterMutationKey = () => ["user-register"] as const;
 
@@ -9,7 +9,7 @@ export function useRegister() {
     const router = useRouter();
     return useMutation({
         mutationKey: userRegisterMutationKey(),
-        mutationFn: async (userData: TSignUpSchema) => {
+        mutationFn: async (userData: ICreateUserInputDTO) => {
             // A camada de serviço agora lida com o fetch
             return createUser(userData);
         },

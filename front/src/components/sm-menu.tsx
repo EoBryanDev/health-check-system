@@ -6,10 +6,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import Link from "next/link";
 import { useState } from "react";
+import { AvatarImprovisedImg } from "./menu/avatar-img";
+import { useUserInfoQuery } from "@/hooks/queries/use-user-info";
 
 
 export function MenuSm() {
+  const { data, isLoading } = useUserInfoQuery();
   const [open, setOpen] = useState(false)
+
+
+  if (isLoading) {
+    return <></>;
+  }
     
   return (
     <div className="flex items-center gap-3">
@@ -28,18 +36,13 @@ export function MenuSm() {
                 <div className="flex justify-between space-y-6">
                   <div className="flex items-center gap-3">
                     <Avatar>
-                      
-                      <AvatarFallback>
-                          AD {/* trocar para info do usuario depois*/}
-                        {/* {session?.user?.name?.split(" ")[0]?.[0]}
-                        {session?.user?.name?.split(" ")[1]?.[0]} */}
-                      </AvatarFallback>
+                       <AvatarImprovisedImg data={data} />
                     </Avatar>
 
                     <div>
-                      <h3 className="font-semibold">ADMIN {/* trocar para info do usuario depois*/}</h3>
+                      <h3 className="font-semibold">{data?.first_name?.toUpperCase()} {" | "} <span> {data?.role.toLowerCase()}</span></h3> 
                       <span className="text-muted-foreground block text-xs">
-                        teste@teste.com.br {/* trocar para info do usuario depois*/}
+                        {data?.email?.toUpperCase()}
                       </span>
                     </div>
                   </div>
