@@ -1,14 +1,15 @@
-export interface IServiceOutputDTO {
+type TClassificafion = 'GOOD' | 'WARNING' | 'ERROR';
+type TMethod = 'HTTP' | 'JOB';
+
+export interface IServiceLogInputDTO {
     service_id: string;
-    group_id: string;
-    job_id?: string;
-    service_name: string;
-    service_description?: string;
-    service_url: string;
-    last_run: string | null;
-    rate_limit_tolerance: number;
-    created_at: string;
-    created_by: string;
+    start_at: string;
+    duration: number;
+    method?: TMethod;
+    status_code: number;
+    requester: string;
+    device: string;
+    classification: TClassificafion;
 }
 
 export interface IServiceLogOutputDTO {
@@ -22,3 +23,4 @@ export interface IServiceLogOutputDTO {
     device: string;
     classification: string;
 }
+

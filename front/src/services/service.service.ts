@@ -1,5 +1,5 @@
 import { IApiResponse } from "@/interfaces/IApiResponse";
-import { IServiceInputDTO, IServiceOutputDTO, IServiceDetailOutputDTO } from "@/interfaces/IService";
+import { IServiceInputDTO, IServiceOutputDTO } from "@/interfaces/IService";
 
 const API_INTERNAL_URL = '/api';
 
@@ -36,7 +36,7 @@ export const getAllServices = async (): Promise<IApiResponse<IServiceOutputDTO[]
     return response.json();
 };
 
-export const getServiceById = async (id: string): Promise<IApiResponse<IServiceDetailOutputDTO>> => {
+export const getServiceById = async (id: string): Promise<IApiResponse<IServiceOutputDTO>> => {
     const response = await fetch(`${API_INTERNAL_URL}/services/${id}`, {
         method: "GET"
     });
@@ -47,4 +47,32 @@ export const getServiceById = async (id: string): Promise<IApiResponse<IServiceD
     }
 
     return response.json();
+};
+
+export const updateService = async (serviceData: IServiceInputDTO): Promise<IApiResponse<IServiceOutputDTO>> => {
+    const response = await fetch(`${API_INTERNAL_URL}/services`, {
+        method: "PUT",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(serviceData),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to update service");
+    }
+
+    return response.json();
+};
+
+export const removeService = async (serviceId: string): Promise<void> => {
+    const response = await fetch(`${API_INTERNAL_URL}/services/${serviceId}`, {
+        method: 'DELETE',
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to remove service.');
+    }
 };

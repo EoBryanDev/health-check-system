@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { IServiceInputDTO } from '@/interfaces/IService';
 import { getAuthTokenServer } from '@/utils/auth-server';
+import { redirect } from 'next/navigation';
 
 const API_BACKEND_URL = process.env.NEXT_PUBLIC_WS;
 
@@ -9,6 +10,7 @@ export async function POST(request: NextRequest) {
         const token = await getAuthTokenServer()
 
         if (!token) {
+
             return NextResponse.json(
                 { message: 'Token de autorização não encontrado' },
                 { status: 401 }
@@ -69,3 +71,4 @@ export async function GET(_request: NextRequest) {
         );
     }
 }
+

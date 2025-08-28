@@ -5,64 +5,70 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Filter, ArrowUpDown } from 'lucide-react'
-import { IServiceOutputDTO } from "@/interfaces/IServiceList"
-import { sortServices } from "@/utils/service-utils" 
+import { ArrowUpDown } from 'lucide-react'
+import { sortServices } from "@/utils/service-utils"
+import { IServiceOutputDTO } from "@/interfaces/IService"
+import { useServicesQuery } from "@/hooks/queries/use-service-data"
+import { Badge } from "@/components/ui/badge"
+import { useGroupsQuery } from "@/hooks/queries/use-group-data"
+import { formatWithTimeZone } from "@/helpers/formatWTimeZone"
+
+const getServiceStatus = (service: IServiceOutputDTO): 'online' | 'error' | 'offline' => {
+  if (!service.last_run) {
+    return 'offline';
+  }
+  return 'online';
+};
+
+const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+        case "online":
+            return "success";
+        case "error":
+        case "offline":
+            return "destructive";
+        default:
+            return "secondary";
+    }
+};
 
 export function ServiceListMain() {
     const router = useRouter()
     const [sortField, setSortField] = useState<keyof IServiceOutputDTO>("last_run")
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
-    const [groupFilter, setGroupFilter] = useState("")
-    const [statusFilter, setStatusFilter] = useState("")
+    const [groupFilter, setGroupFilter] = useState("all")
+    const [statusFilter, setStatusFilter] = useState("all")
 
-    const [services] = useState<(IServiceOutputDTO & { status: "online" | "warning" | "error" | "offline" })[]>([
-        {
-            service_id: "1",
-            service_name: "service-1",
-            service_url: "http://localhost:3000",
-            group_id: "group-id-1",
-            job_id: "job-id-1",
-            last_run: "2024-01-15T10:30:00Z",
-            rate_limit_tolerance: 100,
-            service_description: "First sample service",
-            created_at: "2024-01-01T00:00:00Z",
-            created_by: "admin",
-            status: "online",
-        },
-        {
-            service_id: "2",
-            service_name: "service-2",
-            service_url: "http://localhost:3001",
-            group_id: "group-id-2",
-            job_id: "job-id-2",
-            last_run: "2024-01-15T15:07:51Z",
-            rate_limit_tolerance: 200,
-            service_description: "Second sample service",
-            created_at: "2024-01-01T00:00:00Z",
-            created_by: "admin",
-            status: "warning",
-        },
-        {
-            service_id: "3",
-            service_name: "service-3",
-            service_url: "http://localhost:3002",
-            group_id: "group-id-1",
-            job_id: "job-id-3",
-            last_run: null,
-            rate_limit_tolerance: 50,
-            service_description: "Third sample service",
-            created_at: "2024-01-01T00:00:00Z",
-            created_by: "admin",
-            status: "error",
-        },
-    ])
+    const { data: servicesData, isLoading: isLoadingServices, isError: isErrorServices } = useServicesQuery();
+    const { data: groupsData, isLoading: isLoadingGroups } = useGroupsQuery();
 
-    const statusCounts = useMemo(() => ({
-      success: services.filter((s) => s.status === "online").length,
-      warning: services.filter((s) => s.status === "warning").length,
-      error: services.filter((s) => s.status === "error" || s.status === "offline").length,
-    }), [services]);
+    const servicesWithStatus = useMemo(() => {
+        if (!servicesData) return [];
+        return servicesData.map(service => ({
+            ...service,
+            status: getServiceStatus(service)
+        }));
+    }, [servicesData]);
+
+    const uniqueGroups = useMemo(() => {
+        if (!groupsData) return [];
+        return groupsData.map(group => group.group_id);
+    }, [groupsData]);
+
+    const statusCounts = useMemo(() => {
+        const counts = { online: 0, error: 0, offline: 0 };
+        if (servicesWithStatus) {
+            servicesWithStatus.forEach(service => {
+                const statusKey = service.status as keyof typeof counts;
+                if (statusKey in counts) {
+                    counts[statusKey]++;
+                } else if (service.status === 'error') {
+                     counts.error++;
+                }
+            });
+        }
+        return counts;
+    }, [servicesWithStatus]);
 
     const handleSort = (field: keyof IServiceOutputDTO) => {
         if (sortField === field) {
@@ -74,17 +80,37 @@ export function ServiceListMain() {
     }
 
     const filteredAndSortedServices = useMemo(() => {
-      const filtered = services.filter((service) => {
-        const matchesGroup = groupFilter === "" || groupFilter === "all" || service.group_id === groupFilter;
-        const matchesStatus = statusFilter === "" || statusFilter === "all" || service.status === statusFilter;
-        return matchesGroup && matchesStatus;
-      });
-      return sortServices(filtered, sortField, sortDirection);
-    }, [services, groupFilter, statusFilter, sortField, sortDirection]);
+        if (!servicesWithStatus) return [];
+        
+        const filtered = servicesWithStatus.filter((service) => {
+            const matchesGroup = groupFilter === "all" || service.group_id === groupFilter;
+            const matchesStatus = statusFilter === "all" || service.status === statusFilter;
+            return matchesGroup && matchesStatus;
+        });
+        
+        return sortServices(filtered, sortField, sortDirection);
+    }, [servicesWithStatus, groupFilter, statusFilter, sortField, sortDirection]);
 
     const handleServiceClick = (serviceId: string) => {
         router.push(`/v1/services/${serviceId}`)
     }
+    
+    if (isLoadingServices || isLoadingGroups) {
+      return (
+          <div className="flex justify-center items-center h-64">
+              <p>Loading services...</p>
+          </div>
+      );
+    }
+    
+    if (isErrorServices) {
+      return (
+          <div className="flex justify-center items-center h-64 text-red-500">
+              <p>Error fetching services. Please try again later.</p>
+          </div>
+      );
+    }
+
 
     return (
         <div className="space-y-6">
@@ -110,8 +136,9 @@ export function ServiceListMain() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All groups</SelectItem>
-                                        <SelectItem value="group-id-1">Group 1</SelectItem>
-                                        <SelectItem value="group-id-2">Group 2</SelectItem>
+                                        {uniqueGroups.map(group => (
+                                            <SelectItem key={group} value={group}>{group}</SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -124,39 +151,23 @@ export function ServiceListMain() {
                                     <SelectContent>
                                         <SelectItem value="all">All status</SelectItem>
                                         <SelectItem value="online">Online</SelectItem>
-                                        <SelectItem value="warning">Warning</SelectItem>
                                         <SelectItem value="error">Error</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <Button size="sm" className="w-full">
-                                <Filter className="w-3 h-3 mr-1" />
-                                Filter
-                            </Button>
                         </CardContent>
                     </Card>
                 </div>
 
-                <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Card>
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs font-medium text-green-600 mb-1">Success</p>
-                                    <p className="text-2xl font-bold">{statusCounts.success}</p>
+                                    <p className="text-xs font-medium text-green-600 mb-1">Online</p>
+                                    <p className="text-2xl font-bold">{statusCounts.online}</p>
                                 </div>
                                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-xs font-medium text-yellow-600 mb-1">Warning</p>
-                                    <p className="text-2xl font-bold">{statusCounts.warning}</p>
-                                </div>
-                                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                             </div>
                         </CardContent>
                     </Card>
@@ -184,14 +195,11 @@ export function ServiceListMain() {
                             <thead className="border-b bg-muted/50">
                                 <tr>
                                     {[
-                                        { key: "service_id", label: "Service ID" },
                                         { key: "service_name", label: "Name" },
                                         { key: "service_url", label: "URL" },
-                                        { key: "group_id", label: "Group ID" },
-                                        { key: "job_id", label: "Job ID" },
+                                        { key: "group_id", label: "Group" },
                                         { key: "last_run", label: "Last Run" },
-                                        { key: "rate_limit_tolerance", label: "Rate Limit" },
-                                        { key: "service_description", label: "Description" },
+                                        { key: "rate_limit_tolerance", label: "Rate Limit" }
                                     ].map((column) => (
                                         <th
                                             key={column.key}
@@ -200,11 +208,16 @@ export function ServiceListMain() {
                                         >
                                             <div className="flex items-center gap-1">
                                                 {column.label}
-                                                <ArrowUpDown className="w-3 h-3" />
+                                                {sortField === column.key && (
+                                                    <ArrowUpDown
+                                                        className={`w-3 h-3 transition-transform ${
+                                                            sortDirection === "asc" ? "rotate-180" : ""
+                                                        }`}
+                                                    />
+                                                )}
                                             </div>
                                         </th>
                                     ))}
-                                    {/* <th className="text-left p-3 font-medium text-sm">Status</th> */}
                                 </tr>
                             </thead>
                             <tbody>
@@ -214,19 +227,14 @@ export function ServiceListMain() {
                                         className="border-b hover:bg-muted/50 cursor-pointer transition-colors"
                                         onClick={() => handleServiceClick(service.service_id)}
                                     >
-                                        <td className="p-3 text-sm">{service.service_id}</td>
                                         <td className="p-3 text-sm font-medium">{service.service_name}</td>
-                                        <td className="p-3 text-sm text-blue-600">{service.service_url}</td>
+                                        <td className="p-3 text-sm text-blue-600 truncate max-w-xs">{service.service_url}</td>
                                         <td className="p-3 text-sm">{service.group_id}</td>
-                                        <td className="p-3 text-sm">{service.job_id || "N/A"}</td>
                                         <td className="p-3 text-sm">
-                                            {service.last_run ? new Date(service.last_run).toLocaleString() : "Never"}
+                                            {service.last_run ? formatWithTimeZone(service.last_run) : "Never"}
                                         </td>
                                         <td className="p-3 text-sm">{service.rate_limit_tolerance}</td>
-                                        <td className="p-3 text-sm">{service.service_description || "N/A"}</td>
-                                        {/* <td className="p-3">
-                                            <Badge variant={getStatusBadgeVariant(service.status)}>{service.status}</Badge>
-                                        </td> */}
+                                     
                                     </tr>
                                 ))}
                             </tbody>

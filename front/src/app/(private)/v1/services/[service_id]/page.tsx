@@ -11,20 +11,30 @@ import { sortLogs } from "@/utils/sort-logs";
 import { ServiceInfo } from "@/components/service-detail/service-info";
 import { ServiceLogsTable } from "@/components/service-detail/service-log-table";
 import { useServiceDetailQuery } from "@/hooks/queries/service-logs-data";
+import { useServicesQuery } from "@/hooks/queries/use-service-data";
 
 export default function ServiceListDetailMain() {
     const params = useParams();
     const router = useRouter();
     const serviceId = params!.service_id as string;
 
-    // Removido o 'refetch' das queries
-    const { data: service, isLoading: serviceLoading } = useServiceDetailQuery(serviceId);
-    const { data: logs, isLoading: logsLoading } = useServiceLogsQuery(serviceId);
+    const [page, setPage] = useState(0);
+    const limit = 10;
+    const offset = page * limit;
+
+    const { data: service, isLoading: serviceLoading } = useServicesQuery();
+    
+    const { data: logsResponse, isLoading: logsLoading } = useServiceLogsQuery(serviceId, offset, limit);
 
     const [sortField, setSortField] = useState<keyof IServiceLogOutputDTO>("start_at");
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
     const isLoading = serviceLoading || logsLoading;
+
+    const service_filtered = service?.find(serv => serv.service_id === serviceId)
+    
+
+    const logs = logsResponse?.data || [];
 
     const handleSort = (field: keyof IServiceLogOutputDTO) => {
         if (sortField === field) {
@@ -36,16 +46,14 @@ export default function ServiceListDetailMain() {
     };
 
     const sortedLogs = useMemo(() => {
-        return sortLogs(logs || [], sortField, sortDirection);
+        return sortLogs(logs, sortField, sortDirection);
     }, [logs, sortField, sortDirection]);
-
-    // A função 'handleRefresh' foi removida, pois não é mais necessária
 
     if (isLoading) {
         return <LoadingState />;
     }
 
-    if (!service) {
+    if (!service_filtered) {
         return (
             <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
                 <h1 className="text-2xl font-bold mb-4">Service Not Found</h1>
@@ -66,15 +74,31 @@ export default function ServiceListDetailMain() {
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold">{service.service_name}</h1>
+                        <h1 className="text-2xl md:text-3xl font-bold">{service_filtered.service_name}</h1>
                         <p className="text-muted-foreground mt-1">Service details and execution logs</p>
                     </div>
                 </div>
             </div>
 
-            <ServiceInfo service={service} />
+            <ServiceInfo service={service_filtered} />
 
             <ServiceLogsTable logs={sortedLogs} sortField={sortField} onSort={handleSort} />
+
+            <div className="flex justify-between items-center mt-4">
+                <Button 
+                    onClick={() => setPage(prev => Math.max(prev - 1, 0))} 
+                    disabled={page === 0 || logsLoading}
+                >
+                    Anterior
+                </Button>
+                <span className="text-sm text-muted-foreground">Página {page + 1}</span>
+                <Button 
+                    onClick={() => setPage(prev => prev + 1)}
+                    disabled={logsLoading || (logsResponse?.data?.length ?? 0) < limit}
+                >
+                    Próximo
+                </Button>
+            </div>
         </main>
     );
 }

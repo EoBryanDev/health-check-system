@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-// import { useEditServiceMutation } from "@/hooks/mutations/use-edit-service";
-// import { useRemoveServiceMutation } from "@/hooks/mutations/use-remove-service";
 import { useServicesQuery } from "@/hooks/queries/use-service-data";
 import { Pencil, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,12 +17,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useState } from "react";
-// import { IService } from "@/interfaces/IConfigurations";
 import { TServiceSchema } from "@/schemas/configurations.schema";
 import { useCreateService } from "@/hooks/mutations/use-add-service";
+import { IServiceInputDTO,  } from "@/interfaces/IService";
+import { useEditServiceMutation } from "@/hooks/mutations/use-edit-service";
+import { useRemoveServiceMutation } from "@/hooks/mutations/use-remove-service";
 
 export function ServicesForm() {
-  // const [editingItem, setEditingItem] = useState<IService | null>(null);
+  const [editingItem, setEditingItem] = useState<TServiceSchema | null>(null);
 
   const {
     register,
@@ -38,60 +38,69 @@ export function ServicesForm() {
       last_run: null,
       rate_limit_tolerance: 0,
       job_id: "",
-      job_name: ""
     }
   });
 
   const { data: servicesData } = useServicesQuery();
   const addServiceMutation = useCreateService();
-  // const editServiceMutation = useEditServiceMutation();
-  // const removeServiceMutation = useRemoveServiceMutation();
+  const editServiceMutation = useEditServiceMutation();
+  const removeServiceMutation = useRemoveServiceMutation();
 
-  const isMutating = addServiceMutation.isPending 
-  //|| editServiceMutation.isPending || removeServiceMutation.isPending;
+  const isMutating = addServiceMutation.isPending || editServiceMutation.isPending  || removeServiceMutation.isPending;
 
-  // const onEditClick = (item: IService) => {
-  //   setEditingItem(item);
-  //   setValue("group_id", item.group_id || "");
-  //   setValue("group_name", item.group || "");
-  //   setValue("job_id", item.job_id || "");
-  //   setValue("job_name", item.job_name || "");
-  //   setValue("service_name", item.name);
-  //   setValue("service_description", item.description || "");
-  //   setValue("service_url", item.url);
-  //   setValue("rate_limit_tolerance", item.rate_limit_tolerance);
-  //   setValue("last_run", item.last_run);
-  // };
+  const onEditClick = (item: TServiceSchema) => {
 
-  // const onRemoveClick = (id: string) => {
-  //   removeServiceMutation.mutate(id);
-  // };
+    
+    setEditingItem(item);
+    setValue("group_id", item.group_id || "");
+    setValue("job_id", item.job_id || "");
+    setValue("service_name", item.service_name);
+    setValue("service_description", item.service_description || "");
+    setValue("service_url", item.service_url);
+    setValue("active", item.active || undefined)
+    setValue("rate_limit_tolerance", item.rate_limit_tolerance);
+    setValue("last_run", item.last_run);
+  };
 
-  // const onCancelClick = () => {
-  //   setEditingItem(null);
-  //   reset();
-  // };
+  const onRemoveClick = (id: string) => {
+    removeServiceMutation.mutate(id);
+  };
 
-  const onSubmit = (data: TServiceSchema) => {
-    // if (editingItem) {
-    //   editServiceMutation.mutate({ 
-    //     ...editingItem,
-    //     group_id: data.group_id,
-    //     group: data.group_name,
-    //     job_id: data.job_id,
-    //     job_name: data.job_name,
-    //     name: data.service_name,
-    //     description: data.service_description,
-    //     url: data.service_url,
-    //     rate_limit_tolerance: data.rate_limit_tolerance,
-    //     last_run: data.last_run,
-    //   });
-    //   setEditingItem(null);
-    // } else {
-      addServiceMutation.mutate(data);
-    // }
+  const onCancelClick = () => {
+    setEditingItem(null);
     reset();
   };
+  
+
+  const onSubmit = (data: TServiceSchema) => {
+  if (editingItem) {
+    const submited: IServiceInputDTO = {
+      service_id: editingItem.service_id, 
+      group_id: data.group_id ? data.group_id : '',
+      job_id: data.job_id,
+      service_name: data.service_name,
+      service_url: data.service_url,
+      rate_limit_tolerance: data.rate_limit_tolerance,
+      last_run: data.last_run ? new Date(data.last_run) : null,
+      service_description: data.service_description
+    };
+
+    editServiceMutation.mutate(submited);
+    setEditingItem(null);
+  } else {
+    const submited: IServiceInputDTO = {
+      group_id: data.group_id ? data.group_id : '',
+      job_id: data.job_id,
+      service_name: data.service_name,
+      service_url: data.service_url,
+      rate_limit_tolerance: data.rate_limit_tolerance,
+      last_run: data.last_run ? new Date(data.last_run) : null,
+      service_description: data.service_description
+    };
+    addServiceMutation.mutate(submited);
+  }
+  reset();
+};
 
   return (
     <Card>
@@ -114,12 +123,6 @@ export function ServicesForm() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="group_name">Group Name</Label>
-              <Input id="group_name" placeholder="Ex: Backend Team" {...register("group_name")} />
-              {errors.group_name && <p className="text-red-500 text-sm">{errors.group_name.message}</p>}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="group_id">Group ID</Label>
               <Input id="group_id" placeholder="Ex: abc-123" {...register("group_id")} />
               {errors.group_id && <p className="text-red-500 text-sm">{errors.group_id.message}</p>}
@@ -129,12 +132,6 @@ export function ServicesForm() {
               <Label htmlFor="job_id">Job ID (Optional)</Label>
               <Input id="job_id" placeholder="Ex: xyz-456" {...register("job_id")} />
               {errors.job_id && <p className="text-red-500 text-sm">{errors.job_id.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="job_name">Job Name (Optional)</Label>
-              <Input id="job_name" placeholder="Ex: Daily Report" {...register("job_name")} />
-              {errors.job_name && <p className="text-red-500 text-sm">{errors.job_name.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -149,7 +146,7 @@ export function ServicesForm() {
             </div>
           </div>
 
-          {/* <div className="flex justify-center gap-2">
+          <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
                 editingItem ? "Save Changes" : "Add Service"
@@ -160,7 +157,7 @@ export function ServicesForm() {
                 Cancel
               </Button>
             )}
-          </div> */}
+          </div>
         </form>
         
         <div className="border rounded-lg overflow-hidden">
@@ -169,7 +166,11 @@ export function ServicesForm() {
               <thead className="bg-muted">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Group ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Job ID</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Desc</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">URL</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Rate Tolerance (ss)</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th>
                 </tr>
               </thead>
@@ -177,8 +178,12 @@ export function ServicesForm() {
                 {servicesData?.map((item) => (
                   <tr key={item.service_id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 text-sm">{item.service_name}</td>
+                    <td className="px-4 py-3 text-sm">{item.group_id}</td>
+                    <td className="px-4 py-3 text-sm">{item.job_id}</td>
+                    <td className="px-4 py-3 text-sm">{item.service_description}</td>
                     <td className="px-4 py-3 text-sm">{item.service_url}</td>
-                    {/* <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">{item.rate_limit_tolerance}</td>
+                    <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -187,7 +192,19 @@ export function ServicesForm() {
                                 size="sm"
                                 variant="outline"
                                 className="w-8 h-8 p-0 bg-transparent"
-                                onClick={() => onEditClick(item)}
+                                onClick={() => {
+                                  const itn: TServiceSchema = {
+                                    service_id: item.service_id,
+                                    job_id: item.job_id,
+                                    group_id: item.group_id,
+                                    last_run: item.last_run ? new Date(item.last_run): null,
+                                    service_description: item.service_description,
+                                    service_name: item.service_name,
+                                    service_url: item.service_url,
+                                    rate_limit_tolerance: item.rate_limit_tolerance
+                                  }
+                                  onEditClick(itn)
+                                }}
                                 disabled={isMutating}
                               >
                                 <Pencil className="w-4 h-4" />
@@ -208,7 +225,7 @@ export function ServicesForm() {
                           <Minus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td> */}
+                    </td>
                   </tr>
                 ))}
               </tbody>

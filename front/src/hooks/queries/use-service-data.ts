@@ -10,7 +10,7 @@ export const useServicesQuery = () => {
         queryKey: getServicesQueryKey(),
         queryFn: async () => {
             const response: IApiResponse<IServiceOutputDTO[] | null> = await getAllServices();
-            if (response.success) {
+            if (response) {
                 return response.data;
             }
             return null;
