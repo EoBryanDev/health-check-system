@@ -20,10 +20,15 @@ import {
 } from "@/components/ui/tooltip";
 import { useState } from "react";
 import { useCreateJob } from "@/hooks/mutations/use-add-job";
+import { formatWithTimeZone } from "@/helpers/formatWTimeZone";
+import { Badge } from "./ui/badge";
+import { useEditJobMutation } from "@/hooks/mutations/use-edit-job";
+import { IJobInputDTO, IJobOutputDTO } from "@/interfaces/IJob";
+import { useRemoveJobMutation } from "@/hooks/mutations/use-remove-job";
 // import { IJob } from "@/interfaces/IConfigurations";
 
 export function JobsForm() {
-  // const [editingItem, setEditingItem] = useState<IJob | null>(null);
+  const [editingItem, setEditingItem] = useState<TJobSchema | null>(null);
 
   const {
     register,
@@ -37,42 +42,68 @@ export function JobsForm() {
 
   const { data: jobsData } = useJobsQuery();
 
-  console.log(jobsData);
   
   const createJobMutation = useCreateJob();
-  // const editJobMutation = useEditJobMutation();
-  // const removeJobMutation = useRemoveJobMutation();
+  const editJobMutation = useEditJobMutation();
+  const removeJobMutation = useRemoveJobMutation();
 
-  const isMutating = createJobMutation.isPending 
-  //|| editJobMutation.isPending || removeJobMutation.isPending;
+  const isMutating = createJobMutation.isPending || editJobMutation.isPending || removeJobMutation.isPending;
 
-  // const onEditClick = (item: IJob) => {
-  //   setEditingItem(item);
-  //   setValue("group_id", item.group_id);
-  //   setValue("group_name", item.group);
-  //   setValue("job_name", item.name);
-  //   setValue("job_description", item.description || "");
-  //   setValue("interval_time", item.interval_time);
-  // };
+  const onEditClick = (item: TJobSchema) => {
+    const formValues:   IJobInputDTO= {
+      job_id: item.job_id  ,
+      group_id: item.group_id,
+      group_name: item.group_name || '',
+      job_name: item.job_name,
+      job_description: item.job_description || "",
+      interval_time: item.interval_time,
+      active: item.active ? item.active : undefined
+    };
+    
+    setEditingItem(item); 
+    setValue("job_name", formValues.job_name);
+    setValue("group_id", formValues.group_id);
+    setValue("group_name", formValues.group_name ??'');
+    setValue("job_description", formValues.job_description);
+    setValue("interval_time", formValues.interval_time);
+  };
 
-  // const onRemoveClick = (id: string) => {
-  //   removeJobMutation.mutate(id);
-  // };
+  const onRemoveClick = (id: string) => {
+    removeJobMutation.mutate(id);
+  };
 
-  // const onCancelClick = () => {
-  //   setEditingItem(null);
-  //   reset();
-  // };
-
-  const onSubmit = (data: TJobSchema) => {
-    // if (editingItem) {
-    //   editJobMutation.mutate({ ...editingItem, name: data.job_name, group: data.group_name, interval_time: data.interval_time, description: data.job_description, group_id: data.group_id });
-    //   setEditingItem(null);
-    // } else {
-      createJobMutation.mutate(data);
-    // }
+  const onCancelClick = () => {
+    setEditingItem(null);
     reset();
   };
+const onSubmit = (data: TJobSchema) => {
+  if (editingItem) {
+    const editedJob: IJobInputDTO = {
+      job_id: editingItem.job_id, 
+      job_name: data.job_name,
+      group_id: data.group_id,
+      group_name: data.group_name ?? '',
+      job_description: data.job_description,
+      interval_time: data.interval_time,
+      active: editingItem.active 
+    };
+    editJobMutation.mutate(editedJob);
+  } else {
+    const newJob: IJobInputDTO = {
+      job_name: data.job_name,
+      group_id: data.group_id,
+      group_name: data.group_name ? data.group_name : '',
+      job_description: data.job_description,
+      interval_time: data.interval_time,
+    };
+
+
+    createJobMutation.mutate(newJob);
+  }
+  reset();
+  setEditingItem(null);
+};
+  
 
   return (
     <Card>
@@ -86,12 +117,6 @@ export function JobsForm() {
               <Label htmlFor="job_name">Job Name</Label>
               <Input id="job_name" placeholder="Ex: Daily Report" {...register("job_name")} />
               {errors.job_name && <p className="text-red-500 text-sm">{errors.job_name.message}</p>}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="group_name">Group Name</Label>
-              <Input id="group_name" placeholder="Ex: Backend Team" {...register("group_name")} />
-              {errors.group_name && <p className="text-red-500 text-sm">{errors.group_name.message}</p>}
             </div>
             
             <div className="space-y-2">
@@ -115,15 +140,15 @@ export function JobsForm() {
           <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
-                // editingItem ? "Save Changes" : 
+                editingItem ? "Save Changes" : 
                 "Add Job"
               )}
             </Button>
-            {/* {editingItem && (
+            {editingItem && (
               <Button type="button" onClick={onCancelClick} variant="outline" className="w-full sm:w-auto">
                 Cancel
               </Button>
-            )} */}
+            )}
           </div>
         </form>
         
@@ -134,15 +159,21 @@ export function JobsForm() {
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Group</th>
-                  {/* <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th> */}
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Desc</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Active</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Created At</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {jobsData?.map((item) => (
                   <tr key={item.job_id} className="hover:bg-muted/50">
                     <td className="px-4 py-3 text-sm">{item.job_name}</td>
-                    <td className="px-4 py-3 text-sm">{item.group_name}</td>
-                    {/* <td className="px-4 py-3">
+                    <td className="px-4 py-3 text-sm">{item.group_id}</td>
+                    <td className="px-4 py-3 text-sm">{item.job_description}</td>
+                    <td className="px-4 py-3 text-sm">{<Badge className={`${item.active ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>{item.active ? 'active' : 'inative'} </Badge>} </td>
+                    <td className="px-4 py-3 text-sm">{formatWithTimeZone(item.created_at)}</td>
+                    <td className="px-4 py-3">
                       <div className="flex gap-2">
                         <TooltipProvider>
                           <Tooltip>
@@ -172,7 +203,7 @@ export function JobsForm() {
                           <Minus className="w-4 h-4" />
                         </Button>
                       </div>
-                    </td> */}
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
-import { IJobInputDTO } from '@/interfaces/IConfigurations';
 import { getAuthTokenServer } from '@/utils/auth-server';
+import { IJobInputDTO } from '@/interfaces/IJob';
 
 const API_BACKEND_URL = process.env.NEXT_PUBLIC_WS;
 
@@ -52,5 +52,71 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         return NextResponse.json({ success: false, error: 'Failed to create job.' }, { status: 500 });
+    }
+}
+
+export async function PUT(
+    request: NextRequest
+) {
+    try {
+        const token = await getAuthTokenServer();
+
+        if (!token) {
+            return NextResponse.json(
+                { message: 'Token de autorização não encontrado' },
+                { status: 401 }
+            );
+        }
+        const jobData: IJobInputDTO = await request.json();
+
+        const response = await fetch(`${API_BACKEND_URL}/jobs`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(jobData),
+        });
+
+        const data = await response.json();
+        return NextResponse.json(data, { status: response.status });
+
+    } catch (error) {
+        return NextResponse.json(
+            { success: false, error: 'Failed to update job.' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(
+    _request: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const token = await getAuthTokenServer();
+
+        if (!token) {
+            return NextResponse.json({ message: 'Token de autorização não encontrado' }, { status: 401 });
+        }
+
+        const { id } = params;
+
+        const response = await fetch(`${API_BACKEND_URL}/jobs/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            return NextResponse.json(error, { status: response.status });
+        }
+
+        return new NextResponse(null, { status: 204 });
+
+    } catch (error) {
+        return NextResponse.json({ success: false, error: 'Failed to delete job.' }, { status: 500 });
     }
 }

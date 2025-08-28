@@ -11,7 +11,7 @@ export const useJobsQuery = () => {
         queryFn: async () => {
             const response = await getAllJobs();
 
-            if (response.success && response.data) {
+            if (response) {
                 return response.data;
             }
 

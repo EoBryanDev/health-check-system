@@ -1,7 +1,7 @@
 // src/services/job.service.ts
 import { IApiResponse } from "@/interfaces/IApiResponse";
-import { IJobInputDTO, IJobOutputDTO, IServiceInputDTO } from "@/interfaces/IConfigurations";
-import { IRunJobInputDTO } from "@/interfaces/IJob";
+import { IJobInputDTO, IJobOutputDTO, IRunJobInputDTO } from "@/interfaces/IJob";
+import { IServiceInputDTO } from "@/interfaces/IService";
 
 const API_INTERNAL_URL = '/api';
 
@@ -70,4 +70,32 @@ export const runJob = async (data: IRunJobInputDTO): Promise<IApiResponse<any>> 
   }
 
   return response.json();
+};
+
+export const updateJob = async (item: IJobInputDTO): Promise<IApiResponse<IJobOutputDTO>> => {
+  const response = await fetch(`${API_INTERNAL_URL}/jobs`, {
+    method: "PUT",
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(item),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to create jobs");
+  }
+
+  return response.json();
+};
+
+export const removeJob = async (jobId: string): Promise<void> => {
+  const response = await fetch(`${API_INTERNAL_URL}/jobs/${jobId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to remove job.');
+  }
 };
