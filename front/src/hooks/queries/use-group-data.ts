@@ -11,7 +11,7 @@ export const useGroupsQuery = () => {
         queryFn: async () => {
             const response: IApiResponse<IGroupOutputDTO[] | null> = await getAllGroups();
 
-            if (response.success && response.data) {
+            if (response) {
                 return response.data;
             }
 
