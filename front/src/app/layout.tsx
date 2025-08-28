@@ -1,4 +1,3 @@
-// front/src/app/layout.tsx
 import ReactQueryProvider from "@/providers/react-query";
 import "./globals.css";
 import type { Metadata } from "next";
@@ -17,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HCS - Home",
+  title: "HC - Home",
   description: "Home page to access system",
 };
 
@@ -38,7 +37,6 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {/* O Suspense foi removido daqui */}
             {children}
           </ThemeProvider>
         </ReactQueryProvider>

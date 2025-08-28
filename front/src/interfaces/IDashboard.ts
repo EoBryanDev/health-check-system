@@ -1,23 +1,21 @@
-export interface DashboardStats {
+export interface IDashboardStats {
     systemUptime: string
     averageServiceInterval: string
     servicesCreated: number
     servicesActiveCreated: number
 }
 
-export interface JobStats {
-    activeJobs: number
-    successJobs: number
-    warningJobs: number
-    errorJobs: number
+export interface IJobStats {
+    activeJobs: number;
 }
 
-export interface GroupStats {
+
+export interface IGroupStats {
     totalGroups: number
     totalUsers: number
 }
 
-export interface VolumetryData {
+export interface IVolumetryData {
     timestamp: string
     volume: number
 }

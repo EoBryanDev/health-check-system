@@ -44,7 +44,6 @@ export default function ConfigMain() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar - Desktop */}
         <div className="hidden lg:block w-64">
           <Card>
             <CardHeader>
@@ -67,7 +66,6 @@ export default function ConfigMain() {
           </Card>
         </div>
 
-        {/* Mobile Section Selector */}
         <div className="lg:hidden">
           <div className="flex gap-2 mb-4 overflow-x-auto">
             {["Groups", "Jobs", "Services"].map((section) => (
@@ -84,7 +82,6 @@ export default function ConfigMain() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1">
           {renderForm()}
         </div>

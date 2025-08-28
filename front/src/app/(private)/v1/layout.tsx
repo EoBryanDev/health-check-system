@@ -1,22 +1,23 @@
 
 import { Footer } from "@/components/footer";
-import { MenuHeader } from "@/components/menu-header";
+import { Menu } from "@/components/menu";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "HCS - Dashboard",
+  title: "HC - Dashboard",
   description: "Main page to follow up yout services",
 };
 
-export default function RootLayout({
+export default function LoggedLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-       <MenuHeader />
-            {children}
+       <Menu />
+          {children}
         <Footer />
     </div>
   );
