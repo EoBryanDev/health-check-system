@@ -1,10 +1,10 @@
 // src/services/group.service.ts
 import { IApiResponse } from "@/interfaces/IApiResponse";
-import { IGroupInputDTO, IGroupOutputDTO } from "@/interfaces/IGroup";
+import { IGroupInputDTO, IGroupOutputUsersDTO } from "@/interfaces/IGroup";
 
 const API_INTERNAL_URL = '/api';
 
-export const addGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGroupOutputDTO>> => {
+export const addGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGroupOutputUsersDTO>> => {
     const response = await fetch(`${API_INTERNAL_URL}/groups`, {
         method: "POST",
         headers: {
@@ -21,7 +21,10 @@ export const addGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGrou
     return response.json();
 };
 
-export const updateGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGroupOutputDTO>> => {
+export const updateGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IGroupOutputUsersDTO>> => {
+
+    console.log('here');
+
     const response = await fetch(`${API_INTERNAL_URL}/groups`, {
         method: "PUT",
         headers: {
@@ -38,7 +41,7 @@ export const updateGroup = async (item: IGroupInputDTO): Promise<IApiResponse<IG
     return response.json();
 };
 
-export const getAllGroups = async (): Promise<IApiResponse<IGroupOutputDTO[] | null>> => {
+export const getAllGroups = async (): Promise<IApiResponse<IGroupOutputUsersDTO[] | null>> => {
     const response = await fetch(`${API_INTERNAL_URL}/groups`, {
         method: "GET"
     });

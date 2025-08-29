@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { IApiResponse } from "@/interfaces/IApiResponse";
-import { IUser } from "@/interfaces/IUser";
 import { getUserInfo } from "@/services/user.service";
+import { IUser } from "@/interfaces/IUser";
 
 export const getUserInfoQueryKey = () => ["user_info"] as const;
 

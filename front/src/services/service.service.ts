@@ -50,6 +50,7 @@ export const getServiceById = async (id: string): Promise<IApiResponse<IServiceO
 };
 
 export const updateService = async (serviceData: IServiceInputDTO): Promise<IApiResponse<IServiceOutputDTO>> => {
+
     const response = await fetch(`${API_INTERNAL_URL}/services`, {
         method: "PUT",
         headers: {
@@ -74,5 +75,26 @@ export const removeService = async (serviceId: string): Promise<void> => {
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to remove service.');
+    }
+};
+
+export const runJob = async (service_id: string): Promise<IApiResponse<void>> => {
+    try {
+        const response = await fetch(`${API_INTERNAL_URL}/services/${service_id}/run-service`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || "Failed to run job.");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error running job:", error);
+        throw error;
     }
 };

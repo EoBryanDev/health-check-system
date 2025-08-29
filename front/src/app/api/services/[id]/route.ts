@@ -1,4 +1,3 @@
-// app/api/services/[id]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
 import { getAuthTokenServer } from '@/utils/auth-server';
 
@@ -16,7 +15,6 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
             );
         }
 
-        // Faz a requisição para o backend real com o token
         const response = await fetch(`${API_BACKEND_URL}/services/${id}`, {
             method: 'GET',
             headers: {

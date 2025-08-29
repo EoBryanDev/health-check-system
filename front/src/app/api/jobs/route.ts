@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ message: 'Token de autorização não encontrado' }, { status: 401 });
         }
 
+
         const jobData: IJobInputDTO = await request.json();
         const response = await fetch(`${API_BACKEND_URL}/jobs`, {
             method: 'POST',
@@ -49,6 +50,8 @@ export async function POST(request: NextRequest) {
         });
 
         const data = await response.json();
+        console.log('here');
+
         return NextResponse.json(data, { status: response.status });
     } catch (error) {
         return NextResponse.json({ success: false, error: 'Failed to create job.' }, { status: 500 });

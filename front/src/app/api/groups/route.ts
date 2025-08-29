@@ -59,10 +59,10 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest
 ) {
   try {
+
     const token = await getAuthTokenServer();
 
     if (!token) {
@@ -72,10 +72,9 @@ export async function PUT(
       );
     }
 
-    const { id } = params;
     const groupData: IGroupInputDTO = await request.json();
 
-    const response = await fetch(`${API_BACKEND_URL}/groups/${id}`, {
+    const response = await fetch(`${API_BACKEND_URL}/groups`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -88,6 +87,7 @@ export async function PUT(
     return NextResponse.json(data, { status: response.status });
 
   } catch (error) {
+
     return NextResponse.json(
       { success: false, error: 'Failed to update group.' },
       { status: 500 }
