@@ -3,15 +3,15 @@ import { IJobInputDTO } from '../../infrastructure/dto/IJobDTO';
 import { IRepository } from '../entities/interfaces/IRepository';
 
 class CreateJobUseCase {
-  constructor(private repository: IRepository) {}
+  constructor(private repository: IRepository) { }
 
   async execute(job_payload: IJobInputDTO, data_in_token: IDataInToken) {
     if (data_in_token.role === 'ANALYST') {
       throw new Error('');
     }
 
-    const groups = await this.repository.findGroupByName(
-      job_payload.group_name
+    const groups = await this.repository.findGroupById(
+      job_payload.group_id
     );
 
     if (!groups) {

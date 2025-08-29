@@ -51,7 +51,7 @@ interface IRepository {
 
   findGroupById(group_id: string): Promise<IGroupOutputDTO | null>;
 
-  findAllGroups(params: IQueryParams): Promise<IGroupOutputDTO[] | null>;
+  findAllGroups(params: IQueryParams): Promise<IGroupOutputUsersDTO[] | null>;
 
   // inativeGroup(group_id: string): Promise<void>;
   createUserGroup(user_group_payload: IUserGroupInput): Promise<IUserGroup>;

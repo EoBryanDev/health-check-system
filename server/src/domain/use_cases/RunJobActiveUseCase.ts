@@ -159,7 +159,9 @@ class RunJobActiveUseCase {
 
 
     } catch (error) {
-      console.log(error)
+      const err = error instanceof Error && error.message
+      throw new Error(err ? err : 'Error');
+
     } finally {
       await this.cacheRepository.del('is_job_running');
     }
