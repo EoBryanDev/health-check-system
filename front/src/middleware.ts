@@ -25,21 +25,35 @@ export async function middleware(request: NextRequest) {
     });
 
     let isValidToken = false;
+    let tokenExpired = false;
+
     if (authToken) {
         try {
             await jwtVerify(authToken.value, JWT_SECRET);
             isValidToken = true;
-        } catch (error) {
+        } catch (error: any) {
             console.error('Token validation failed:', error);
+
+
+            if (error.code === 'ERR_JWT_EXPIRED' || error.message?.includes('expired')) {
+                tokenExpired = true;
+                console.log('Token expired, will redirect to login');
+            }
         }
     }
-
-    if (!isValidToken && !publicRoute) {
+    if ((!isValidToken || tokenExpired) && !publicRoute) {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE;
-        return NextResponse.redirect(redirectUrl);
-    }
 
+        const response = NextResponse.redirect(redirectUrl);
+
+        if (authToken) {
+            response.cookies.delete(TOKEN_KEY);
+            console.log('Removed expired/invalid token from cookies');
+        }
+
+        return response;
+    }
     if (isValidToken && publicRoute && publicRoute.whenAuthenticated === 'redirect') {
         const redirectUrl = request.nextUrl.clone();
         redirectUrl.pathname = REDIRECT_WHEN_AUTHENTICATED_ROUTE;
