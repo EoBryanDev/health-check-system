@@ -1,6 +1,6 @@
 import { IVolumetryData } from "@/interfaces/IDashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
-import { VolumetryChart } from "../volumetry-chart"
+import { VolumetryChart } from "./volumetry-chart"
 
 interface IDashboardVolumetryInfo {
   volumetryData: IVolumetryData[] | undefined,

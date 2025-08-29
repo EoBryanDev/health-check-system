@@ -2,13 +2,14 @@ import type { IDashboardStats, IJobStats, IGroupStats, IVolumetryData } from "@/
 import { getAllJobs } from "@/services/job.service";
 import { getAllGroups } from "@/services/group.service";
 import { getAllServices } from "@/services/service.service";
-import { IJobOutputDTO, IGroupOutputDTO } from "@/interfaces/IConfigurations";
 import { IServiceOutputDTO } from "@/interfaces/IService";
 import { IApiResponse } from "@/interfaces/IApiResponse";
 import { IServiceLogOutputDTO } from "@/interfaces/IServiceList";
 import { getAllServicesLogs } from "@/services/service_log.service";
 import { processVolumetryData } from "@/helpers/processVolumetryData";
 import { calculateAverageInterval } from "@/helpers/calculateAverageInterval";
+import { IJobOutputDTO } from "@/interfaces/IJob";
+import { IGroupOutputUsersDTO } from "@/interfaces/IGroup";
 
 async function fetchDashboardData(): Promise<{
     stats: IDashboardStats;
@@ -20,7 +21,7 @@ async function fetchDashboardData(): Promise<{
 
         const [jobsResponse, groupsResponse, servicesResponse, serviceLogsResponse]: [
             IApiResponse<IJobOutputDTO[] | null>,
-            IApiResponse<IGroupOutputDTO[] | null>,
+            IApiResponse<IGroupOutputUsersDTO[] | null>,
             IApiResponse<IServiceOutputDTO[] | null>,
             IApiResponse<IServiceLogOutputDTO[] | null>
         ] = await Promise.all([
@@ -59,7 +60,7 @@ async function fetchDashboardData(): Promise<{
 
         return {
             stats: {
-                systemUptime: "99.8%",
+                systemUptime: '',
                 averageServiceInterval,
                 servicesCreated,
                 servicesActiveCreated,

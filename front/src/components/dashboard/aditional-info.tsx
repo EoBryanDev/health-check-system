@@ -13,7 +13,7 @@ const DashboardAdditionalInfo = ({dashboardStats}: IDashboardAdditionalInfoProps
       </CardHeader>
       <CardContent className="space-y-2 sm:space-y-3">
         <div className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:gap-3">
-          <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
+          {/* <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
             <div className="text-xs text-muted-foreground">SYSTEM UPTIME</div>
             <div className="text-sm sm:text-lg font-semibold text-green-500">
               {dashboardStats?.systemUptime ?? "N/A"}
@@ -24,7 +24,7 @@ const DashboardAdditionalInfo = ({dashboardStats}: IDashboardAdditionalInfoProps
             <div className="text-sm sm:text-lg font-semibold">
               {dashboardStats?.averageServiceInterval ?? "N/A"}
             </div>
-          </div>
+          </div> */}
           <div className="border rounded-lg p-2 sm:p-3 text-center hover:bg-muted/20 transition-colors">
             <div className="text-xs text-muted-foreground">SERVICES CREATED</div>
             <div className="text-sm sm:text-lg font-semibold">

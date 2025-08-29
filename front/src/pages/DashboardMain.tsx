@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Users, UserCheck, Activity } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useDashboardData } from "@/hooks/queries/use-dashboard-data"; 
-import { VolumetryChart } from "@/components/volumetry-chart";
+import { VolumetryChart } from "@/components/dashboard/volumetry-chart";
 import { DashboardFetchError } from "@/components/dashboard/fetch-error";
 import { DashboardFetchLoading } from "@/components/dashboard/fetching-data";
 import { DashboardGroupInfo } from "@/components/dashboard/group-info";
