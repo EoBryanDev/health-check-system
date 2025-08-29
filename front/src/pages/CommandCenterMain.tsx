@@ -20,7 +20,6 @@ export function CommandCenterMain() {
         </p>
       </div>
 
-      {/* Navigation Tabs */}
       <div className="flex flex-col sm:flex-row gap-2 mb-6">
         <Button
           variant={activeTab === "group" ? "default" : "outline"}
@@ -45,7 +44,6 @@ export function CommandCenterMain() {
         </Button>
       </div>
 
-      {/* Content Sections */}
       {activeTab === "group" && <GroupCCSection />}
       {activeTab === "job" && <JobCCSection />}
       {activeTab === "service" && <ServiceCCSection />}
