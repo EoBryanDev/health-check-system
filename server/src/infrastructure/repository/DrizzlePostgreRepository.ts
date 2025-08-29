@@ -650,6 +650,7 @@ class DrizzlePostgreRepository implements IRepository {
           job_name: row.job_name,
           created_at: row.created_at?.toString() ?? '',
           services: [],
+          active: row.active,
           group_id: row.group_id,
           interval_time: row.interval_time,
           created_by: row.created_by,
@@ -756,7 +757,7 @@ class DrizzlePostgreRepository implements IRepository {
   }
 
   async findAllJobsWService(
-    _params: IQueryParams
+    params: IQueryParams
   ): Promise<IJobOutputWServiceAvailableDTO[] | null> {
     // 1. Buscar todos os jobs (sem filtro de group_id)
     const jobs = await this.db
@@ -771,7 +772,8 @@ class DrizzlePostgreRepository implements IRepository {
         updated_at: schema.jobs.updated_at,
         created_by: schema.jobs.created_by,
       })
-      .from(schema.jobs);
+      .from(schema.jobs)
+      .where(eq(schema.jobs.active, params.active!));
 
     if (!jobs || jobs.length === 0) {
       return [];
@@ -1073,7 +1075,7 @@ class DrizzlePostgreRepository implements IRepository {
         active: service.active,
         last_run: service.last_run ? service.last_run.toString() : '',
         rate_limit_tolerance: service.rate_limit_tolerance,
-        created_at: service.created_at.toString(),
+        created_at: service.created_at.toString() ?? '',
         created_by: service.created_by,
       };
     });

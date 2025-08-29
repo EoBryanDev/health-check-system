@@ -65,8 +65,8 @@ class ServiceController {
       const { user_id, role } = req.user!;
       const { body } = req;
 
-      const date = typeof body.last_run === 'string' ? new Date(body.last_run) : typeof body.last_run === 'undefined' ? null : body.last_run
-      const valid_body = editServiceSchema.parse({ ...body, job_id: body.job_id === '' ? undefined : body.job_id, last_run: date });
+      const valid_body = editServiceSchema.parse(body);
+
 
       const response = await this.editServiceUseCase.execute(valid_body, {
         user_id,
@@ -79,8 +79,6 @@ class ServiceController {
 
       resp.status(200).json(outputSuccessDTO);
     } catch (error) {
-      console.log(error);
-
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
           error: error.message,

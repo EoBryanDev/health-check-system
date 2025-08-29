@@ -1,17 +1,27 @@
-import axios, { AxiosError } from "axios";
-import { IDataInToken } from "../../infrastructure/dto/IDataInToken";
-import { IRepository } from "../entities/interfaces/IRepository";
-import { IQueryParams } from "./interfaces/IQueryParams";
-import { ICacheProvider } from "../services/interfaces/ICacheProvider";
-import { IServiceLogInputDTO } from "../../infrastructure/dto/IServiceLogDTO";
-import { IServiceInputDTO } from "../../infrastructure/dto/IServiceDTO";
+import axios, { AxiosError } from 'axios';
+import { IDataInToken } from '../../infrastructure/dto/IDataInToken';
+import { IRepository } from '../entities/interfaces/IRepository';
+import { IServiceLogInputDTO } from '../../infrastructure/dto/IServiceLogDTO';
+import { ICacheProvider } from '../services/interfaces/ICacheProvider';
+import { IServiceInputDTO } from '../../infrastructure/dto/IServiceDTO';
 
 class RunJobActiveUseCase {
-  constructor(private repository: IRepository, private cacheRepository: ICacheProvider) { }
+  constructor(
+    private repository: IRepository,
+    private cacheRepository: ICacheProvider
+  ) { }
 
-  async execute(job_id: string, data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' }, _params: IQueryParams, method: 'HTTP' | 'JOB' = 'JOB') {
+  async execute(
+    job_id: string,
+    data_in_token: IDataInToken = { user_id: '-1', role: 'NODE_CRON' },
+    method: 'HTTP' | 'JOB' = 'JOB'
+  ) {
+    const isJobRunning =
+      await this.cacheRepository.get<boolean>('is_job_running');
 
-
+    if (isJobRunning) {
+      throw new Error('There is already a job running.');
+    }
 
     await this.cacheRepository.set<boolean>('is_job_running', true);
 
@@ -149,8 +159,8 @@ class RunJobActiveUseCase {
 
 
     } catch (error) {
-      const err = error instanceof Error && error.message
-      throw new Error(err ? err : 'Error');
+      console.log(error)
+
 
     } finally {
       await this.cacheRepository.del('is_job_running');
@@ -159,4 +169,5 @@ class RunJobActiveUseCase {
 
 }
 
-export { RunJobActiveUseCase }
+
+export { RunJobActiveUseCase };

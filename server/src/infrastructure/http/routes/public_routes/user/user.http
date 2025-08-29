@@ -1,0 +1,17 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+
+# Create User
+# @name createUser
+POST {{ baseUrl }}/users
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "first_name": "Bryan",
+    "last_name": "Andrade",
+    "email": "teste@teste.com.br",
+    "password": "123"
+}
+###

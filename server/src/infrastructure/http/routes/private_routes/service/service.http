@@ -1,0 +1,102 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+@userEmail = teste@teste.com.br
+
+### Login
+# @name auth
+POST {{ baseUrl }}/login
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "email": "{{userEmail}}",
+    "password": "123"
+}
+
+### Group
+# @name group 
+GET {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Jobs
+# @name job 
+GET {{baseUrl}}/jobs
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Service
+# @name service 
+GET {{baseUrl}}/services
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### CreateService
+# @name createService
+
+POST {{baseUrl}}/services
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_id":"bb0150be-409d-4e08-976a-ddbb4dc331e9",
+    "job_id": "96bef3dd-1bad-4a48-b8b6-39df96790590",
+    "group_name": "Search Site",
+    "service_name": "Google",
+    "service_url": "https://www.google.com.br",
+    "rate_limit_tolerance": 1000
+}
+
+### Service By id
+# @name service_byid 
+GET {{baseUrl}}/services/6c3c7dee-18aa-454a-8785-3e9ef965f11f
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+
+### Service Log by Service Id
+# @name service_logs_by_service_id 
+GET {{baseUrl}}/services/6c3c7dee-18aa-454a-8785-3e9ef965f11f/service-logs?offset=0&limit=2
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### edit service
+# @name editService
+PUT {{baseUrl}}/services
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "service_id": "d1eda6c2-01aa-48f7-83bb-54110c7dde0d",
+    "job_id": "96bef3dd-1bad-4a48-b8b6-39df96790590",
+    "group_id":"bb0150be-409d-4e08-976a-ddbb4dc331e9",
+    "group_name": "Search Site",
+    "service_name": "Google Searching",
+    "service_url": "https://www.google.com.brr",
+    "rate_limit_tolerance": 1200
+}
+
+### Edit service
+# @name deleteService
+
+DELETE {{baseUrl}}/services/0639d9e8-f0ca-4b9c-a325-4f584194e24f
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Run Service By iD
+# @name serviceRunner
+PUT {{baseUrl}}/services/6c3c7dee-18aa-454a-8785-3e9ef965f11f/run-service
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+
