@@ -30,8 +30,8 @@ Accept: application/json
 Content-Type: application/json
 
 {
-    "group_name":"Search Site",
-    "group_description": "",
+    "group_name":"Social Media",
+    "group_description": "Group used to check social media status",
     "users_email": "{{userEmail}}"
 }
 
