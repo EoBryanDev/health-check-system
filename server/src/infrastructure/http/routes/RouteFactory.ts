@@ -85,7 +85,8 @@ class RouteFactory {
 
   public getLoginControllerInstance(): LoginController {
     return new LoginController(
-      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService)
+      new LoginUseCase(this.dbConnection, this.hashService, this.tokenService),
+      new GetLoginUserInfo(this.dbConnection)
     );
   }
 

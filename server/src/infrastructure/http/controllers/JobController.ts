@@ -218,7 +218,6 @@ class JobController {
         limit: 0,
       };
 
-      // talvez pudesse fazer um simple factory
       if (mode === 'all') {
         await this.runAllJobsActiveUseCase.execute(
           { user_id, role },
@@ -233,7 +232,6 @@ class JobController {
           'HTTP'
         );
       } else {
-        // preciso voltar para implementar esse cara
         await this.runJobActiveUseCase.execute(
           id,
           { user_id, role },
@@ -247,7 +245,6 @@ class JobController {
       };
 
       resp.status(204).json(outputSuccessDTO);
-      // esqueci de implementar o rodar
     } catch (error) {
       if (error instanceof Error) {
         const resp_error: IHTTPErrorOutputDTO = {
