@@ -160,9 +160,9 @@ class GroupController {
 
       const params: IQueryParams = {
         active: undefined,
-        offset: 0, // non implemented yey
-        limit: 0, // non implemented yey
-      }; // in the future i'll get it from req.params
+        offset: 0,
+        limit: 0,
+      };
 
       const response = await this.getAllGroupsUseCase.execute(
         { user_id, role },

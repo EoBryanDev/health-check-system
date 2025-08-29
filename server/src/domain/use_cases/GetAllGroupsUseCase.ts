@@ -1,5 +1,5 @@
 import { IDataInToken } from '../../infrastructure/dto/IDataInToken';
-import { IGroupOutputDTO } from '../../infrastructure/dto/IGroupDTO';
+import { IGroupOutputUsersDTO } from '../../infrastructure/dto/IGroupDTO';
 import { IRepository } from '../entities/interfaces/IRepository';
 import { IQueryParams } from './interfaces/IQueryParams';
 
@@ -9,7 +9,7 @@ class GetAllGroupsUseCase {
   public async execute(
     data_in_token: IDataInToken,
     params: IQueryParams
-  ): Promise<IGroupOutputDTO[]> {
+  ): Promise<IGroupOutputUsersDTO[]> {
     if (data_in_token.role === 'ANALYST') {
       throw new Error(
         'The current user does not have privileges to do this action!'

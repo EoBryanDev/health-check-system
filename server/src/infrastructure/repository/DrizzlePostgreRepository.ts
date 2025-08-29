@@ -1,6 +1,6 @@
 import { db } from '../db/connection';
 import { schema } from '../db/schema/index';
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, desc, eq, inArray } from 'drizzle-orm';
 import { IRepository } from '../../domain/entities/interfaces/IRepository';
 import {
   IGroupInputDTO,
@@ -159,11 +159,22 @@ class DrizzlePostgreRepository implements IRepository {
     return created_resp;
   }
 
-  async findAllGroups(params: IQueryParams): Promise<IGroupOutputDTO[] | null> {
+  async findAllGroups(params: IQueryParams): Promise<IGroupOutputUsersDTO[] | null> {
     const groups = await this.db
       .select()
       .from(schema.groups)
       .where(eq(schema.groups.active, params.active ?? schema.groups.active));
+
+    const groups_user = await this.db
+      .select()
+      .from(schema.group_users)
+
+    const users = await this.db
+      .select()
+      .from(schema.users)
+
+
+
 
     // } else {
     //   console.log('2');
@@ -179,6 +190,15 @@ class DrizzlePostgreRepository implements IRepository {
       group_name: g.group_name,
       group_description: g.group_description ?? '',
       active: g.active,
+      user: groups_user.filter(group => group.group_id === g.group_id).map(group_user => {
+        const user_on_group = users.find(user => user.user_id === group_user.user_id)
+
+        return {
+          user_name: `${user_on_group?.first_name} ${user_on_group?.last_name}`,
+          email: user_on_group?.email ?? '',
+          active: user_on_group?.active ?? null,
+        } as IGroupMembersOutputDTO
+      }),
       created_at: g.created_at?.toString() ?? '',
       updated_at: g.updated_at?.toString() ?? '',
       created_by: g.created_by,
@@ -630,6 +650,7 @@ class DrizzlePostgreRepository implements IRepository {
           job_name: row.job_name,
           created_at: row.created_at?.toString() ?? '',
           services: [],
+          active: row.active,
           group_id: row.group_id,
           interval_time: row.interval_time,
           created_by: row.created_by,
@@ -1047,8 +1068,10 @@ class DrizzlePostgreRepository implements IRepository {
       return {
         service_id: service.service_id,
         group_id: service.group_id,
+        job_id: service.job_id ?? undefined,
         service_name: service.service_name,
         service_url: service.service_url,
+        service_description: service.service_description ?? '',
         active: service.active,
         last_run: service.last_run ? service.last_run.toString() : '',
         rate_limit_tolerance: service.rate_limit_tolerance,
@@ -1102,7 +1125,8 @@ class DrizzlePostgreRepository implements IRepository {
       .from(schema.service_logs)
       .where(eq(schema.service_logs.service_id, service_id))
       .limit(params.limit)
-      .offset(params.offset);
+      .offset(params.offset)
+      .orderBy(desc(schema.service_logs.start_at));
 
     if (!logs || logs.length === 0) {
       return null;
