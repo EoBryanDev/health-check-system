@@ -3,33 +3,20 @@
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowUpDown } from 'lucide-react'
 import { sortServices } from "@/utils/service-utils"
 import { IServiceOutputDTO } from "@/interfaces/IService"
 import { useServicesQuery } from "@/hooks/queries/use-service-data"
-import { Badge } from "@/components/ui/badge"
 import { useGroupsQuery } from "@/hooks/queries/use-group-data"
 import { formatWithTimeZone } from "@/helpers/formatWTimeZone"
 
-const getServiceStatus = (service: IServiceOutputDTO): 'online' | 'error' | 'offline' => {
-  if (!service.last_run) {
-    return 'offline';
-  }
-  return 'online';
-};
-
-const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-        case "online":
-            return "success";
-        case "error":
-        case "offline":
-            return "destructive";
-        default:
-            return "secondary";
-    }
+const getServiceStatus = (service: IServiceOutputDTO): 'online' | 'inactive'  => {
+   if (service.active) {
+    
+       return 'online';
+   } 
+   return 'inactive'
 };
 
 export function ServiceListMain() {
@@ -52,18 +39,18 @@ export function ServiceListMain() {
 
     const uniqueGroups = useMemo(() => {
         if (!groupsData) return [];
-        return groupsData.map(group => group.group_id);
+        return groupsData.map(group => ({group_name: group.group_name, group_id: group.group_id}));
     }, [groupsData]);
 
     const statusCounts = useMemo(() => {
-        const counts = { online: 0, error: 0, offline: 0 };
+        const counts = { online: 0, inactive: 0, offline: 0 };
         if (servicesWithStatus) {
             servicesWithStatus.forEach(service => {
                 const statusKey = service.status as keyof typeof counts;
                 if (statusKey in counts) {
                     counts[statusKey]++;
-                } else if (service.status === 'error') {
-                     counts.error++;
+                } else if (service.status === 'inactive') {
+                     counts.inactive++;
                 }
             });
         }
@@ -137,7 +124,7 @@ export function ServiceListMain() {
                                     <SelectContent>
                                         <SelectItem value="all">All groups</SelectItem>
                                         {uniqueGroups.map(group => (
-                                            <SelectItem key={group} value={group}>{group}</SelectItem>
+                                            <SelectItem key={group.group_id} value={group.group_id}>{group.group_name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -151,7 +138,7 @@ export function ServiceListMain() {
                                     <SelectContent>
                                         <SelectItem value="all">All status</SelectItem>
                                         <SelectItem value="online">Online</SelectItem>
-                                        <SelectItem value="error">Error</SelectItem>
+                                        <SelectItem value="inactive">Inactive</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -175,8 +162,8 @@ export function ServiceListMain() {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-xs font-medium text-red-600 mb-1">Error</p>
-                                    <p className="text-2xl font-bold">{statusCounts.error}</p>
+                                    <p className="text-xs font-medium text-red-600 mb-1">Inactive</p>
+                                    <p className="text-2xl font-bold">{statusCounts.inactive}</p>
                                 </div>
                                 <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                             </div>
