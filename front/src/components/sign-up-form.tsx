@@ -1,0 +1,168 @@
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useRegister } from "@/hooks/mutations/use-register";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { signUpSchema, TSignUpSchema } from "@/schemas/sign-up-form.schema";
+import { Separator } from "@radix-ui/react-separator";
+
+
+
+const SignUpForm = () => {
+  const createUser = useRegister()
+  const sign_up_form = useForm<TSignUpSchema>({
+    resolver: zodResolver(signUpSchema),
+    defaultValues: {
+      first_name: "",
+      last_name: "",
+      email: "",
+      cellnumber: "",
+      password: "",
+      passwordConfirmation: "",
+    },
+  });
+
+  const onSubmit = async (values: TSignUpSchema) => {
+    try {
+      await createUser.mutateAsync(values);
+      toast.success("User created successfully! In 3 seconds you'll be redirected to your Dashboard");
+      
+      sign_up_form.reset
+    } catch (error) {
+      toast.error("There was not possible create a new user");
+      console.error(error);
+    }
+    
+  };
+  return (
+    <>
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle className="text-4xl">Health Check System</CardTitle>
+          <CardDescription>Here you will be always know what is your system health. 
+            Made to intuitive manage, you can run checking, see the historic and control your system future. </CardDescription>
+        </CardHeader>
+        <div className="py-3 px-25">
+          <Separator />
+        </div>
+        <CardHeader>
+          <CardTitle>Sign up</CardTitle>
+          <CardDescription>Create an account to continue</CardDescription>
+        </CardHeader>
+        <Form {...sign_up_form}>
+          <form
+            onSubmit={sign_up_form.handleSubmit(onSubmit)}
+            className="space-y-8"
+          >
+            <CardContent className="grid gap-6">
+              <FormField
+                control={sign_up_form.control}
+                name="first_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Type your first name" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="last_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Type your last name" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Type your e-mail" {...field} />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Type your password"
+                        {...field}
+                        type="password"
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={sign_up_form.control}
+                name="passwordConfirmation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm your password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Type your password again"
+                        {...field}
+                        type="password"
+                      />
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full">
+                Entrar
+              </Button>
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
+    </>
+  );
+};
+
+export default SignUpForm;
