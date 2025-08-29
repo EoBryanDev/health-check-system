@@ -22,6 +22,7 @@ import { useEditGroupMutation } from "@/hooks/mutations/use-edit-group";
 import { useState } from "react";
 import { IGroupInputDTO } from "@/interfaces/IGroup";
 import { useRemoveGroupMutation } from "@/hooks/mutations/use-remove-group";
+import { useUserInfoQuery } from "@/hooks/queries/use-user-info";
 
 
 export function GroupsForm() {
@@ -38,23 +39,28 @@ export function GroupsForm() {
   });
 
   const { data: groupsData } = useGroupsQuery();
+  const { data: userData } = useUserInfoQuery();
   const createGroupMutation = useCreateGroup();
+
   const editGroupMutation = useEditGroupMutation();
   const removeGroupMutation = useRemoveGroupMutation();
+
+  
 
   const isMutating = createGroupMutation.isPending || editGroupMutation.isPending  || removeGroupMutation.isPending;
 
   const onEditClick = (item: IGroupInputDTO) => {
-
+    
     const edit: TGroupSchema = {
-    group_name: item.group_name,
-    users_email: item.users_email,
-    group_description: item.group_description || '',
+      group_id: item.group_id ?? '',
+      group_name: item.group_name,
+      users_email: userData!.email,
+      group_description: item.group_description || '',
   };
   
   setEditingItem(edit);
   setValue("group_name", item.group_name);
-  setValue("users_email", item.users_email);
+  setValue("users_email", userData!.email);
   setValue("group_description", item.group_description || "");
   };
 
@@ -68,11 +74,12 @@ export function GroupsForm() {
   };
 
   const onSubmit = (data: TGroupSchema) => {
+    const userCreated = userData!.email
     if (editingItem) {
-      editGroupMutation.mutate({ ...editingItem, group_name: data.group_name, users_email: data.users_email, group_description: data.group_description });
+      editGroupMutation.mutate({ ...editingItem, group_name: data.group_name, users_email: userCreated, group_description: data.group_description });
       setEditingItem(null);
     } else {
-      createGroupMutation.mutate(data);
+      createGroupMutation.mutate({ ...data, users_email: userCreated});
     }
     reset();
   };
@@ -87,15 +94,10 @@ export function GroupsForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="group_name">Group Name</Label>
-              <Input id="group_name" placeholder="Ex: Backend Team" {...register("group_name")} />
+              <Input id="group_name" placeholder="Ex: Portals Sites" {...register("group_name")} />
               {errors.group_name && <p className="text-red-500 text-sm">{errors.group_name.message}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="users_email">User Email</Label>
-              <Input id="users_email" placeholder="Ex: user@example.com" {...register("users_email")} />
-              {errors.users_email && <p className="text-red-500 text-sm">{errors.users_email.message}</p>}
-            </div>
 
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="group_description">Description (Optional)</Label>

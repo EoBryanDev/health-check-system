@@ -60,7 +60,7 @@ export interface IJobLogOutputDTO {
     duration: number;
 }
 
-export type TJobExecutionMode = 'all' | 'group';
+export type TJobExecutionMode = 'all' | 'group' | 'single';
 
 export interface IRunJobInputDTO {
     id?: string;

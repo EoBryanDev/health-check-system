@@ -11,10 +11,17 @@ export interface IAddUserToGroup {
   user_code: string
 }
 
-export interface IGroupOutputDTO {
+export interface IGroupMembersOutputDTO {
+  user_name: string;
+  email: string;
+  active: boolean;
+}
+
+export interface IGroupOutputUsersDTO {
   group_id: string;
   group_name: string;
   group_description: string;
+  user: Array<IGroupMembersOutputDTO> | null
   active: boolean;
   created_at: string;
   updated_at: string;

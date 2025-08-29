@@ -2,16 +2,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { IApiResponse } from "@/interfaces/IApiResponse";
 import { updateGroup } from "@/services/group.service";
 import { getGroupsQueryKey } from "../queries/use-group-data";
-import { IGroupInputDTO, IGroupOutputDTO } from "@/interfaces/IGroup";
+import { IGroupInputDTO, IGroupOutputUsersDTO } from "@/interfaces/IGroup";
 
 export const useEditGroupMutation = () => {
   const queryClient = useQueryClient();
-  return useMutation<IGroupOutputDTO, Error, IGroupInputDTO>({
+  return useMutation<IGroupOutputUsersDTO, Error, IGroupInputDTO>({
     mutationFn: async (groupData: IGroupInputDTO) => {
       if (!groupData.group_id) {
         throw new Error("Group ID is required for editing.");
       }
-      const response: IApiResponse<IGroupOutputDTO> = await updateGroup(groupData);
+
+      const response: IApiResponse<IGroupOutputUsersDTO> = await updateGroup(groupData);
       return response.data;
     },
     onSuccess: () => {

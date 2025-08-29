@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-// import { useEditJobMutation } from "@/hooks/mutations/use-edit-job";
-// import { useRemoveJobMutation } from "@/hooks/mutations/use-remove-job";
 import { useJobsQuery } from "@/hooks/queries/use-job-data";
+import { useGroupsQuery } from "@/hooks/queries/use-group-data";
 import { Pencil, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -23,9 +22,18 @@ import { useCreateJob } from "@/hooks/mutations/use-add-job";
 import { formatWithTimeZone } from "@/helpers/formatWTimeZone";
 import { Badge } from "./ui/badge";
 import { useEditJobMutation } from "@/hooks/mutations/use-edit-job";
-import { IJobInputDTO, IJobOutputDTO } from "@/interfaces/IJob";
+import { IJobInputDTO } from "@/interfaces/IJob";
 import { useRemoveJobMutation } from "@/hooks/mutations/use-remove-job";
-// import { IJob } from "@/interfaces/IConfigurations";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 
 export function JobsForm() {
   const [editingItem, setEditingItem] = useState<TJobSchema | null>(null);
@@ -41,31 +49,21 @@ export function JobsForm() {
   });
 
   const { data: jobsData } = useJobsQuery();
+  const { data: groupsData } = useGroupsQuery();
 
-  
   const createJobMutation = useCreateJob();
   const editJobMutation = useEditJobMutation();
   const removeJobMutation = useRemoveJobMutation();
 
   const isMutating = createJobMutation.isPending || editJobMutation.isPending || removeJobMutation.isPending;
+  
 
   const onEditClick = (item: TJobSchema) => {
-    const formValues:   IJobInputDTO= {
-      job_id: item.job_id  ,
-      group_id: item.group_id,
-      group_name: item.group_name || '',
-      job_name: item.job_name,
-      job_description: item.job_description || "",
-      interval_time: item.interval_time,
-      active: item.active ? item.active : undefined
-    };
-    
-    setEditingItem(item); 
-    setValue("job_name", formValues.job_name);
-    setValue("group_id", formValues.group_id);
-    setValue("group_name", formValues.group_name ??'');
-    setValue("job_description", formValues.job_description);
-    setValue("interval_time", formValues.interval_time);
+    setEditingItem(item);
+    setValue("job_name", item.job_name);
+    setValue("group_id", item.group_id);
+    setValue("job_description", item.job_description || "");
+    setValue("interval_time", item.interval_time);
   };
 
   const onRemoveClick = (id: string) => {
@@ -76,34 +74,46 @@ export function JobsForm() {
     setEditingItem(null);
     reset();
   };
-const onSubmit = (data: TJobSchema) => {
+
+  const onSubmit = (data: TJobSchema) => {
   if (editingItem) {
     const editedJob: IJobInputDTO = {
-      job_id: editingItem.job_id, 
+      job_id: editingItem.job_id,
       job_name: data.job_name,
       group_id: data.group_id,
-      group_name: data.group_name ?? '',
+      // group_name: group_name,
       job_description: data.job_description,
       interval_time: data.interval_time,
-      active: editingItem.active 
+      active: editingItem.active,
     };
-    editJobMutation.mutate(editedJob);
+    editJobMutation.mutate(editedJob, {
+      onSuccess: () => {
+        reset();
+        setEditingItem(null);
+      },
+      onError: (error) => {
+        console.error("Failed to edit job:", error);
+      }
+    });
   } else {
     const newJob: IJobInputDTO = {
       job_name: data.job_name,
       group_id: data.group_id,
-      group_name: data.group_name ? data.group_name : '',
+      // group_name: group_name,
       job_description: data.job_description,
       interval_time: data.interval_time,
     };
-
-
-    createJobMutation.mutate(newJob);
+    createJobMutation.mutate(newJob, {
+      onSuccess: () => {
+        reset();
+        setEditingItem(null);
+      },
+      onError: (error) => {
+        console.error("Failed to create job:", error);
+      }
+    });
   }
-  reset();
-  setEditingItem(null);
 };
-  
 
   return (
     <Card>
@@ -115,19 +125,33 @@ const onSubmit = (data: TJobSchema) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="job_name">Job Name</Label>
-              <Input id="job_name" placeholder="Ex: Daily Report" {...register("job_name")} />
+              <Input id="job_name" placeholder="Ex: Monitoring 15m" {...register("job_name")} />
               {errors.job_name && <p className="text-red-500 text-sm">{errors.job_name.message}</p>}
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="group_id">Group ID</Label>
-              <Input id="group_id" placeholder="Ex: abc-123" {...register("group_id")} />
+              <Label htmlFor="group_id">Group</Label>
+              <Select onValueChange={(value) => setValue("group_id", value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a group" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Groups</SelectLabel>
+                    {groupsData?.map((group) => (
+                      <SelectItem key={group.group_id} value={group.group_id}>
+                        {group.group_name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
               {errors.group_id && <p className="text-red-500 text-sm">{errors.group_id.message}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="interval_time">Interval (ms)</Label>
-              <Input id="interval_time" type="number" placeholder="Ex: 5000" {...register("interval_time", { valueAsNumber: true })} />
+              <Label htmlFor="interval_time">Interval (ss)</Label>
+              <Input id="interval_time" type="number" placeholder="Ex: 300" {...register("interval_time", { valueAsNumber: true })} />
               {errors.interval_time && <p className="text-red-500 text-sm">{errors.interval_time.message}</p>}
             </div>
 
@@ -140,7 +164,7 @@ const onSubmit = (data: TJobSchema) => {
           <div className="flex justify-center gap-2">
             <Button type="submit" className="w-full sm:w-auto" disabled={isMutating}>
               {isMutating ? "Submitting..." : (
-                editingItem ? "Save Changes" : 
+                editingItem ? "Save Changes" :
                 "Add Job"
               )}
             </Button>
@@ -151,14 +175,15 @@ const onSubmit = (data: TJobSchema) => {
             )}
           </div>
         </form>
-        
+
         <div className="border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted">
                 <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Job ID</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Name</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Group</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Group ID</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Desc</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Active</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">Created At</th>
@@ -168,10 +193,15 @@ const onSubmit = (data: TJobSchema) => {
               <tbody className="divide-y">
                 {jobsData?.map((item) => (
                   <tr key={item.job_id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-sm">{item.job_id}</td>
                     <td className="px-4 py-3 text-sm">{item.job_name}</td>
                     <td className="px-4 py-3 text-sm">{item.group_id}</td>
                     <td className="px-4 py-3 text-sm">{item.job_description}</td>
-                    <td className="px-4 py-3 text-sm">{<Badge className={`${item.active ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>{item.active ? 'active' : 'inative'} </Badge>} </td>
+                    <td className="px-4 py-3 text-sm">
+                      {<Badge className={`${item.active ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+                        {item.active ? 'active' : 'inactive'}
+                      </Badge>}
+                    </td>
                     <td className="px-4 py-3 text-sm">{formatWithTimeZone(item.created_at)}</td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">

@@ -12,6 +12,8 @@ export const useCreateJob = () => {
         mutationFn: async (jobData) => {
             const response: IApiResponse<IJobOutputDTO> = await createJob(jobData);
 
+            console.log(response);
+
             if (!response.success) {
                 throw new Error(response.error || "Failed to create job");
             }

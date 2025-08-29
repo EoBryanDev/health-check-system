@@ -16,6 +16,17 @@ export interface ICreateUserInputDTO {
   cellnumber?: string;
 }
 
+export interface IUser {
+
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  created_at: string;
+  role: 'ADMIN' | 'ANALYST' | 'MANAGER';
+
+}
+
 export interface ICreateUserOutputDTO {
   user_id: string;
   first_name: string;

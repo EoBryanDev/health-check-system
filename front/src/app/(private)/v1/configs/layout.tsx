@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "HCS - Configurations",
+  title: "HC - Configurations",
   description: "Page to make configurations",
 };
 

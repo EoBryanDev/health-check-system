@@ -4,23 +4,23 @@ export const groupSchema = z.object({
     group_id: z.uuid().optional(),
     group_name: z.string().min(1, "Group name is required."),
     group_description: z.string().optional(),
-    users_email: z.string().email("Invalid email format.").min(1, "Email is required."),
+    users_email: z.string().optional()
 });
 
 export const jobSchema = z.object({
     job_id: z.uuid().optional(),
     group_id: z.string().min(1, "Group ID is required."),
-    group_name: z.string().min(1, "Group name is required."),
+    // group_name: z.string().min(1, "Group name is required."),
     active: z.boolean().optional(),
     job_name: z.string().min(1, "Job name is required."),
     job_description: z.string().optional(),
-    interval_time: z.number().int().min(1000, "Interval must be at least 1000ms."),
+    interval_time: z.number().int().min(300, "Interval must be at least 300s(5m)."),
 });
 
 export const serviceSchema = z.object({
     service_id: z.uuid().optional(),
     group_id: z.uuid().optional(),
-    job_id: z.uuid().optional(),
+    job_id: z.union([z.string().length(0), z.uuid()]).nullable().optional(),
     last_run: z.date().nullable().optional(),
     service_name: z.string().min(1, "Service name is required."),
     active: z.boolean().optional(),

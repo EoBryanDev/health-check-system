@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { IGroupInputDTO, IGroupOutputDTO } from "@/interfaces/IConfigurations";
 import { IApiResponse } from "@/interfaces/IApiResponse";
 import { addGroup } from "@/services/group.service";
 import { getGroupsQueryKey } from "../queries/use-group-data";
+import { IGroupInputDTO, IGroupOutputUsersDTO } from "@/interfaces/IGroup";
 
 export const useCreateGroup = () => {
     const queryClient = useQueryClient();
-    return useMutation<IGroupOutputDTO, Error, IGroupInputDTO>({
+    return useMutation<IGroupOutputUsersDTO, Error, IGroupInputDTO>({
         mutationFn: async (newGroupData) => {
-            const response: IApiResponse<IGroupOutputDTO> = await addGroup(newGroupData);
+            const response: IApiResponse<IGroupOutputUsersDTO> = await addGroup(newGroupData);
             return response.data;
         },
         onSuccess: () => {
