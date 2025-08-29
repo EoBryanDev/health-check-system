@@ -3,7 +3,7 @@ import { IServiceInputDTO } from '../../infrastructure/dto/IServiceDTO';
 import { IRepository } from '../entities/interfaces/IRepository';
 
 class CreateServiceUseCase {
-  constructor(private dbRepository: IRepository) {}
+  constructor(private dbRepository: IRepository) { }
 
   async execute(
     service_payload: IServiceInputDTO,

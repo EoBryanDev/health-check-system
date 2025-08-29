@@ -1,0 +1,78 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+@userEmail = teste@teste.com.br
+
+### Login
+# @name auth
+POST {{ baseUrl }}/login
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "email": "{{userEmail}}",
+    "password": "123"
+}
+
+### Group
+# @name group 
+GET {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### CreateGroup
+# @name createGroup
+
+POST {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_name":"Social Media",
+    "group_description": "Group used to check social media status",
+    "users_email": "{{userEmail}}"
+}
+
+### Add User to group
+# @name addUserToGroup
+
+POST {{baseUrl}}/groups/bb0150be-409d-4e08-976a-ddbb4dc331e9/users/a85fba03-de1f-4ca4-a960-fc0e0466d57a
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+### Remove User from group
+# @name removeUserFromGroup
+
+DELETE {{baseUrl}}/groups/bb0150be-409d-4e08-976a-ddbb4dc331e9/users/a85fba03-de1f-4ca4-a960-fc0e0466d57a
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+
+### Edit Group
+# @name editGroup
+
+PUT {{baseUrl}}/groups
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "group_id": "d3ac347f-0ae9-4b72-b18a-bfd4e12a1c7b",
+    "group_name":"Social Media",
+    "group_description": "Edited",
+    "users_email": "{{userEmail}}"
+}
+
+### Edit Group
+# @name deleteGroup
+
+DELETE {{baseUrl}}/groups/89e2b9aa-397e-4475-ae9f-120f6da500b5
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json
+
+

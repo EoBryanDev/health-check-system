@@ -1,0 +1,21 @@
+# Variables
+
+@baseUrl = http://localhost:3000
+
+### Login
+# @name auth
+POST {{ baseUrl }}/login
+Accept: application/json 
+Content-Type: application/json
+
+{
+    "email": "teste@teste.com.br",
+    "password": "123"
+}
+
+### user
+# @name user 
+GET {{baseUrl}}/user
+Authorization: Bearer {{auth.response.body.data.access_token}}
+Accept: application/json 
+Content-Type: application/json

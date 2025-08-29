@@ -7,7 +7,7 @@ export const editServiceSchema = z.object({
   active: z.boolean().optional(),
   job_id: z.string().optional(),
   job_name: z.string().optional(),
-  last_run: z.date().optional(),
+  last_run: z.date().nullable().optional(),
   service_name: z.string(),
   service_description: z.string().optional(),
   service_url: z.string(),
